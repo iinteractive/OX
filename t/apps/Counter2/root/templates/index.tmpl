@@ -1,0 +1,12 @@
+<html>
+<head><title>OX - Counter2 Example</title>
+<body>
+<h1>[% count %]</h1>
+<hr/>
+<a href="[% uri_for({ page => 'inc' }) %]">++</a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="[% uri_for({ page => 'dec' }) %]">--</a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="[% uri_for({ page => 'reset' }) %]">reset</a>
+</body>
+</html>

@@ -28,7 +28,6 @@ has 'bread_board' => (
         my $self = shift;
         Bread::Board::Container->new( name => $self->name )
     },
-    handles => [qw[ fetch ]]
 );
 
 has 'root' => (
@@ -116,6 +115,11 @@ sub application_dependencies { [] }
 sub configure_application {
     my ($self, $s, $app) = @_;
     $app;
+}
+
+sub fetch_service {
+    my ($self, $service_path, %params) = @_;
+    $self->bread_board->fetch( $service_path )->get( %params );
 }
 
 sub to_app {
