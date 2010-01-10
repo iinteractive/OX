@@ -1,17 +1,23 @@
 package OX::Application;
 use Moose;
+use MooseX::NonMoose;
 
 use Bread::Board ();
-use Path::Router;
+
 use Path::Class;
 use Class::Inspector;
 
+use Path::Router;
 use Plack::App::Path::Router;
 
 use OX::Web::Request;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
+
+extends 'Plack::Component';
+
+has '_app' => ( is => 'rw', isa => 'CodeRef' );
 
 has 'name' => (
     is      => 'ro',
@@ -24,21 +30,17 @@ has 'bread_board' => (
     is      => 'ro',
     isa     => 'Bread::Board::Container',
     lazy    => 1,
-    default => sub {
-        my $self = shift;
-        Bread::Board::Container->new( name => $self->name )
-    },
+    builder => 'setup_bread_board'
 );
 
-has '_is_setup' => ( is => 'rw', isa => 'Bool', default => 0 );
-
-sub setup {
+sub setup_bread_board {
     my $self = shift;
 
-    return if $self->_is_setup;
+    my $bb = Bread::Board::Container->new( name => $self->name );
 
-    Bread::Board::set_root_container( $self->bread_board );
+    Bread::Board::set_root_container( $bb );
 
+    # XXX - this might not be a good idea - SL
     Bread::Board::service 'app_root' => do {
         my $class = $self->meta->name;
         my $root  = file( Class::Inspector->resolved_filename( $class ) );
@@ -54,8 +56,10 @@ sub setup {
 
     $Bread::Board::CC = undef;
 
-    $self->_is_setup(1);
+    $bb;
 }
+
+# ... Router handling/setup
 
 sub setup_router {
     my $self = shift;
@@ -76,21 +80,31 @@ sub configure_router {
     #my ($self, $s, $router) = @_;
 }
 
+# ... Public Utils
+
 sub fetch_service {
     my ($self, $service_path, %params) = @_;
     $self->bread_board->fetch( $service_path )->get( %params );
 }
 
-sub to_app {
+# ... Plack::Component API
+
+sub prepare_app {
     my $self = shift;
-    $self->setup;
-    Plack::App::Path::Router->new(
-        router        => $self->fetch_service('Router'),
-        request_class => 'OX::Web::Request',
+    $self->_app(
+        Plack::App::Path::Router->new(
+            router        => $self->fetch_service('Router'),
+            request_class => 'OX::Web::Request',
+        )->to_app
     );
 }
 
-# ...
+sub call {
+    my ($self, $env) = @_;
+    $self->_app->( $env );
+}
+
+# ... Private Utils
 
 sub _dump_bread_board {
     require Bread::Board::Dumper;

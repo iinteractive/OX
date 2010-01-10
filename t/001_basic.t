@@ -21,8 +21,6 @@ my $app = Counter->new;
 isa_ok($app, 'Counter');
 isa_ok($app, 'OX::Application');
 
-$app->setup;
-
 # diag $app->_dump_bread_board;
 
 my $root = $app->fetch_service('app_root');

@@ -21,13 +21,28 @@ has 'view' => (
     is       => 'ro',
     isa      => 'OX::View::TT',
     lazy     => 1,
-    default  => sub {
-        my $self = shift;
-        OX::View::TT->new(
-            template_root => $self->fetch_service('app_root')->subdir(qw[ root templates ])
-        )
-    }
+    default  => sub { (shift)->fetch_service('View') }
 );
+
+augment 'setup_bread_board' => sub {
+    my $self = shift;
+
+    Bread::Board::service 'template_root' => (
+        block => sub {
+            (shift)->param('app_root')->subdir(qw[ root templates ])
+        },
+        dependencies => [
+            Bread::Board::depends_on('app_root')
+        ]
+    );
+
+    Bread::Board::service 'View' => (
+        class        => 'OX::View::TT',
+        dependencies => [
+            Bread::Board::depends_on('template_root')
+        ]
+    );
+};
 
 sub configure_router {
     my ($self, $s, $router) = @_;
