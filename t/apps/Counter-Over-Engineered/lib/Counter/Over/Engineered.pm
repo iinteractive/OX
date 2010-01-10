@@ -28,49 +28,31 @@ augment 'setup_bread_board' => sub {
             }
         );
     };
-
 };
 
+sub router_dependencies {
+    +{ root => depends_on('/Controller/Root') }
+}
+
 sub configure_router {
-    my ($self, $s, $router) = @_;
-
-    my $c = $s->param('root_controller');
-
-    $router->add_route('/',
-        defaults => {
+    return +{
+        '/' => {
             controller => 'root',
             action     => 'index',
         },
-        target   => sub { $c->index( @_ ) }
-    );
-
-    $router->add_route('/inc',
-        defaults => {
+        '/inc' => {
             controller => 'root',
             action     => 'inc',
         },
-        target   => sub { $c->inc( @_ ) }
-    );
-
-    $router->add_route('/dec',
-        defaults => {
+        '/dec' => {
             controller => 'root',
             action     => 'dec',
         },
-        target   => sub { $c->dec( @_ ) }
-    );
-
-    $router->add_route('/reset',
-        defaults => {
+        '/reset' => {
             controller => 'root',
             action     => 'reset',
         },
-        target   => sub { $c->reset( @_ ) }
-    );
-}
-
-sub router_dependencies {
-    +{ root_controller => depends_on('/Controller/Root') }
+    }
 }
 
 no Moose; no Bread::Board; 1;

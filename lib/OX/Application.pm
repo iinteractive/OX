@@ -61,6 +61,19 @@ sub setup_bread_board {
 
 # ... Router handling/setup
 
+sub _autowire_router {
+    my ($self, $service, $router, $routes) = @_;
+    foreach my $path ( keys %$routes ) {
+        my $c = $service->param( $routes->{ $path }->{controller} );
+        my $a = $routes->{ $path }->{action};
+        $router->add_route(
+            $path,
+            defaults => $routes->{ $path },
+            target   => sub { $c->$a( @_ ) }
+        );
+    }
+}
+
 sub setup_router {
     my $self = shift;
     Bread::Board::service 'Router' => (
@@ -68,7 +81,9 @@ sub setup_router {
         block => sub {
             my $s      = shift;
             my $router = Path::Router->new;
-            $self->configure_router( $s, $router );
+            my $rv = $self->configure_router( $s, $router );
+            $self->_autowire_router( $s, $router, $rv )
+                if ref $rv eq 'HASH';
             $router;
         },
         dependencies => $self->router_dependencies
