@@ -24,7 +24,7 @@ has 'view' => (
     default  => sub {
         my $self = shift;
         OX::View::TT->new(
-            template_root => $self->fetch_service('root')->subdir(qw[ root templates ])
+            template_root => $self->fetch_service('app_root')->subdir(qw[ root templates ])
         )
     }
 );

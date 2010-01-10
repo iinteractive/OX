@@ -25,7 +25,7 @@ $app->setup;
 
 # diag $app->_dump_bread_board;
 
-my $root = $app->fetch_service('root');
+my $root = $app->fetch_service('app_root');
 isa_ok($root, 'Path::Class::Dir');
 is($root, 't/apps/Counter2', '... got the right root dir');
 

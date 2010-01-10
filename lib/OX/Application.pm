@@ -30,42 +30,31 @@ has 'bread_board' => (
     },
 );
 
-has 'root' => (
-    is      => 'ro',
-    isa     => 'Any',
-    default => sub {
-        my $class = (shift)->meta->name;
+has '_is_setup' => ( is => 'rw', isa => 'Bool', default => 0 );
+
+sub setup {
+    my $self = shift;
+
+    return if $self->_is_setup;
+
+    Bread::Board::set_root_container( $self->bread_board );
+
+    Bread::Board::service 'app_root' => do {
+        my $class = $self->meta->name;
         my $root  = file( Class::Inspector->resolved_filename( $class ) );
         # climb out of the lib/ directory
         $root = $root->parent foreach split /\:\:/ => $class;
         $root = $root->parent; # one last time for lib/
         $root;
-    },
-);
-
-has 'is_setup' => (
-    is      => 'rw',
-    isa     => 'Bool',
-    default => 0,
-);
-
-sub setup {
-    my $self = shift;
-
-    return if $self->is_setup;
-
-    Bread::Board::set_root_container( $self->bread_board );
-
-    Bread::Board::service 'root' => $self->root;
+    };
 
     inner();
 
     $self->setup_router;
-    $self->setup_application;
 
     $Bread::Board::CC = undef;
 
-    $self->is_setup(1);
+    $self->_is_setup(1);
 }
 
 sub setup_router {
@@ -75,7 +64,8 @@ sub setup_router {
         block => sub {
             my $s      = shift;
             my $router = Path::Router->new;
-            $self->configure_router( $s, $router ) || $router;
+            $self->configure_router( $s, $router );
+            $router;
         },
         dependencies => $self->router_dependencies
     );
@@ -83,38 +73,7 @@ sub setup_router {
 
 sub router_dependencies { [] }
 sub configure_router {
-    my ($self, $s, $router) = @_;
-    $router;
-}
-
-sub setup_application {
-    my $self = shift;
-    my $deps = $self->application_dependencies;
-
-    if (ref $deps eq 'ARRAY') {
-        push @$deps => Bread::Board::depends_on('Router');
-    }
-    elsif (ref $deps eq 'HASH') {
-        $deps->{'Router'} = Bread::Board::depends_on('Router');
-    }
-
-    Bread::Board::service 'Application' => (
-        block => sub {
-            my $s   = shift;
-            my $app = Plack::App::Path::Router->new(
-                router        => $s->parent->fetch('Router')->get,
-                request_class => 'OX::Web::Request',
-            );
-            $self->configure_application( $s, $app ) || $app;
-        },
-        dependencies => $deps
-    );
-}
-
-sub application_dependencies { [] }
-sub configure_application {
-    my ($self, $s, $app) = @_;
-    $app;
+    #my ($self, $s, $router) = @_;
 }
 
 sub fetch_service {
@@ -125,7 +84,10 @@ sub fetch_service {
 sub to_app {
     my $self = shift;
     $self->setup;
-    $self->bread_board->fetch('Application')->get
+    Plack::App::Path::Router->new(
+        router        => $self->fetch_service('Router'),
+        request_class => 'OX::Web::Request',
+    );
 }
 
 # ...
