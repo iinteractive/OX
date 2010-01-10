@@ -13,19 +13,19 @@ BEGIN {
     use_ok('OX::Application');
 }
 
-use lib 't/apps/Counter2/lib';
+use lib 't/apps/Counter-Improved/lib';
 
-use Counter2;
+use Counter::Improved;
 
-my $app = Counter2->new;
-isa_ok($app, 'Counter2');
+my $app = Counter::Improved->new;
+isa_ok($app, 'Counter::Improved');
 isa_ok($app, 'OX::Application');
 
 #diag $app->_dump_bread_board;
 
 my $root = $app->fetch_service('app_root');
 isa_ok($root, 'Path::Class::Dir');
-is($root, 't/apps/Counter2', '... got the right root dir');
+is($root, 't/apps/Counter-Improved', '... got the right root dir');
 
 my $router = $app->fetch_service('Router');
 isa_ok($router, 'Path::Router');
@@ -46,7 +46,7 @@ routes_ok($router, {
 },
 "... our routes are valid");
 
-my $title = qr/<title>OX - Counter2 Example<\/title>/;
+my $title = qr/<title>OX - Counter::Improved Example<\/title>/;
 
 test_psgi
       app    => $app->to_app,

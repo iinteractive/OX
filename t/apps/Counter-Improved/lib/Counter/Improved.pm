@@ -1,4 +1,4 @@
-package Counter2;
+package Counter::Improved;
 use Moose;
 
 use Bread::Board;
