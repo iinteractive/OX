@@ -1,6 +1,7 @@
 package Counter2;
 use Moose;
 
+use Bread::Board;
 use OX::View::TT;
 
 extends 'OX::Application';
@@ -17,30 +18,19 @@ has 'count' => (
     }
 );
 
-has 'view' => (
-    is       => 'ro',
-    isa      => 'OX::View::TT',
-    lazy     => 1,
-    default  => sub { (shift)->fetch_service('View') }
-);
-
 augment 'setup_bread_board' => sub {
     my $self = shift;
 
-    Bread::Board::service 'template_root' => (
+    service 'template_root' => (
         block => sub {
             (shift)->param('app_root')->subdir(qw[ root templates ])
         },
-        dependencies => [
-            Bread::Board::depends_on('app_root')
-        ]
+        dependencies => [ depends_on('app_root') ]
     );
 
-    Bread::Board::service 'View' => (
+    service 'View' => (
         class        => 'OX::View::TT',
-        dependencies => [
-            Bread::Board::depends_on('template_root')
-        ]
+        dependencies => [ depends_on('template_root') ]
     );
 };
 
@@ -71,9 +61,9 @@ sub configure_router {
 sub render_view {
     my ($self, $method, $request) = @_;
     $self->$method() if $method;
-    $self->view->render($request, 'index.tmpl' => { count => $self->count });
+    $self->fetch_service('View')->render($request, 'index.tmpl' => { count => $self->count });
 }
 
-no Moose; 1;
+no Moose; no Bread::Board; 1;
 
 __END__
