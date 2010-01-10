@@ -1,8 +1,6 @@
 package Counter::Improved;
 use Moose;
-
 use Bread::Board;
-use OX::View::TT;
 
 extends 'OX::Application';
 
@@ -19,17 +17,18 @@ has 'count' => (
 );
 
 augment 'setup_bread_board' => sub {
-    container 'View' => as {
-        service 'template_root' => (
-            block => sub {
-                (shift)->param('app_root')->subdir(qw[ root templates ])
-            },
-            dependencies => [ depends_on('/app_root') ]
-        );
 
+    service 'template_root' => (
+        block => sub {
+            (shift)->param('app_root')->subdir(qw[ root templates ])
+        },
+        dependencies => [ depends_on('/app_root') ]
+    );
+
+    container 'View' => as {
         service 'TT' => (
             class        => 'OX::View::TT',
-            dependencies => [ depends_on('template_root') ]
+            dependencies => [ depends_on('/template_root') ]
         );
     };
 };

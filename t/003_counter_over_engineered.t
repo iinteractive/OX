@@ -13,23 +13,23 @@ BEGIN {
     use_ok('OX::Application');
 }
 
-use lib 't/apps/Counter-Improved/lib';
+use lib 't/apps/Counter-Over-Engineered/lib';
 
-use Counter::Improved;
+use Counter::Over::Engineered;
 
-my $app = Counter::Improved->new;
-isa_ok($app, 'Counter::Improved');
+my $app = Counter::Over::Engineered->new;
+isa_ok($app, 'Counter::Over::Engineered');
 isa_ok($app, 'OX::Application');
 
 #diag $app->_dump_bread_board;
 
 my $root = $app->fetch_service('app_root');
 isa_ok($root, 'Path::Class::Dir');
-is($root, 't/apps/Counter-Improved', '... got the right root dir');
+is($root, 't/apps/Counter-Over-Engineered', '... got the right root dir');
 
 my $template_root = $app->fetch_service('template_root');
 isa_ok($template_root, 'Path::Class::Dir');
-is($template_root, 't/apps/Counter-Improved/root/templates', '... got the right template_root dir');
+is($template_root, 't/apps/Counter-Over-Engineered/root/templates', '... got the right template_root dir');
 
 my $router = $app->fetch_service('Router');
 isa_ok($router, 'Path::Router');
@@ -43,14 +43,14 @@ for qw[
 ];
 
 routes_ok($router, {
-    ''      => { page => 'index' },
-    'inc'   => { page => 'inc'   },
-    'dec'   => { page => 'dec'   },
-    'reset' => { page => 'reset' },
+    ''      => { controller => 'root', action => 'index' },
+    'inc'   => { controller => 'root', action => 'inc'   },
+    'dec'   => { controller => 'root', action => 'dec'   },
+    'reset' => { controller => 'root', action => 'reset' },
 },
 "... our routes are valid");
 
-my $title = qr/<title>OX - Counter::Improved Example<\/title>/;
+my $title = qr/<title>OX - Counter::Over::Engineered Example<\/title>/;
 
 test_psgi
       app    => $app->to_app,

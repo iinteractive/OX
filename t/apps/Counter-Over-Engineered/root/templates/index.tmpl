@@ -1,0 +1,12 @@
+<html>
+<head><title>OX - Counter::Over::Engineered Example</title>
+<body>
+<h1>[% count %]</h1>
+<hr/>
+<a href="[% uri_for({ controller => 'root', action => 'inc' }) %]">++</a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="[% uri_for({ controller => 'root', action => 'dec' }) %]">--</a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="[% uri_for({ controller => 'root', action => 'reset' }) %]">reset</a>
+</body>
+</html>
