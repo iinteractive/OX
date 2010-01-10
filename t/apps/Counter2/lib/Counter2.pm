@@ -19,49 +19,64 @@ has 'count' => (
 );
 
 augment 'setup_bread_board' => sub {
-    my $self = shift;
+    container 'View' => as {
+        service 'template_root' => (
+            block => sub {
+                (shift)->param('app_root')->subdir(qw[ root templates ])
+            },
+            dependencies => [ depends_on('/app_root') ]
+        );
 
-    service 'template_root' => (
-        block => sub {
-            (shift)->param('app_root')->subdir(qw[ root templates ])
-        },
-        dependencies => [ depends_on('app_root') ]
-    );
-
-    service 'View' => (
-        class        => 'OX::View::TT',
-        dependencies => [ depends_on('template_root') ]
-    );
+        service 'TT' => (
+            class        => 'OX::View::TT',
+            dependencies => [ depends_on('template_root') ]
+        );
+    };
 };
 
 sub configure_router {
     my ($self, $s, $router) = @_;
 
+    my $view = $s->param('view');
+
     $router->add_route('/',
         defaults => { page => 'index' },
-        target   => sub { $self->render_view( undef, @_ ) }
+        target   => sub {
+            my $r = shift;
+            $view->render( $r, 'index.tmpl', { count => $self->count } );
+        }
     );
 
     $router->add_route('/inc',
         defaults => { page => 'inc' },
-        target   => sub { $self->render_view('inc_counter', @_ ) }
+        target   => sub {
+            my $r = shift;
+            $self->inc_counter;
+            $view->render( $r, 'index.tmpl', { count => $self->count } );
+        }
     );
 
     $router->add_route('/dec',
         defaults => { page => 'dec' },
-        target   => sub { $self->render_view('dec_counter', @_ ) }
+        target   => sub {
+            my $r = shift;
+            $self->dec_counter;
+            $view->render( $r, 'index.tmpl', { count => $self->count } );
+        }
     );
 
     $router->add_route('/reset',
         defaults => { page => 'reset' },
-        target   => sub { $self->render_view('reset_counter', @_ ) }
+        target   => sub {
+            my $r = shift;
+            $self->reset_counter;
+            $view->render( $r, 'index.tmpl', { count => $self->count } );
+        }
     );
 }
 
-sub render_view {
-    my ($self, $method, $request) = @_;
-    $self->$method() if $method;
-    $self->fetch_service('View')->render($request, 'index.tmpl' => { count => $self->count });
+sub router_dependencies {
+    +{ view => depends_on('View/TT') }
 }
 
 no Moose; no Bread::Board; 1;
