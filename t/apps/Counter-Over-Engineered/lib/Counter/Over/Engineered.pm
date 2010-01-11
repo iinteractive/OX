@@ -28,32 +28,39 @@ augment 'setup_bread_board' => sub {
             }
         );
     };
+
+    service 'router_config' => (
+        block => sub {
+            +{
+                '/' => {
+                    controller => 'root',
+                    action     => 'index',
+                },
+                '/inc' => {
+                    controller => 'root',
+                    action     => 'inc',
+                },
+                '/dec' => {
+                    controller => 'root',
+                    action     => 'dec',
+                },
+                '/reset' => {
+                    controller => 'root',
+                    action     => 'reset',
+                },
+                '/set/:number' => {
+                    controller => 'root',
+                    action     => 'set',
+                    number     => { isa => 'Int' }
+                },
+            }
+        },
+        dependencies => {
+            root => depends_on('/Controller/Root')
+        }
+    );
 };
 
-sub router_dependencies {
-    +{ root => depends_on('/Controller/Root') }
-}
-
-sub configure_router {
-    return +{
-        '/' => {
-            controller => 'root',
-            action     => 'index',
-        },
-        '/inc' => {
-            controller => 'root',
-            action     => 'inc',
-        },
-        '/dec' => {
-            controller => 'root',
-            action     => 'dec',
-        },
-        '/reset' => {
-            controller => 'root',
-            action     => 'reset',
-        },
-    }
-}
 
 no Moose; no Bread::Board; 1;
 

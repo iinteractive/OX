@@ -10,6 +10,7 @@ has 'count' => (
         inc_counter   => 'inc',
         dec_counter   => 'dec',
         reset_counter => 'reset',
+        set_counter   => 'set'
     }
 );
 
@@ -39,6 +40,12 @@ sub dec {
 sub reset {
     my ($self, $r) = @_;
     $self->reset_counter;
+    $self->view->render( $r, 'index.tmpl', { count => $self->count } );
+}
+
+sub set {
+    my ($self, $r, $number) = @_;
+    $self->set_counter( $number );
     $self->view->render( $r, 'index.tmpl', { count => $self->count } );
 }
 

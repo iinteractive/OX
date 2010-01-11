@@ -40,13 +40,15 @@ for qw[
     /inc
     /dec
     /reset
+    /set/10
 ];
 
 routes_ok($router, {
-    ''      => { controller => 'root', action => 'index' },
-    'inc'   => { controller => 'root', action => 'inc'   },
-    'dec'   => { controller => 'root', action => 'dec'   },
-    'reset' => { controller => 'root', action => 'reset' },
+    ''       => { controller => 'root', action => 'index' },
+    'inc'    => { controller => 'root', action => 'inc'   },
+    'dec'    => { controller => 'root', action => 'dec'   },
+    'reset'  => { controller => 'root', action => 'reset' },
+    'set/10' => { controller => 'root', action => 'set',  number => 10 },
 },
 "... our routes are valid");
 
@@ -91,6 +93,18 @@ test_psgi
               my $res = $cb->($req);
               like($res->content, $title, '... got the right title');
               like($res->content, qr/<h1>0<\/h1>/, '... got the right content in index');
+          }
+          {
+              my $req = HTTP::Request->new(GET => "http://localhost/set/100");
+              my $res = $cb->($req);
+              like($res->content, $title, '... got the right title');
+              like($res->content, qr/<h1>100<\/h1>/, '... got the right content in /set/100');
+          }
+          {
+              my $req = HTTP::Request->new(GET => "http://localhost/dec");
+              my $res = $cb->($req);
+              like($res->content, $title, '... got the right title');
+              like($res->content, qr/<h1>99<\/h1>/, '... got the right content in /dec');
           }
       };
 

@@ -64,12 +64,28 @@ sub setup_bread_board {
 sub _autowire_router {
     my ($self, $service, $router, $routes) = @_;
     foreach my $path ( keys %$routes ) {
-        my $c = $service->param( $routes->{ $path }->{controller} );
-        my $a = $routes->{ $path }->{action};
+
+        my $spec = $routes->{ $path };
+
+        my ($defaults, $validations) = ({}, {});
+
+        foreach my $key ( keys %$spec ) {
+            if (ref $spec->{ $key }) {
+                $validations->{ $key } = $spec->{ $key }->{'isa'};
+            }
+            else {
+                $defaults->{ $key } = $spec->{ $key };
+            }
+        }
+
+        my $c = $service->param( $defaults->{controller} );
+        my $a = $defaults->{action};
+
         $router->add_route(
             $path,
-            defaults => $routes->{ $path },
-            target   => sub { $c->$a( @_ ) }
+            defaults    => $defaults,
+            target      => sub { $c->$a( @_ ) },
+            validations => $validations,
         );
     }
 }
@@ -81,9 +97,17 @@ sub setup_router {
         block => sub {
             my $s      = shift;
             my $router = Path::Router->new;
-            my $rv = $self->configure_router( $s, $router );
-            $self->_autowire_router( $s, $router, $rv )
-                if ref $rv eq 'HASH';
+            if ($s->parent->has_service('router_config')) {
+                my $service = $s->parent->get_service('router_config');
+                $self->_autowire_router(
+                    $service,
+                    $router,
+                    $service->get
+                );
+            }
+            else {
+                $self->configure_router( $s, $router );
+            }
             $router;
         },
         dependencies => $self->router_dependencies
