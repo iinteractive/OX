@@ -27,10 +27,6 @@ my $root = $app->fetch_service('app_root');
 isa_ok($root, 'Path::Class::Dir');
 is($root, 't/apps/Counter-Over-Engineered', '... got the right root dir');
 
-my $template_root = $app->fetch_service('template_root');
-isa_ok($template_root, 'Path::Class::Dir');
-is($template_root, 't/apps/Counter-Over-Engineered/root/templates', '... got the right template_root dir');
-
 my $router = $app->fetch_service('Router');
 isa_ok($router, 'Path::Router');
 
@@ -105,6 +101,11 @@ test_psgi
               my $res = $cb->($req);
               like($res->content, $title, '... got the right title');
               like($res->content, qr/<h1>99<\/h1>/, '... got the right content in /dec');
+          }
+          {
+              my $req = HTTP::Request->new(GET => "http://localhost/set/foo");
+              my $res = $cb->($req);
+              is($res->code, 404, '... did not match, so got 404');
           }
       };
 

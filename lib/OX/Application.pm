@@ -61,35 +61,6 @@ sub setup_bread_board {
 
 # ... Router handling/setup
 
-sub _autowire_router {
-    my ($self, $service, $router, $routes) = @_;
-    foreach my $path ( keys %$routes ) {
-
-        my $spec = $routes->{ $path };
-
-        my ($defaults, $validations) = ({}, {});
-
-        foreach my $key ( keys %$spec ) {
-            if (ref $spec->{ $key }) {
-                $validations->{ $key } = $spec->{ $key }->{'isa'};
-            }
-            else {
-                $defaults->{ $key } = $spec->{ $key };
-            }
-        }
-
-        my $c = $service->param( $defaults->{controller} );
-        my $a = $defaults->{action};
-
-        $router->add_route(
-            $path,
-            defaults    => $defaults,
-            target      => sub { $c->$a( @_ ) },
-            validations => $validations,
-        );
-    }
-}
-
 sub setup_router {
     my $self = shift;
     Bread::Board::service 'Router' => (
@@ -97,17 +68,7 @@ sub setup_router {
         block => sub {
             my $s      = shift;
             my $router = Path::Router->new;
-            if ($s->parent->has_service('router_config')) {
-                my $service = $s->parent->get_service('router_config');
-                $self->_autowire_router(
-                    $service,
-                    $router,
-                    $service->get
-                );
-            }
-            else {
-                $self->configure_router( $s, $router );
-            }
+            $self->configure_router( $s, $router );
             $router;
         },
         dependencies => $self->router_dependencies
@@ -116,7 +77,40 @@ sub setup_router {
 
 sub router_dependencies { [] }
 sub configure_router {
-    #my ($self, $s, $router) = @_;
+    my ($self, $s, $router) = @_;
+
+    if ($s->parent->has_service('router_config')) {
+
+        my $service = $s->parent->get_service('router_config');
+        my $routes  = $service->get;
+
+        foreach my $path ( keys %$routes ) {
+
+            my $spec = $routes->{ $path };
+
+            my ($defaults, $validations) = ({}, {});
+
+            foreach my $key ( keys %$spec ) {
+                if (ref $spec->{ $key }) {
+                    $validations->{ $key } = $spec->{ $key }->{'isa'};
+                }
+                else {
+                    $defaults->{ $key } = $spec->{ $key };
+                }
+            }
+
+            my $c = $service->param( $defaults->{controller} );
+            my $a = $defaults->{action};
+
+            $router->add_route(
+                $path,
+                defaults    => $defaults,
+                target      => sub { $c->$a( @_ ) },
+                validations => $validations,
+            );
+        }
+
+    }
 }
 
 # ... Public Utils

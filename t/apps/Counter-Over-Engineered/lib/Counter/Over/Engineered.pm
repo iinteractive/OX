@@ -6,17 +6,21 @@ extends 'OX::Application';
 
 augment 'setup_bread_board' => sub {
 
-    service 'template_root' => (
-        block => sub {
-            (shift)->param('app_root')->subdir(qw[ root templates ])
-        },
-        dependencies => [ depends_on('app_root') ]
-    );
+    container 'Model' => as {
+        service 'Counter' => (
+            class => 'Counter::Over::Engineered::Model'
+        );
+    };
 
     container 'View' => as {
         service 'TT' => (
             class        => 'OX::View::TT',
-            dependencies => [ depends_on('/template_root') ]
+            dependencies => {
+                template_root => (service 'template_root' => (
+                    block        => sub { (shift)->param('app_root')->subdir(qw[ root templates ]) },
+                    dependencies => [ depends_on('/app_root') ]
+                ))
+            }
         );
     };
 
@@ -24,7 +28,8 @@ augment 'setup_bread_board' => sub {
         service 'Root' => (
             class        => 'Counter::Over::Engineered::Controller',
             dependencies => {
-                view => depends_on('/View/TT')
+                view  => depends_on('/View/TT'),
+                model => depends_on('/Model/Counter')
             }
         );
     };

@@ -17,18 +17,17 @@ has 'count' => (
 );
 
 augment 'setup_bread_board' => sub {
-
-    service 'template_root' => (
-        block => sub {
-            (shift)->param('app_root')->subdir(qw[ root templates ])
-        },
-        dependencies => [ depends_on('/app_root') ]
-    );
-
     container 'View' => as {
         service 'TT' => (
             class        => 'OX::View::TT',
-            dependencies => [ depends_on('/template_root') ]
+            dependencies => {
+                template_root => (service 'template_root' => (
+                    block => sub {
+                        (shift)->param('app_root')->subdir(qw[ root templates ])
+                    },
+                    dependencies => [ depends_on('/app_root') ]
+                ))
+            }
         );
     };
 };

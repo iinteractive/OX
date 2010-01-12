@@ -1,17 +1,10 @@
 package Counter::Over::Engineered::Controller;
 use Moose;
 
-has 'count' => (
-    traits  => [ 'Counter' ],
-    is      => 'ro',
-    isa     => 'Int',
-    default => 0,
-    handles => {
-        inc_counter   => 'inc',
-        dec_counter   => 'dec',
-        reset_counter => 'reset',
-        set_counter   => 'set'
-    }
+has 'model' => (
+    is       => 'ro',
+    isa      => 'Counter::Over::Engineered::Model',
+    required => 1,
 );
 
 has 'view' => (
@@ -22,31 +15,31 @@ has 'view' => (
 
 sub index {
     my ($self, $r) = @_;
-    $self->view->render( $r, 'index.tmpl', { count => $self->count } );
+    $self->view->render( $r, 'index.tmpl', { count => $self->model->count } );
 }
 
 sub inc {
     my ($self, $r) = @_;
-    $self->inc_counter;
-    $self->view->render( $r, 'index.tmpl', { count => $self->count } );
+    $self->model->inc_counter;
+    $self->view->render( $r, 'index.tmpl', { count => $self->model->count } );
 }
 
 sub dec {
     my ($self, $r) = @_;
-    $self->dec_counter;
-    $self->view->render( $r, 'index.tmpl', { count => $self->count } );
+    $self->model->dec_counter;
+    $self->view->render( $r, 'index.tmpl', { count => $self->model->count } );
 }
 
 sub reset {
     my ($self, $r) = @_;
-    $self->reset_counter;
-    $self->view->render( $r, 'index.tmpl', { count => $self->count } );
+    $self->model->reset_counter;
+    $self->view->render( $r, 'index.tmpl', { count => $self->model->count } );
 }
 
 sub set {
     my ($self, $r, $number) = @_;
-    $self->set_counter( $number );
-    $self->view->render( $r, 'index.tmpl', { count => $self->count } );
+    $self->model->set_counter( $number );
+    $self->view->render( $r, 'index.tmpl', { count => $self->model->count } );
 }
 
 no Moose; 1;

@@ -27,10 +27,6 @@ my $root = $app->fetch_service('app_root');
 isa_ok($root, 'Path::Class::Dir');
 is($root, 't/apps/Counter-Improved', '... got the right root dir');
 
-my $template_root = $app->fetch_service('template_root');
-isa_ok($template_root, 'Path::Class::Dir');
-is($template_root, 't/apps/Counter-Improved/root/templates', '... got the right template_root dir');
-
 my $router = $app->fetch_service('Router');
 isa_ok($router, 'Path::Router');
 
