@@ -13,13 +13,14 @@ augment 'setup_bread_board' => sub {
     };
 
     container 'View' => as {
-        service 'TT' => (
-            class        => 'OX::View::TT',
+        service 'Nib' => (
+            class        => 'OX::View::Nib',
             dependencies => {
                 template_root => (service 'template_root' => (
                     block        => sub { (shift)->param('app_root')->subdir(qw[ root templates ]) },
                     dependencies => [ depends_on('/app_root') ]
-                ))
+                )),
+                responder => depends_on('/Controller/Root')
             }
         );
     };
@@ -28,7 +29,7 @@ augment 'setup_bread_board' => sub {
         service 'Root' => (
             class        => 'Counter::Over::Engineered::Controller',
             dependencies => {
-                view  => depends_on('/View/TT'),
+                view  => depends_on('/View/Nib'),
                 model => depends_on('/Model/Counter')
             }
         );

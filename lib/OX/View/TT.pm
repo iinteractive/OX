@@ -42,23 +42,25 @@ sub normalize_web_base {
     $base;
 }
 
+sub build_template_params {
+    my ($self, $r, $params) = @_;
+    my $BASE = $self->normalize_web_base( $r );
+    return +{
+        r           => $r,
+        base        => $BASE,
+        uri_for     => sub { $BASE . $r->router->uri_for( %{ $_[0] } ) },
+        %{ $params || {} }
+    }
+}
+
 sub render {
     my ($self, $r, $template, $params) = @_;
-
-    my $BASE = $self->normalize_web_base( $r );
-
     my $out = '';
     $self->tt->process(
         $template,
-        {
-            r           => $r,
-            base        => $BASE,
-            uri_for     => sub { $BASE . $r->router->uri_for( %{ $_[0] } ) },
-            %{ $params || {} }
-        },
+        $self->build_template_params( $r, $params ),
         \$out
     ) || confess $self->tt->error;
-
     $out;
 }
 
