@@ -8,5 +8,9 @@
 [% action({ type => 'link', action => 'dec', body => '--' }) %]
 &nbsp;&nbsp;|&nbsp;&nbsp;
 [% action({ type => 'link', action => 'reset', body => 'reset' }) %]
+<hr/>
+[% FOREACH num IN [ 100, 200, 1000 ] %]
+    [% action({ type => 'link', action => 'set', number => num, body => 'set to ' _ num }) %]<br/>
+[% END %]
 </body>
 </html>

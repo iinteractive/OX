@@ -34,14 +34,14 @@ override 'build_template_params' => sub {
 
     $params->{action} = sub {
         my $spec = shift;
-        if ($spec->{type} eq 'link') {
+        my $body = delete $spec->{body};
+        my $type = delete $spec->{type};
+        if ($type eq 'link') {
+            $spec->{controller} ||= 'root';
             return '<a href="'
-                 . $params->{uri_for}->({
-                     controller => $spec->{controller} || 'root',
-                     action     => $spec->{action}
-                 })
+                 . $params->{uri_for}->( $spec )
                  . '">'
-                 . $spec->{body}
+                 . $body
                  . '</a>';
         }
     };
