@@ -9,7 +9,7 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 extends 'Plack::Request';
 
-sub router { (shift)->env->{'psgix.router'} }
+sub router { (shift)->env->{'plack.router'} }
 
 sub new_response {
     my $self = shift;
