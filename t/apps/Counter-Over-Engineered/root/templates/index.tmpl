@@ -3,14 +3,20 @@
 <body>
 <h1>[% outlet({ type => 'text', bind_to => 'model/count' }) %]</h1>
 <hr/>
-[% action({ type => 'link', action => 'inc', body => '++' }) %]
+[% action({ type => 'link', bind_to => 'inc', body => '++' }) %]
 &nbsp;&nbsp;|&nbsp;&nbsp;
-[% action({ type => 'link', action => 'dec', body => '--' }) %]
+[% action({ type => 'link', bind_to => 'dec', body => '--' }) %]
 &nbsp;&nbsp;|&nbsp;&nbsp;
-[% action({ type => 'link', action => 'reset', body => 'reset' }) %]
+[% action({ type => 'link', bind_to => 'reset', body => 'reset' }) %]
 <hr/>
 [% FOREACH num IN [ 100, 200, 1000 ] %]
-    [% action({ type => 'link', action => 'set', number => num, body => 'set to ' _ num }) %]<br/>
+    [%
+        action({
+            type    => 'link',
+            bind_to => { 'set' => { number => num } },
+            body    => 'set to ' _ num
+        })
+    %]<br/>
 [% END %]
 </body>
 </html>

@@ -37,9 +37,33 @@ override 'build_template_params' => sub {
         my $body = delete $spec->{body};
         my $type = delete $spec->{type};
         if ($type eq 'link') {
-            $spec->{controller} ||= 'root';
+
+            my ($full_name, $controller, $action);
+            my $additional = {};
+
+            if (ref $spec->{bind_to}) {
+                ($full_name)  =   keys %{ $spec->{bind_to} };
+                ($additional) = values %{ $spec->{bind_to} };
+            }
+            else {
+                $full_name = $spec->{bind_to};
+            }
+
+            if ( $full_name =~ /\// ) {
+                ($controller, $action) = split /\// => $full_name;
+            }
+            else {
+                $action = $full_name;
+            }
+
+            my $route = {
+                controller => $controller,
+                action     => $action,
+                %$additional
+            };
+
             return '<a href="'
-                 . $params->{uri_for}->( $spec )
+                 . $params->{uri_for}->( $route )
                  . '">'
                  . $body
                  . '</a>';
