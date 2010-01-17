@@ -109,4 +109,27 @@ test_psgi
           }
       };
 
+
+my $view = $app->fetch_service('/View/Nib');
+isa_ok($view, 'OX::View::Nib');
+
+=pod
+
+- create a mock responder that will handle the outlet calls
+- create a request which has a router to handle the uri_for calls
+
+test UI
+
+=cut
+
+
+
+
+
+
+
+
+
+
+
 done_testing;

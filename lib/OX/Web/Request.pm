@@ -11,6 +11,11 @@ extends 'Plack::Request';
 
 sub router { (shift)->env->{'plack.router'} }
 
+sub uri_for {
+    my ($self, $route) = @_;
+    $self->router->uri_for( %$route );
+}
+
 sub new_response {
     my $self = shift;
     OX::Web::Response->new( @_ );

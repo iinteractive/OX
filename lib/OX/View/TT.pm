@@ -48,7 +48,7 @@ sub build_template_params {
     return +{
         r           => $r,
         base        => $BASE,
-        uri_for     => sub { $BASE . $r->router->uri_for( %{ $_[0] } ) },
+        uri_for     => sub { $BASE . $r->uri_for( $_[0] ) },
         %{ $params || {} }
     }
 }

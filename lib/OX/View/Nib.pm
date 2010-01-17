@@ -14,6 +14,10 @@ has 'responder' => (
 
 sub _resolve_binding {
     my ($self, $bind_to) = @_;
+    # TODO:
+    # make it check better and
+    # perhaps find errors earlier
+    # - SL
     my ($method, @binding) = split /\// => $bind_to;
     my $result = $self->responder->$method;
     while ($method = shift @binding) {
@@ -24,6 +28,7 @@ sub _resolve_binding {
 
 override 'build_template_params' => sub {
     my $self   = shift;
+    my $r      = shift;
     my $params = super();
 
     $params->{outlet} = sub {
@@ -36,6 +41,9 @@ override 'build_template_params' => sub {
         my $spec = shift;
         my $body = delete $spec->{body};
         my $type = delete $spec->{type};
+        # TODO:
+        # delegate this correctly ..
+        # - SL
         if ($type eq 'link') {
 
             my ($full_name, $controller, $action);
@@ -63,7 +71,7 @@ override 'build_template_params' => sub {
             };
 
             return '<a href="'
-                 . $params->{uri_for}->( $route )
+                 . $r->uri_for( $route )
                  . '">'
                  . $body
                  . '</a>';
