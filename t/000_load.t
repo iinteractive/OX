@@ -8,6 +8,7 @@ use Test::Exception;
 use Test::Moose;
 
 BEGIN {
+    use_ok('OX');
     use_ok('OX::Application');
 }
 
