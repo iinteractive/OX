@@ -31,6 +31,12 @@ override 'build_template_params' => sub {
     my $r      = shift;
     my $params = super();
 
+    # TODO:
+    # Fix the whole bunch of this,
+    # the current form is a quick
+    # hack to get done for the talk
+    # - SL
+
     $params->{outlet} = sub {
         my $spec = shift;
         # ignore type for now
