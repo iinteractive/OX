@@ -122,7 +122,9 @@ test UI
 
 =cut
 
-
+my $template_root = $app->fetch_service('/View/template_root');
+isa_ok($template_root, 'Path::Class::Dir');
+is($template_root, 't/apps/Counter-Over-Engineered/root/templates', '... got the right root dir');
 
 
 
