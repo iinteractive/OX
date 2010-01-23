@@ -1,5 +1,5 @@
-package OX::View::Nib::Outlet;
-use Moose;
+package OX::View::Nib::Action;
+use Moose::Role;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -7,27 +7,11 @@ our $AUTHORITY = 'cpan:STEVAN';
 has 'binding' => (
     init_arg => 'bind_to',
     is       => 'ro',
-    isa      => 'Str',
+    isa      => 'Str | HashRef',
     required => 1,
 );
 
-sub resolve {
-    my ($self, $nib) = @_;
-
-    my ($method, @binding) = split /\// => $self->binding;
-
-    my $result = $nib->responder->$method;
-
-    while ($method = shift @binding) {
-        $result = $result->$method;
-    }
-
-    $result;
-}
-
-__PACKAGE__->meta->make_immutable;
-
-no Moose; 1;
+no Moose::Role; 1;
 
 __END__
 
@@ -35,11 +19,11 @@ __END__
 
 =head1 NAME
 
-OX::View::Nib::Outlet - A Moosey solution to this problem
+OX::View::Nib::Action - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use OX::View::Nib::Outlet;
+  use OX::View::Nib::Action;
 
 =head1 DESCRIPTION
 

@@ -2,6 +2,7 @@ package OX::View::Nib;
 use Moose;
 
 use OX::View::Nib::Outlet;
+use OX::View::Nib::Action::Link;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -19,54 +20,18 @@ override 'build_template_params' => sub {
     my $r      = shift;
     my $params = super();
 
-    # TODO:
-    # Fix the whole bunch of this,
-    # the current form is a quick
-    # hack to get done for the talk
-    # - SL
-
     $params->{outlet} = sub {
-        OX::View::Nib::Outlet->new( @_ )->resolve( $self->responder )
+        OX::View::Nib::Outlet->new( @_ )->resolve( $self )
     };
 
     $params->{action} = sub {
         my $spec = shift;
-        my $body = delete $spec->{body};
         my $type = delete $spec->{type};
-        # TODO:
-        # delegate this correctly ..
-        # - SL
         if ($type eq 'link') {
-
-            my ($full_name, $controller, $action);
-            my $additional = {};
-
-            if (ref $spec->{bind_to}) {
-                ($full_name)  =   keys %{ $spec->{bind_to} };
-                ($additional) = values %{ $spec->{bind_to} };
-            }
-            else {
-                $full_name = $spec->{bind_to};
-            }
-
-            if ( $full_name =~ /\// ) {
-                ($controller, $action) = split /\// => $full_name;
-            }
-            else {
-                $action = $full_name;
-            }
-
-            my $route = {
-                controller => $controller,
-                action     => $action,
-                %$additional
-            };
-
-            return '<a href="'
-                 . $r->uri_for( $route )
-                 . '">'
-                 . $body
-                 . '</a>';
+            OX::View::Nib::Action::Link->new( $spec )->resolve( $self, $r )
+        }
+        else {
+            confess "Unknown action type $type";
         }
     };
 
