@@ -1,19 +1,28 @@
-package OX::View::Nib::Outlet;
-use Moose::Role;
+package OX::View::Nib::Outlet::Text;
+use Moose;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-has 'binding' => (
-    init_arg => 'bind_to',
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
-);
+with 'OX::View::Nib::Outlet';
 
-requires 'resolve';
+sub resolve {
+    my ($self, $nib) = @_;
 
-no Moose::Role; 1;
+    my ($method, @binding) = split /\// => $self->binding;
+
+    my $result = $nib->responder->$method;
+
+    while ($method = shift @binding) {
+        $result = $result->$method;
+    }
+
+    $result;
+}
+
+__PACKAGE__->meta->make_immutable;
+
+no Moose; 1;
 
 __END__
 
@@ -21,11 +30,11 @@ __END__
 
 =head1 NAME
 
-OX::View::Nib::Outlet - A Moosey solution to this problem
+OX::View::Nib::Outlet::Text - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use OX::View::Nib::Outlet;
+  use OX::View::Nib::Outlet::Text;
 
 =head1 DESCRIPTION
 

@@ -11,6 +11,8 @@ has 'binding' => (
     required => 1,
 );
 
+requires 'resolve';
+
 no Moose::Role; 1;
 
 __END__

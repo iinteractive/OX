@@ -1,7 +1,7 @@
 package OX::View::Nib;
 use Moose;
 
-use OX::View::Nib::Outlet;
+use OX::View::Nib::Outlet::Text;
 use OX::View::Nib::Action::Link;
 
 our $VERSION   = '0.01';
@@ -21,7 +21,14 @@ override 'build_template_params' => sub {
     my $params = super();
 
     $params->{outlet} = sub {
-        OX::View::Nib::Outlet->new( @_ )->resolve( $self )
+        my $spec = shift;
+        my $type = delete $spec->{type};
+        if ($type eq 'text') {
+            OX::View::Nib::Outlet::Text->new( $spec )->resolve( $self )
+        }
+        else {
+            confess "Unknown outlet type ($type)";
+        }
     };
 
     $params->{action} = sub {
@@ -31,7 +38,7 @@ override 'build_template_params' => sub {
             OX::View::Nib::Action::Link->new( $spec )->resolve( $self, $r )
         }
         else {
-            confess "Unknown action type $type";
+            confess "Unknown action type ($type)";
         }
     };
 
