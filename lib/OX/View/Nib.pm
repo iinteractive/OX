@@ -1,6 +1,8 @@
 package OX::View::Nib;
 use Moose;
 
+use OX::View::Nib::Outlet;
+
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -11,20 +13,6 @@ has 'responder' => (
     isa      => 'Object',
     required => 1,
 );
-
-sub _resolve_binding {
-    my ($self, $bind_to) = @_;
-    # TODO:
-    # make it check better and
-    # perhaps find errors earlier
-    # - SL
-    my ($method, @binding) = split /\// => $bind_to;
-    my $result = $self->responder->$method;
-    while ($method = shift @binding) {
-        $result = $result->$method;
-    }
-    $result;
-}
 
 override 'build_template_params' => sub {
     my $self   = shift;
@@ -38,9 +26,7 @@ override 'build_template_params' => sub {
     # - SL
 
     $params->{outlet} = sub {
-        my $spec = shift;
-        # ignore type for now
-        $self->_resolve_binding( $spec->{bind_to} );
+        OX::View::Nib::Outlet->new( @_ )->resolve( $self->responder )
     };
 
     $params->{action} = sub {

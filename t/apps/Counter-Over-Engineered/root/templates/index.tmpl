@@ -1,7 +1,7 @@
 <html>
 <head><title>OX - Counter::Over::Engineered Example</title>
 <body>
-<h1>[% outlet({ type => 'text', bind_to => 'model/count' }) %]</h1>
+<h1>[% outlet({ bind_to => 'model/count' }) %]</h1>
 <hr/>
 [% action({ type => 'link', bind_to => 'inc', body => '++' }) %]
 &nbsp;&nbsp;|&nbsp;&nbsp;
