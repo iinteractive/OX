@@ -1,4 +1,4 @@
-package OX::View::Nib::Outlet::Text;
+package OX::View::Nib::Outlet::List::Text;
 use Moose;
 
 our $VERSION   = '0.01';
@@ -6,9 +6,19 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 with 'OX::View::Nib::Outlet';
 
+has 'template' => (
+    is       => 'ro',
+    isa      => 'Str',
+    required => 1,
+);
+
 sub resolve {
     my ($self, $nib) = @_;
-    $self->locate_bound_element( $self->binding, $nib->responder );
+
+    my $list     = $self->locate_bound_element( $self->binding, $nib->responder );
+    my $template = $self->template;
+
+    join "" => map { sprintf $template => $_ } @$list;
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -21,11 +31,11 @@ __END__
 
 =head1 NAME
 
-OX::View::Nib::Outlet::Text - A Moosey solution to this problem
+OX::View::Nib::Outlet::List::Text - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use OX::View::Nib::Outlet::Text;
+  use OX::View::Nib::Outlet::List::Text;
 
 =head1 DESCRIPTION
 

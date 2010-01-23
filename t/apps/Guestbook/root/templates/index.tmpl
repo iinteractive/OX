@@ -1,0 +1,13 @@
+<html>
+<head><title>OX - Guestbook Example</title>
+<body>
+<hr/>
+<div id="posts">[%-
+    outlet({
+        type     => 'list.text',
+        bind_to  => 'model/posts',
+        template => '<div class="post">%s</div>'
+    })
+-%]</div>
+</body>
+</html>

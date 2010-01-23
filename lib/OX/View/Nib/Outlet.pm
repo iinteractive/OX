@@ -11,6 +11,20 @@ has 'binding' => (
     required => 1,
 );
 
+sub locate_bound_element {
+    my ($self, $binding, $object) = @_;
+
+    my ($method, @binding) = split /\// => $binding;
+
+    my $result = $object->$method;
+
+    while ($method = shift @binding) {
+        $result = $result->$method;
+    }
+
+    $result;
+}
+
 requires 'resolve';
 
 no Moose::Role; 1;
