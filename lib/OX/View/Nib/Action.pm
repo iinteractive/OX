@@ -7,7 +7,7 @@ our $AUTHORITY = 'cpan:STEVAN';
 has 'binding' => (
     init_arg => 'bind_to',
     is       => 'ro',
-    isa      => 'Str | HashRef',
+    isa      => 'HashRef',
     required => 1,
 );
 

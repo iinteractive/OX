@@ -3,17 +3,17 @@
 <body>
 <h1>[% outlet({ type => 'text', bind_to => 'model/count' }) %]</h1>
 <hr/>
-[% action({ type => 'link', bind_to => 'inc', body => '++' }) %]
+[% action({ type => 'link', bind_to => { controller => 'root', action => 'inc' }, body => '++' }) %]
 &nbsp;&nbsp;|&nbsp;&nbsp;
-[% action({ type => 'link', bind_to => 'dec', body => '--' }) %]
+[% action({ type => 'link', bind_to => { controller => 'root', action => 'dec' }, body => '--' }) %]
 &nbsp;&nbsp;|&nbsp;&nbsp;
-[% action({ type => 'link', bind_to => 'reset', body => 'reset' }) %]
+[% action({ type => 'link', bind_to => { controller => 'root', action => 'reset' }, body => 'reset' }) %]
 <hr/>
 [% FOREACH num IN [ 100, 200, 1000 ] %]
     [%
         action({
             type    => 'link',
-            bind_to => { 'set' => { number => num } },
+            bind_to => { controller => 'root', action => 'set', number => num },
             body    => 'set to ' _ num
         })
     %]<br/>

@@ -14,36 +14,8 @@ has 'body' => (
 
 sub resolve {
     my ($self, $nib, $request) = @_;
-
-    my ($full_name, $controller, $action);
-
-    my $additional = {};
-
-    my $binding = $self->binding;
-
-    if (ref $binding) {
-        ($full_name)  =   keys %{ $binding };
-        ($additional) = values %{ $binding };
-    }
-    else {
-        $full_name = $binding;
-    }
-
-    if ( $full_name =~ /\// ) {
-        ($controller, $action) = split /\// => $full_name;
-    }
-    else {
-        $action = $full_name;
-    }
-
-    my $route = {
-        controller => $controller,
-        action     => $action,
-        %$additional
-    };
-
     return '<a href="'
-         . $request->uri_for( $route )
+         . $request->uri_for( $self->binding )
          . '">'
          . $self->body
          . '</a>';
