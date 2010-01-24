@@ -50,6 +50,15 @@ sub setup_bread_board {
         $root;
     };
 
+    Bread::Board::service 'resource_builder' => (
+        class => 'OX::Application::Resource::ControllerAction',
+        parameters => {
+            path       => { isa => 'Str'                   },
+            route_spec => { isa => 'HashRef'               },
+            service    => { isa => 'Bread::Board::Service' },
+        }
+    );
+
     inner();
 
     $self->setup_router;
@@ -86,27 +95,15 @@ sub configure_router {
 
         foreach my $path ( keys %$routes ) {
 
-            my $spec = $routes->{ $path };
-
-            my ($defaults, $validations) = ({}, {});
-
-            foreach my $key ( keys %$spec ) {
-                if (ref $spec->{ $key }) {
-                    $validations->{ $key } = $spec->{ $key }->{'isa'};
-                }
-                else {
-                    $defaults->{ $key } = $spec->{ $key };
-                }
-            }
-
-            my $c = $service->param( $defaults->{controller} );
-            my $a = $defaults->{action};
+            ($s->parent->has_service('resource_builder'))
+                || confess "You must define a resource_builder service in order to use the router_config";
 
             $router->add_route(
-                $path,
-                defaults    => $defaults,
-                target      => sub { $c->$a( @_ ) },
-                validations => $validations,
+                $s->parent->get_service('resource_builder')->get(
+                    path       => $path,
+                    route_spec => $routes->{ $path },
+                    service    => $service,
+                )->compile_route
             );
         }
 
