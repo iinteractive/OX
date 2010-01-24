@@ -62,7 +62,7 @@ test_psgi
               like($res->content, qr/<div id="posts"><\/div>/, '... got the right content in index');
           }
           {
-              my $req = HTTP::Request->new(GET => "http://localhost/post?text=Hello%20World");
+              my $req = HTTP::Request->new(GET => "http://localhost/post?note=Hello%20World");
               my $res = $cb->($req);
               is($res->code, 302, '... got redirection status code');
           }
