@@ -1,6 +1,14 @@
 <html>
 <head><title>OX - Guestbook Example</title>
 <body>
+<form method="POST">
+    <input type='text' name='note' />
+    [% action({
+       type    => 'button',
+       bind_to => { controller => 'root', action => 'post' },
+       value   => 'Add New Post'
+    }) %]
+</form>
 <hr/>
 <div id="posts">[%-
     outlet({

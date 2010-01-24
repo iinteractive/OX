@@ -5,6 +5,7 @@ use OX::View::Nib::Outlet::Text;
 use OX::View::Nib::Outlet::List::Text;
 
 use OX::View::Nib::Action::Link;
+use OX::View::Nib::Action::Button;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -41,6 +42,9 @@ override 'build_template_params' => sub {
         my $type = delete $spec->{type};
         if ($type eq 'link') {
             OX::View::Nib::Action::Link->new( $spec )->resolve( $self, $r )
+        }
+        elsif ($type eq 'button') {
+            OX::View::Nib::Action::Button->new( $spec )->resolve( $self, $r )
         }
         else {
             confess "Unknown action type ($type)";
