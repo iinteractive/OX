@@ -20,14 +20,14 @@ augment 'setup_bread_board' => sub {
                     block        => sub { (shift)->param('app_root')->subdir(qw[ root templates ]) },
                     dependencies => [ depends_on('/app_root') ]
                 )),
-                responder => depends_on('/Controller/Root')
+                responder => depends_on('/Resources/Guestbook')
             }
         );
     };
 
-    container 'Controller' => as {
-        service 'Root' => (
-            class        => 'Guestbook::Controller',
+    container 'Resources' => as {
+        service 'Guestbook' => (
+            class        => 'Guestbook::Resource',
             dependencies => {
                 view  => depends_on('/View/Nib'),
                 model => depends_on('/Model/Posts')
@@ -35,29 +35,25 @@ augment 'setup_bread_board' => sub {
         );
     };
 
-    service 'router_config' => (
-        block => sub {
-            +{
-                '/' => {
-                    controller => 'root',
-                    action     => 'index',
-                },
-                '/list' => {
-                    controller => 'root',
-                    action     => 'list',
-                },
-                '/post' => {
-                    controller => 'root',
-                    action     => 'post',
-                },
-            }
-        },
-        dependencies => {
-            root => depends_on('/Controller/Root')
+};
+
+sub configure_router {
+    my ($self, $s, $router) = @_;
+
+    my $guestbook = $s->param('guestbook');
+
+    $router->add_route('/',
+        defaults => { resource => 'guestbook' },
+        target   => sub {
+            my $r = shift;
+            $guestbook->resolve( $r )->{ $r->method }->();
         }
     );
+}
 
-};
+sub router_dependencies {
+    +{ guestbook => depends_on('Resources/Guestbook') }
+}
 
 1;
 

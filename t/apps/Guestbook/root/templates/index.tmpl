@@ -5,7 +5,7 @@
     <input type='text' name='note' />
     [% action({
        type    => 'button',
-       bind_to => { controller => 'root', action => 'post' },
+       bind_to => { resource => 'guestbook' },
        value   => 'Add New Post'
     }) %]
 </form>

@@ -8,6 +8,7 @@ use Test::Exception;
 use Test::Moose;
 use Test::Path::Router;
 use Plack::Test;
+use HTTP::Request::Common;
 
 BEGIN {
     use_ok('OX::Application');
@@ -30,17 +31,10 @@ is($root, 't/apps/Guestbook', '... got the right root dir');
 my $router = $app->fetch_service('Router');
 isa_ok($router, 'Path::Router');
 
-path_ok($router, $_, '... ' . $_ . ' is a valid path')
-for qw[
-    /
-    /list
-    /post
-];
+path_ok($router, '/', '... / is a valid path');
 
 routes_ok($router, {
-    ''     => { controller => 'root', action => 'index' },
-    'list' => { controller => 'root', action => 'list' },
-    'post' => { controller => 'root', action => 'post' },
+    '' => { resource => 'guestbook' },
 },
 "... our routes are valid");
 
@@ -53,21 +47,16 @@ test_psgi
           {
               my $req = HTTP::Request->new(GET => "http://localhost/");
               my $res = $cb->($req);
-              is($res->code, 302, '... got redirection status code');
-          }
-          {
-              my $req = HTTP::Request->new(GET => "http://localhost/list");
-              my $res = $cb->($req);
               like($res->content, $title, '... got the right title');
               like($res->content, qr/<div id="posts"><\/div>/, '... got the right content in index');
           }
           {
-              my $req = HTTP::Request->new(GET => "http://localhost/post?note=Hello%20World");
+              my $req = POST "http://localhost/", [ note => 'Hello World' ];
               my $res = $cb->($req);
               is($res->code, 302, '... got redirection status code');
           }
           {
-              my $req = HTTP::Request->new(GET => "http://localhost/list");
+              my $req = HTTP::Request->new(GET => "http://localhost/");
               my $res = $cb->($req);
               like($res->content, $title, '... got the right title');
               like($res->content, qr/<div id="posts"><div class="post">Hello World<\/div><\/div>/, '... got the right content in index');
