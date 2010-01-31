@@ -26,6 +26,12 @@ has 'name' => (
     default => sub { (shift)->meta->name },
 );
 
+has 'route_builder_class' => (
+    is      => 'ro',
+    isa     => 'Str',
+    default => 'OX::Application::RouteBuilder::ControllerAction',
+);
+
 has 'bread_board' => (
     is      => 'ro',
     isa     => 'Bread::Board::Container',
@@ -50,8 +56,8 @@ sub setup_bread_board {
         $root;
     };
 
-    Bread::Board::service 'resource_builder' => (
-        class => 'OX::Application::Resource::ControllerAction',
+    Bread::Board::service 'route_builder' => (
+        class      => $self->route_builder_class,
         parameters => {
             path       => { isa => 'Str'                   },
             route_spec => { isa => 'HashRef'               },
@@ -95,16 +101,16 @@ sub configure_router {
 
         foreach my $path ( keys %$routes ) {
 
-            ($s->parent->has_service('resource_builder'))
-                || confess "You must define a resource_builder service in order to use the router_config";
+            ($s->parent->has_service('route_builder'))
+                || confess "You must define a route_builder service in order to use the router_config";
 
-            $router->add_route(
-                $s->parent->get_service('resource_builder')->get(
-                    path       => $path,
-                    route_spec => $routes->{ $path },
-                    service    => $service,
-                )->compile_route
-            );
+            map {
+                $router->add_route( @$_ )
+            } $s->parent->get_service('route_builder')->get(
+                path       => $path,
+                route_spec => $routes->{ $path },
+                service    => $service,
+            )->compile_routes;
         }
 
     }

@@ -1,4 +1,4 @@
-package OX::Application::Resource;
+package OX::Application::RouteBuilder;
 use Moose::Role;
 
 our $VERSION   = '0.01';
@@ -22,7 +22,24 @@ has 'service' => (
     required => 1
 );
 
-requires 'compile_route';
+sub extract_defaults_and_validations {
+    my ($self, $spec) = @_;
+
+    my ($defaults, $validations) = ({}, {});
+
+    foreach my $key ( keys %$spec ) {
+        if (ref $spec->{ $key }) {
+            $validations->{ $key } = $spec->{ $key }->{'isa'};
+        }
+        else {
+            $defaults->{ $key } = $spec->{ $key };
+        }
+    }
+
+    return ($defaults, $validations);
+}
+
+requires 'compile_routes';
 
 no Moose::Role; 1;
 
@@ -32,11 +49,11 @@ __END__
 
 =head1 NAME
 
-OX::Application::Resource - A Moosey solution to this problem
+OX::Application::RouteBuilder - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use OX::Application::Resource;
+  use OX::Application::RouteBuilder;
 
 =head1 DESCRIPTION
 

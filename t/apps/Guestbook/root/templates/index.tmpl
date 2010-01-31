@@ -6,6 +6,6 @@
     <input type='submit' value='Add New Post' />
 </form>
 <hr/>
-<div id="posts">[%- FOREACH post IN model.posts -%]<div class="post">[% post %]</div>[%- END -%]</div>
+<div id="posts">[%- FOREACH post IN this.posts -%]<div class="post">[% post %]</div>[%- END -%]</div>
 </body>
 </html>

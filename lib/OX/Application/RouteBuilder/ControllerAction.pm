@@ -1,36 +1,27 @@
-package OX::Application::Resource::ControllerAction;
+package OX::Application::RouteBuilder::ControllerAction;
 use Moose;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-with 'OX::Application::Resource';
+with 'OX::Application::RouteBuilder';
 
-sub compile_route {
+sub compile_routes {
     my $self = shift;
 
     my $spec = $self->route_spec;
 
-    my ($defaults, $validations) = ({}, {});
-
-    foreach my $key ( keys %$spec ) {
-        if (ref $spec->{ $key }) {
-            $validations->{ $key } = $spec->{ $key }->{'isa'};
-        }
-        else {
-            $defaults->{ $key } = $spec->{ $key };
-        }
-    }
+    my ($defaults, $validations) = $self->extract_defaults_and_validations( $spec );
 
     my $c = $self->service->param( $defaults->{controller} );
     my $a = $defaults->{action};
 
-    return (
+    return [
         $self->path,
         defaults    => $defaults,
         target      => sub { $c->$a( @_ ) },
         validations => $validations,
-    );
+    ];
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -43,11 +34,11 @@ __END__
 
 =head1 NAME
 
-OX::Application::Resource::ControllerAction - A Moosey solution to this problem
+OX::Application::RouteBuilder::ControllerAction - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use OX::Application::Resource::ControllerAction;
+  use OX::Application::RouteBuilder::ControllerAction;
 
 =head1 DESCRIPTION
 

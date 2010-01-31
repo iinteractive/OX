@@ -1,28 +1,28 @@
 package Guestbook::Resource;
 use Moose;
 
-has 'model' => (
-    is       => 'ro',
-    isa      => 'Guestbook::Model',
-    required => 1,
-);
-
-has 'view' => (
-    is       => 'ro',
-    isa      => 'OX::View::TT',
-    required => 1,
+has 'posts' => (
+    traits  => [ 'Array' ],
+    is      => 'ro',
+    isa     => 'ArrayRef[Str]',
+    lazy    => 1,
+    default => sub { [] },
+    handles => {
+        'add_post' => 'push',
+    }
 );
 
 sub resolve {
-    my ($self, $r) = @_;
+    my $self = shift;
     +{
-        GET  => sub {
-            $self->view->render( $r, 'index.tmpl', { model => $self->model } );
-        },
+        GET  => sub { 1 }, # no action to take ...
         POST => sub {
-            $self->model->add_post( $r->param('note') );
+            my $r = shift;
+            $self->add_post( $r->param('note') );
+
             my $uri = $r->uri->clone;
             $uri->query( undef );
+
             my $resp = $r->new_response;
             $resp->redirect( $uri );
             $resp;

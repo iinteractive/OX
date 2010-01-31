@@ -1,19 +1,18 @@
 package Guestbook;
 use Moose;
 use Bread::Board;
+use JSON;
 
 extends 'OX::Application';
 
+has '+route_builder_class' => (
+    default => 'OX::Application::RouteBuilder::ResourceTransform',
+);
+
 augment 'setup_bread_board' => sub {
 
-    container 'Model' => as {
-        service 'Posts' => (
-            class => 'Guestbook::Model'
-        );
-    };
-
-    container 'View' => as {
-        service 'TT' => (
+    container 'Transformers' => as {
+        service 'HTML' => (
             class        => 'OX::View::TT',
             dependencies => {
                 template_root => (service 'template_root' => (
@@ -24,38 +23,51 @@ augment 'setup_bread_board' => sub {
                 ))
             }
         );
+        service 'JSON' => (
+            block => sub { JSON->new }
+        );
     };
 
     container 'Resources' => as {
         service 'Guestbook' => (
-            class        => 'Guestbook::Resource',
-            dependencies => {
-                view  => depends_on('/View/TT'),
-                model => depends_on('/Model/Posts')
-            }
+            class => 'Guestbook::Resource',
         );
     };
 
-};
-
-sub configure_router {
-    my ($self, $s, $router) = @_;
-
-    my $guestbook = $s->param('guestbook');
-
-    $router->add_route('/',
-        defaults => { resource => 'guestbook' },
-        target   => sub {
-            my $r = shift;
-            $guestbook->resolve( $r )->{ $r->method }->();
+    service 'router_config' => (
+        block => sub {
+            +{
+                '/guestbook' => {
+                    resource  => 'guestbook',
+                    transform => {
+                        'html' => sub {
+                            my ($renderer, $resource, $request ) = @_;
+                            $renderer->render( $request, 'index.tmpl', { this => $resource } );
+                        },
+                        'json' => sub {
+                            my ($renderer, $resource, $request ) = @_;
+                            $renderer->encode( $resource->posts );
+                        },
+                    }
+                }
+            }
+        },
+        dependencies => {
+            guestbook => depends_on('Resources/Guestbook'),
+            html      => depends_on('Transformers/HTML'),
+            json      => depends_on('Transformers/JSON')
         }
     );
-}
 
-sub router_dependencies {
-    +{ guestbook => depends_on('Resources/Guestbook') }
-}
+};
 
 1;
 
 __END__
+
+
+
+
+
+
+
