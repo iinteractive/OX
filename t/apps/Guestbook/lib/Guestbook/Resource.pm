@@ -9,7 +9,7 @@ has 'model' => (
 
 has 'view' => (
     is       => 'ro',
-    isa      => 'OX::View::Nib',
+    isa      => 'OX::View::TT',
     required => 1,
 );
 
@@ -17,7 +17,7 @@ sub resolve {
     my ($self, $r) = @_;
     +{
         GET  => sub {
-            $self->view->render( $r, 'index.tmpl' );
+            $self->view->render( $r, 'index.tmpl', { model => $self->model } );
         },
         POST => sub {
             $self->model->add_post( $r->param('note') );

@@ -1,21 +1,11 @@
 <html>
 <head><title>OX - Guestbook Example</title>
 <body>
-<form method="POST">
+<form method="POST" action="[% r.uri_for({ resource => 'guestbook' }) %]">
     <input type='text' name='note' />
-    [% action({
-       type    => 'button',
-       bind_to => { resource => 'guestbook' },
-       value   => 'Add New Post'
-    }) %]
+    <input type='submit' value='Add New Post' />
 </form>
 <hr/>
-<div id="posts">[%-
-    outlet({
-        type     => 'list.text',
-        bind_to  => 'model/posts',
-        template => '<div class="post">%s</div>'
-    })
--%]</div>
+<div id="posts">[%- FOREACH post IN model.posts -%]<div class="post">[% post %]</div>[%- END -%]</div>
 </body>
 </html>
