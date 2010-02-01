@@ -41,11 +41,11 @@ augment 'setup_bread_board' => sub {
                     resource  => 'guestbook',
                     transform => {
                         'html' => sub {
-                            my ($renderer, $resource, $request ) = @_;
+                            my ($renderer, $request, $resource ) = @_;
                             $renderer->render( $request, 'index.tmpl', { this => $resource } );
                         },
                         'json' => sub {
-                            my ($renderer, $resource, $request ) = @_;
+                            my ($renderer, $request, $resource ) = @_;
                             $renderer->encode( $resource->posts );
                         },
                     }

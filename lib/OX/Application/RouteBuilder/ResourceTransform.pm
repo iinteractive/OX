@@ -43,7 +43,7 @@ sub compile_routes {
                 return $response
                     if blessed $response && $response->isa('OX::Web::Response');
 
-                return $transformer->( $renderer, $resource, $request );
+                return $transformer->( $renderer, $request, $response );
             }
         ]
     }

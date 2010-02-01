@@ -15,7 +15,7 @@ has 'posts' => (
 sub resolve {
     my $self = shift;
     +{
-        GET  => sub { 1 }, # no action to take ...
+        GET  => sub { $self },
         POST => sub {
             my $r = shift;
             $self->add_post( $r->param('note') );
