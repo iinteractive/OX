@@ -38,8 +38,8 @@ for qw[
 ];
 
 routes_ok($router, {
-    'guestbook.html' => { resource => 'guestbook', transform => 'html' },
-    'guestbook.json' => { resource => 'guestbook', transform => 'json' },
+    'guestbook.html' => { resource => 'guestbook', transform => 'text/html' },
+    'guestbook.json' => { resource => 'guestbook', transform => 'application/json' },
 },
 "... our routes are valid");
 

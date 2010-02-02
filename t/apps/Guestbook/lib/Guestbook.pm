@@ -40,11 +40,11 @@ augment 'setup_bread_board' => sub {
                 '/guestbook' => {
                     resource  => 'guestbook',
                     transform => {
-                        'html' => sub {
+                        'text/html' => sub {
                             my ($renderer, $request, $resource ) = @_;
                             $renderer->render( $request, 'index.tmpl', { this => $resource } );
                         },
-                        'json' => sub {
+                        'application/json' => sub {
                             my ($renderer, $request, $resource ) = @_;
                             $renderer->encode( $resource->posts );
                         },
@@ -53,9 +53,9 @@ augment 'setup_bread_board' => sub {
             }
         },
         dependencies => {
-            guestbook => depends_on('Resources/Guestbook'),
-            html      => depends_on('Transformers/HTML'),
-            json      => depends_on('Transformers/JSON')
+            'guestbook'        => depends_on('Resources/Guestbook'),
+            'text/html'        => depends_on('Transformers/HTML'),
+            'application/json' => depends_on('Transformers/JSON')
         }
     );
 
