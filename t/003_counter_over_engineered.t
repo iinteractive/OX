@@ -13,8 +13,6 @@ BEGIN {
     use_ok('OX::Application');
 }
 
-exit;
-
 use lib 't/apps/Counter-Over-Engineered/lib';
 
 use Counter::Over::Engineered;
@@ -25,11 +23,11 @@ isa_ok($app, 'OX::Application');
 
 #diag $app->_dump_bread_board;
 
-my $root = $app->fetch_service('app_root');
+my $root = $app->resolve( service => 'app_root' );
 isa_ok($root, 'Path::Class::Dir');
 is($root, 't/apps/Counter-Over-Engineered', '... got the right root dir');
 
-my $router = $app->fetch_service('Router');
+my $router = $app->resolve( service => 'Router' );
 isa_ok($router, 'Path::Router');
 
 path_ok($router, $_, '... ' . $_ . ' is a valid path')
@@ -110,30 +108,6 @@ test_psgi
               is($res->code, 404, '... did not match, so got 404');
           }
       };
-
-
-my $view = $app->fetch_service('/View/Nib');
-isa_ok($view, 'OX::View::Nib');
-
-=pod
-
-- create a mock responder that will handle the outlet calls
-- create a request which has a router to handle the uri_for calls
-
-test UI
-
-=cut
-
-my $template_root = $app->fetch_service('/View/template_root');
-isa_ok($template_root, 'Path::Class::Dir');
-is($template_root, 't/apps/Counter-Over-Engineered/root/templates', '... got the right root dir');
-
-
-
-
-
-
-
 
 
 done_testing;

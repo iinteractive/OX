@@ -16,21 +16,24 @@ has 'count' => (
     }
 );
 
-augment 'setup_bread_board' => sub {
-    container 'View' => as {
-        service 'TT' => (
-            class        => 'OX::View::TT',
-            dependencies => {
-                template_root => (service 'template_root' => (
-                    block => sub {
-                        (shift)->param('app_root')->subdir(qw[ root templates ])
-                    },
-                    dependencies => [ depends_on('/app_root') ]
-                ))
-            }
-        );
-    };
-};
+sub BUILD {
+    my $self = shift;
+    container $self => as {
+        container 'View' => as {
+            service 'TT' => (
+                class        => 'OX::View::TT',
+                dependencies => {
+                    template_root => (service 'template_root' => (
+                        block => sub {
+                            (shift)->param('app_root')->subdir(qw[ root templates ])
+                        },
+                        dependencies => [ depends_on('/app_root') ]
+                    ))
+                }
+            );
+        };
+    }
+}
 
 sub configure_router {
     my ($self, $s, $router) = @_;

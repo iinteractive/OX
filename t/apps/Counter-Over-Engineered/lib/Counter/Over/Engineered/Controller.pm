@@ -9,37 +9,42 @@ has 'model' => (
 
 has 'view' => (
     is       => 'ro',
-    isa      => 'OX::View::Nib',
+    isa      => 'OX::View::TT',
     required => 1,
 );
 
 sub index {
     my ($self, $r) = @_;
-    $self->view->render( $r, 'index.tmpl' );
+    $self->render( $r );
 }
 
 sub inc {
     my ($self, $r) = @_;
     $self->model->inc_counter;
-    $self->view->render( $r, 'index.tmpl' );
+    $self->render( $r );
 }
 
 sub dec {
     my ($self, $r) = @_;
     $self->model->dec_counter;
-    $self->view->render( $r, 'index.tmpl' );
+    $self->render( $r );
 }
 
 sub reset {
     my ($self, $r) = @_;
     $self->model->reset_counter;
-    $self->view->render( $r, 'index.tmpl' );
+    $self->render( $r );
 }
 
 sub set {
     my ($self, $r, $number) = @_;
     $self->model->set_counter( $number );
-    $self->view->render( $r, 'index.tmpl' );
+    $self->render( $r );
+}
+
+sub render {
+    my ($self, $r) = @_;
+    $self->view->render( $r, 'index.tmpl', { this => $self } );
 }
 
 no Moose; 1;

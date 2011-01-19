@@ -1,8 +1,6 @@
 package OX::Application;
 use Moose;
-use MooseX::NonMoose;
-
-use Bread::Board ();
+use Bread::Board;
 
 use Path::Class;
 use Class::Inspector;
@@ -15,16 +13,11 @@ use OX::Web::Request;
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-extends 'Plack::Component';
+extends 'Bread::Board::Container';
+
+has '+name' => ( lazy => 1, default => sub { (shift)->meta->name } );
 
 has '_app' => ( is => 'rw', isa => 'CodeRef' );
-
-has 'name' => (
-    is      => 'ro',
-    isa     => 'Str',
-    lazy    => 1,
-    default => sub { (shift)->meta->name },
-);
 
 has 'route_builder_class' => (
     is      => 'ro',
@@ -32,62 +25,40 @@ has 'route_builder_class' => (
     default => 'OX::Application::RouteBuilder::ControllerAction',
 );
 
-has 'bread_board' => (
-    is      => 'ro',
-    isa     => 'Bread::Board::Container',
-    lazy    => 1,
-    builder => 'setup_bread_board'
-);
-
-sub setup_bread_board {
+sub BUILD {
     my $self = shift;
+    container $self => as {
 
-    my $bb = Bread::Board::Container->new( name => $self->name );
+        service 'app_root' => do {
+            my $class = $self->meta->name;
+            my $root  = file( Class::Inspector->resolved_filename( $class ) );
+            # climb out of the lib/ directory
+            $root = $root->parent foreach split /\:\:/ => $class;
+            $root = $root->parent; # one last time for lib/
+            $root;
+        };
 
-    Bread::Board::set_root_container( $bb );
+        service 'route_builder' => (
+            class      => $self->route_builder_class,
+            parameters => {
+                path       => { isa => 'Str'                   },
+                route_spec => { isa => 'HashRef'               },
+                service    => { isa => 'Bread::Board::Service' },
+            }
+        );
 
-    # XXX - this might not be a good idea - SL
-    Bread::Board::service 'app_root' => do {
-        my $class = $self->meta->name;
-        my $root  = file( Class::Inspector->resolved_filename( $class ) );
-        # climb out of the lib/ directory
-        $root = $root->parent foreach split /\:\:/ => $class;
-        $root = $root->parent; # one last time for lib/
-        $root;
+        service 'Router' => (
+            class => 'Path::Router',
+            block => sub {
+                my $s      = shift;
+                my $router = Path::Router->new;
+                $self->configure_router( $s, $router );
+                $router;
+            },
+            dependencies => $self->router_dependencies
+        );
+
     };
-
-    Bread::Board::service 'route_builder' => (
-        class      => $self->route_builder_class,
-        parameters => {
-            path       => { isa => 'Str'                   },
-            route_spec => { isa => 'HashRef'               },
-            service    => { isa => 'Bread::Board::Service' },
-        }
-    );
-
-    inner();
-
-    $self->setup_router;
-
-    $Bread::Board::CC = undef;
-
-    $bb;
-}
-
-# ... Router handling/setup
-
-sub setup_router {
-    my $self = shift;
-    Bread::Board::service 'Router' => (
-        class => 'Path::Router',
-        block => sub {
-            my $s      = shift;
-            my $router = Path::Router->new;
-            $self->configure_router( $s, $router );
-            $router;
-        },
-        dependencies => $self->router_dependencies
-    );
 }
 
 sub router_dependencies { [] }
@@ -112,15 +83,7 @@ sub configure_router {
                 service    => $service,
             )->compile_routes;
         }
-
     }
-}
-
-# ... Public Utils
-
-sub fetch_service {
-    my ($self, $service_path, %params) = @_;
-    $self->bread_board->fetch( $service_path )->get( %params );
 }
 
 # ... Plack::Component API
@@ -129,7 +92,7 @@ sub prepare_app {
     my $self = shift;
     $self->_app(
         Plack::App::Path::Router->new(
-            router        => $self->fetch_service('Router'),
+            router        => $self->resolve( service => 'Router'),
             request_class => 'OX::Web::Request',
         )->to_app
     );
@@ -138,6 +101,12 @@ sub prepare_app {
 sub call {
     my ($self, $env) = @_;
     $self->_app->( $env );
+}
+
+sub to_app {
+    my $self = shift;
+    $self->prepare_app;
+    return sub { $self->call( @_ ) };
 }
 
 # ... Private Utils

@@ -23,11 +23,11 @@ isa_ok($app, 'OX::Application');
 
 #diag $app->_dump_bread_board;
 
-my $root = $app->fetch_service('app_root');
+my $root = $app->resolve( service => 'app_root' );
 isa_ok($root, 'Path::Class::Dir');
 is($root, 't/apps/Counter-Improved', '... got the right root dir');
 
-my $router = $app->fetch_service('Router');
+my $router = $app->resolve( service => 'Router' );
 isa_ok($router, 'Path::Router');
 
 path_ok($router, $_, '... ' . $_ . ' is a valid path')
