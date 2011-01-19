@@ -13,6 +13,8 @@ BEGIN {
     use_ok('OX::Application');
 }
 
+exit;
+
 use lib 't/apps/Counter-Over-Engineered/lib';
 
 use Counter::Over::Engineered;
