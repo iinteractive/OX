@@ -1,0 +1,16 @@
+<html>
+<head><title>OX - Counter::Over::Engineered::Sugar Example</title>
+<body>
+<h1>[% this.model.count %]</h1>
+<hr/>
+<a href="[% uri_for({ controller => 'root', action => 'inc' }) %]">++</a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="[% uri_for({ controller => 'root', action => 'dec' }) %]">--</a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="[% uri_for({ controller => 'root', action => 'reset' }) %]">reset</a>
+<hr/>
+[% FOREACH num IN [ 100, 200, 1000 ] %]
+    <a href="[% uri_for({ controller => 'root', action => 'set', number => num }) %]">set to [% num %]</a><br/>
+[% END %]
+</body>
+</html>
