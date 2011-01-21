@@ -99,14 +99,14 @@ sub component {
         $service = Bread::Board::ConstructorInjection->new(
             name         => $name,
             class        => $service_val,
-            dependencies => \%params, # XXX: do something better here
+            dependencies => \%params,
         );
     }
     elsif (ref($service_val) eq 'CODE') {
         $service = Bread::Board::BlockInjection->new(
             name         => $name,
             block        => $service_val,
-            dependencies => \%params, # XXX: do something better here
+            dependencies => \%params,
         );
     }
 
@@ -133,7 +133,7 @@ sub config {
         $service = Bread::Board::BlockInjection->new(
             name         => $name,
             block        => $service_val,
-            dependencies => \%params, # XXX: do something better here
+            dependencies => \%params,
         );
     }
     else {
