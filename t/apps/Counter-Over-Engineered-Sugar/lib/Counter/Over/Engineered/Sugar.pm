@@ -9,18 +9,20 @@ component Counter => 'Counter::Over::Engineered::Sugar::Model';
 component TT => 'OX::View::TT' => (
     template_root => depends_on('/Config/template_root'),
 );
-component root => 'Counter::Over::Engineered::Sugar::Controller' => (
+component CounterController => 'Counter::Over::Engineered::Sugar::Controller' => (
     view  => depends_on('/Component/TT'),
     model => depends_on('/Component/Counter')
 );
 
-route '/'            => 'root.index';
-route '/inc'         => 'root.inc';
-route '/dec'         => 'root.dec';
-route '/reset'       => 'root.reset';
-route '/set/:number' => 'root.set' => (
-    number => { isa => 'Int' },
-);
+router as {
+    route '/'            => 'root.index';
+    route '/inc'         => 'root.inc';
+    route '/dec'         => 'root.dec';
+    route '/reset'       => 'root.reset';
+    route '/set/:number' => 'root.set' => (
+        number => { isa => 'Int' },
+    );
+}, (root => depends_on('/Component/CounterController'));
 
 no OX;
 1;

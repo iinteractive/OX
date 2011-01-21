@@ -20,19 +20,8 @@ sub BUILD {
             };
         }
 
-        if ($meta->has_routes) {
-            my $components = $self->get_sub_container('Component');
-            service router_config => (
-                block => sub {
-                    +{ $meta->router_config }
-                },
-                $components
-                    ? (dependencies => {
-                          map { $_ => depends_on("/Component/$_") }
-                              $components->get_service_list
-                      })
-                    : (),
-            );
+        if ($meta->has_router) {
+            $Bread::Board::CC->add_service($meta->router);
         }
     };
 }

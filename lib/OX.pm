@@ -8,8 +8,9 @@ use Bread::Board ();
 
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose'],
-    with_meta => [qw(route component config)],
+    with_meta => [qw(router component config)],
     as_is     => [
+        'route',
         \&Bread::Board::depends_on,
         \&Bread::Board::as,
     ],
@@ -28,19 +29,37 @@ sub init_meta {
     $package->$init_meta(%options);
 }
 
-sub route {
+our $ROUTES;
+
+sub router {
     my $meta = shift;
+    my ($body, %params) = @_;
+
+    die "only one top level router is allowed"
+        if $meta->has_router;
+
+    local $ROUTES = {};
+    $body->();
+    my $routes = $ROUTES;
+    $meta->router(
+        Bread::Board::BlockInjection->new(
+            name         => 'router_config',
+            block        => sub { $routes },
+            dependencies => \%params,
+        )
+    );
+}
+
+sub route {
     my ($path, $action_spec, %params) = @_;
 
     my ($controller, $action) = split /\./, $action_spec;
 
-    $meta->add_route(
-        $path => {
-            controller => $controller,
-            action     => $action,
-            %params,
-        }
-    );
+    $ROUTES->{$path} = {
+        controller => $controller,
+        action     => $action,
+        %params,
+    };
 }
 
 sub component {

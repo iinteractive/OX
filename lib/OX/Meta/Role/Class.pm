@@ -1,16 +1,10 @@
 package OX::Meta::Role::Class;
 use Moose::Role;
 
-has routes => (
-    traits  => ['Hash'],
-    isa     => 'HashRef[HashRef]',
-    default => sub { {} },
-    handles => {
-        has_routes    => 'count',
-        paths         => 'keys',
-        add_route     => 'set',
-        router_config => 'elements',
-    },
+has router => (
+    is        => 'rw',
+    isa       => 'Bread::Board::Service',
+    predicate => 'has_router',
 );
 
 has components => (
