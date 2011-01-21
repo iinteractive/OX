@@ -5,8 +5,8 @@ use Bread::Board;
 use Path::Class;
 use Class::Inspector;
 
-use Path::Router;
-use Plack::App::Path::Router;
+use OX::Router;
+use Plack::App::Path::Router::PSGI;
 
 use OX::Web::Request;
 
@@ -23,6 +23,13 @@ has 'route_builder_class' => (
     is      => 'ro',
     isa     => 'Str',
     default => 'OX::Application::RouteBuilder::ControllerAction',
+);
+
+# can override this to Path::Router to deal with PSGI coderefs directly
+has 'router_class' => (
+    is      => 'ro',
+    isa     => 'Str',
+    default => 'OX::Router',
 );
 
 sub BUILD {
@@ -51,7 +58,7 @@ sub BUILD {
             class => 'Path::Router',
             block => sub {
                 my $s      = shift;
-                my $router = Path::Router->new;
+                my $router = $self->router_class->new;
                 $self->configure_router( $s, $router );
                 $router;
             },
@@ -91,9 +98,8 @@ sub configure_router {
 sub prepare_app {
     my $self = shift;
     $self->_app(
-        Plack::App::Path::Router->new(
-            router        => $self->resolve( service => 'Router'),
-            request_class => 'OX::Web::Request',
+        Plack::App::Path::Router::PSGI->new(
+            router => $self->resolve( service => 'Router' ),
         )->to_app
     );
 }
