@@ -5,6 +5,7 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Bread::Board ();
+use Scalar::Util qw(blessed);
 
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose'],
@@ -35,19 +36,32 @@ sub router {
     my $meta = shift;
     my ($body, %params) = @_;
 
-    die "only one top level router is allowed"
-        if $meta->has_router;
+    if (!ref($body)) {
+        Class::MOP::load_class($body);
+        die 'XXX' unless $body->isa('Path::Router');
+        $meta->router($body->new);
+    }
+    elsif (ref($body) eq 'CODE') {
+        die "only one top level router is allowed"
+            if $meta->has_router_config;
 
-    local $ROUTES = {};
-    $body->();
-    my $routes = $ROUTES;
-    $meta->router(
-        Bread::Board::BlockInjection->new(
-            name         => 'router_config',
-            block        => sub { $routes },
-            dependencies => \%params,
-        )
-    );
+        local $ROUTES = {};
+        $body->();
+        my $routes = $ROUTES;
+        $meta->router_config(
+            Bread::Board::BlockInjection->new(
+                name         => 'router_config',
+                block        => sub { $routes },
+                dependencies => \%params,
+            )
+        );
+    }
+    elsif (blessed($body) && $body->isa('Path::Router')) {
+        $meta->router($body);
+    }
+    else {
+        die 'XXX';
+    }
 }
 
 sub route {

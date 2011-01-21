@@ -3,8 +3,14 @@ use Moose::Role;
 
 has router => (
     is        => 'rw',
-    isa       => 'Bread::Board::Service',
+    isa       => 'Path::Router',
     predicate => 'has_router',
+);
+
+has router_config => (
+    is        => 'rw',
+    isa       => 'Bread::Board::Service',
+    predicate => 'has_router_config',
 );
 
 has components => (

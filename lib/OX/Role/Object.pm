@@ -20,8 +20,17 @@ sub BUILD {
             };
         }
 
+        if ($meta->has_router_config) {
+            $Bread::Board::CC->add_service($meta->router_config);
+        }
+
         if ($meta->has_router) {
-            $Bread::Board::CC->add_service($meta->router);
+            $Bread::Board::CC->add_service(
+                Bread::Board::Literal->new(
+                    name  => 'Router',
+                    value => $meta->router,
+                )
+            );
         }
     };
 }
