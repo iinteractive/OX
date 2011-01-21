@@ -38,7 +38,8 @@ sub router {
 
     if (!ref($body)) {
         Class::MOP::load_class($body);
-        die 'XXX' unless $body->isa('Path::Router');
+        die "A router must be a subclass of Path::Router, not $body"
+            unless $body->isa('Path::Router');
         $meta->router($body->new);
     }
     elsif (ref($body) eq 'CODE') {
@@ -60,7 +61,7 @@ sub router {
         $meta->router($body);
     }
     else {
-        die 'XXX';
+        die "Unknown argument to 'router': $body";
     }
 }
 
@@ -84,7 +85,8 @@ sub component {
     if ((@_ % 2) == 1) {
         # component 'My::App::View' => (...)
         ($service_val, %params) = @_;
-        die 'XXX' if ref($service_val);
+        die "Must supply a name for block injection components"
+            if ref($service_val);
         $name = (split /::/, $service_val)[-1];
     }
     else {
@@ -129,7 +131,8 @@ sub config {
     elsif ((@_ % 2) == 1) {
         # config id => sub { state $i++ }, (...)
         my ($service_val, %params) = @_;
-        die 'XXX' unless ref($service_val) eq 'CODE';
+        die "config must be either a string or a coderef"
+            unless ref($service_val) eq 'CODE';
         $service = Bread::Board::BlockInjection->new(
             name         => $name,
             block        => $service_val,
@@ -137,7 +140,7 @@ sub config {
         );
     }
     else {
-        die 'XXX';
+        die "config must be either a string or a coderef";
     }
 
     $meta->add_config($service);
