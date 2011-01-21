@@ -8,7 +8,7 @@ use Bread::Board ();
 
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose'],
-    with_meta => [qw(route resource component config)],
+    with_meta => [qw(route component config)],
     as_is     => [
         \&Bread::Board::depends_on,
         \&Bread::Board::as,
@@ -43,44 +43,6 @@ sub route {
     );
 }
 
-sub resource {
-    my $meta = shift;
-
-    my ($name, $service_val, %params);
-
-    if ((@_ % 2) == 1) {
-        # resource 'My::App::Controller' => (...)
-        ($service_val, %params) = @_;
-        die 'XXX' if ref($service_val);
-        $name = (split /::/, $service_val)[-1];
-    }
-    else {
-        # resource 'Root' => 'My::App::Controller' => (...)
-        # resource 'Root' => sub { My::App::Controller->new }, (...)
-        ($name, $service_val, %params) = @_;
-    }
-
-    my $service;
-    if (!ref($service_val)) {
-        Class::MOP::load_class($service_val);
-        $service = Bread::Board::ConstructorInjection->new(
-            name         => $name,
-            class        => $service_val,
-            dependencies => \%params, # XXX: do something better here
-        );
-    }
-    elsif (ref($service_val) eq 'CODE') {
-        $service = Bread::Board::BlockInjection->new(
-            name         => $name,
-            block        => $service_val,
-            dependencies => \%params, # XXX: do something better here
-        );
-    }
-
-    $meta->add_resource($service);
-}
-
-# XXX: remove duplication
 sub component {
     my $meta = shift;
 

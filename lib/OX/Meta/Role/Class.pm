@@ -13,17 +13,6 @@ has routes => (
     },
 );
 
-has resources => (
-    traits  => ['Array'],
-    isa     => 'ArrayRef[Bread::Board::Service]',
-    default => sub { [] },
-    handles => {
-        has_resources => 'count',
-        resources     => 'elements',
-        add_resource  => 'push',
-    },
-);
-
 has components => (
     traits  => ['Array'],
     isa     => 'ArrayRef[Bread::Board::Service]',

@@ -14,12 +14,6 @@ sub BUILD {
             };
         }
 
-        if ($meta->has_resources) {
-            container Resource => as {
-                $Bread::Board::CC->add_service($_) for $meta->resources;
-            };
-        }
-
         if ($meta->has_config) {
             container Config => as {
                 $Bread::Board::CC->add_service($_) for $meta->config;
@@ -27,15 +21,15 @@ sub BUILD {
         }
 
         if ($meta->has_routes) {
-            my $resource_container = $self->get_sub_container('Resource');
+            my $components = $self->get_sub_container('Component');
             service router_config => (
                 block => sub {
                     +{ $meta->router_config }
                 },
-                $resource_container
+                $components
                     ? (dependencies => {
-                          map { $_ => depends_on("/Resource/$_") }
-                              $resource_container->get_service_list
+                          map { $_ => depends_on("/Component/$_") }
+                              $components->get_service_list
                       })
                     : (),
             );

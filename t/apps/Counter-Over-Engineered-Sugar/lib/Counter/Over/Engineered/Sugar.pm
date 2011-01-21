@@ -9,8 +9,7 @@ component Counter => 'Counter::Over::Engineered::Sugar::Model';
 component TT => 'OX::View::TT' => (
     template_root => depends_on('/Config/template_root'),
 );
-
-resource root => 'Counter::Over::Engineered::Sugar::Controller' => (
+component root => 'Counter::Over::Engineered::Sugar::Controller' => (
     view  => depends_on('/Component/TT'),
     model => depends_on('/Component/Counter')
 );
