@@ -80,37 +80,52 @@ sub route {
 sub component {
     my $meta = shift;
 
-    my ($name, $service_val, %params);
+    my %args;
 
-    if ((@_ % 2) == 1) {
+    if (@_ == 1 && ref($_[0]) eq 'HASH') {
+        # component { name => 'TT', class => 'My::App::View', ... }
+        %args = %{ $_[0] };
+    }
+    elsif ((@_ % 2) == 1) {
         # component 'My::App::View' => (...)
-        ($service_val, %params) = @_;
+        my ($class, %deps) = @_;
         die "Must supply a name for block injection components"
-            if ref($service_val);
-        $name = (split /::/, $service_val)[-1];
+            if ref($class);
+        my $name = (split /::/, $class)[-1];
+        %args = (
+            name         => $name,
+            class        => $class,
+            %deps ? (dependencies => \%deps) : (),
+        );
     }
     else {
-        # component 'TT' => 'My::App::View' => (...)
-        # component 'TT' => sub { My::App::View->new }, (...)
-        ($name, $service_val, %params) = @_;
+        my ($name, $service_val, %deps) = @_;
+        %args = (
+            name => $name,
+            %deps ? (dependencies => \%deps) : (),
+        );
+        if (!ref($service_val)) {
+            # component 'TT' => 'My::App::View' => (...)
+            $args{class} = $service_val;
+        }
+        elsif (ref($service_val) eq 'CODE') {
+            # component 'TT' => sub { My::App::View->new }, (...)
+            $args{block} = $service_val;
+        }
+        elsif (ref($service_val) eq 'HASH') {
+            # component 'TT' => { class => 'My::App::View', ... }
+            %args = (%args, %$service_val);
+        }
+        else {
+            die 'XXX';
+        }
     }
 
-    my $service;
-    if (!ref($service_val)) {
-        Class::MOP::load_class($service_val);
-        $service = Bread::Board::ConstructorInjection->new(
-            name         => $name,
-            class        => $service_val,
-            dependencies => \%params,
-        );
-    }
-    elsif (ref($service_val) eq 'CODE') {
-        $service = Bread::Board::BlockInjection->new(
-            name         => $name,
-            block        => $service_val,
-            dependencies => \%params,
-        );
-    }
+    Class::MOP::load_class($args{class})
+        if exists $args{class};
+
+    my $class = _service_class_from_args(%args);
+    my $service = $class->new(%args);
 
     $meta->add_component($service);
 }
@@ -119,31 +134,58 @@ sub config {
     my $meta = shift;
     my $name = shift;
 
-    my $service;
+    my %args;
     if (@_ == 1 && !ref($_[0])) {
         # config email => 'foo@example.com'
         my ($service_val) = @_;
-        $service = Bread::Board::Literal->new(
+        %args = (
             name  => $name,
             value => $service_val,
         );
     }
+    elsif (@_ == 1 && ref($_[0]) eq 'HASH') {
+        # config { name => 'email', ... }
+        %args = %{ $_[0] };
+    }
+    elsif (@_ == 2 && !ref($_[0]) && ref($_[1]) eq 'HASH') {
+        # config email => { ... }
+        my ($name, $params) = @_;
+        %args = (name => $name, %$params);
+    }
     elsif ((@_ % 2) == 1) {
         # config id => sub { state $i++ }, (...)
-        my ($service_val, %params) = @_;
+        my ($service_val, %deps) = @_;
         die "config must be either a string or a coderef"
             unless ref($service_val) eq 'CODE';
-        $service = Bread::Board::BlockInjection->new(
-            name         => $name,
-            block        => $service_val,
-            dependencies => \%params,
+        %args = (
+            name  => $name,
+            block => $service_val,
+            %deps ? (dependencies => \%deps) : (),
         );
     }
     else {
         die "config must be either a string or a coderef";
     }
 
+    Class::MOP::load_class($args{class})
+        if exists $args{class};
+
+    my $class = _service_class_from_args(%args);
+    my $service = $class->new(%args);
     $meta->add_config($service);
+}
+
+sub _service_class_from_args {
+    my %args = @_;
+
+    die "Must provide a value"
+        unless exists $args{class}
+            || exists $args{value}
+            || exists $args{block};
+
+    return exists $args{class} ? "Bread::Board::ConstructorInjection"
+         : exists $args{value} ? "Bread::Board::Literal"
+         :                       "Bread::Board::BlockInjection";
 }
 
 1;

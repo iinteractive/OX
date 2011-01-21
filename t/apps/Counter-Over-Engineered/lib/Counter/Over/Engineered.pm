@@ -11,7 +11,8 @@ sub BUILD {
 
         container 'Model' => as {
             service 'Counter' => (
-                class => 'Counter::Over::Engineered::Model'
+                class     => 'Counter::Over::Engineered::Model',
+                lifecycle => 'Singleton',
             );
         };
 

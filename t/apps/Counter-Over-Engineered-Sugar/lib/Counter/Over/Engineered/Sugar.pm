@@ -5,7 +5,10 @@ config template_root => sub {
     (shift)->param('app_root')->subdir(qw[ root templates ])
 }, (app_root => depends_on('/app_root'));
 
-component Counter => 'Counter::Over::Engineered::Sugar::Model';
+component Counter => {
+    class     => 'Counter::Over::Engineered::Sugar::Model',
+    lifecycle => 'Singleton',
+};
 component TT => 'OX::View::TT' => (
     template_root => depends_on('/Config/template_root'),
 );

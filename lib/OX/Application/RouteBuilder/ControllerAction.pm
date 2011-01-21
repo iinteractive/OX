@@ -13,13 +13,18 @@ sub compile_routes {
 
     my ($defaults, $validations) = $self->extract_defaults_and_validations( $spec );
 
-    my $c = $self->service->param( $defaults->{controller} );
+    my $s = $self->service;
+    my $c = $defaults->{controller};
     my $a = $defaults->{action};
 
     return [
         $self->path,
         defaults    => $defaults,
-        target      => sub { $c->$a( @_ ) },
+        target      => sub {
+            my $path = $s->get_dependency($c)->service_path;
+            my $component = $s->get_root_container->resolve(service => $path);
+            return $component->$a(@_);
+        },
         validations => $validations,
     ];
 }
