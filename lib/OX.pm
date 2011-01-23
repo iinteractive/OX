@@ -80,99 +80,47 @@ sub route {
 sub component {
     my $meta = shift;
 
-    my %args;
-
-    if (@_ == 1 && ref($_[0]) eq 'HASH') {
-        # component { name => 'TT', class => 'My::App::View', ... }
-        %args = %{ $_[0] };
-    }
-    elsif ((@_ % 2) == 1) {
-        # component 'My::App::View' => (...)
-        my ($class, %deps) = @_;
-        die "Must supply a name for block injection components"
-            if ref($class);
-        my $name = (split /::/, $class)[-1];
-        %args = (
-            name         => $name,
-            class        => $class,
-            %deps ? (dependencies => \%deps) : (),
-        );
-    }
-    else {
-        my ($name, $service_val, %deps) = @_;
-        %args = (
-            name => $name,
-            %deps ? (dependencies => \%deps) : (),
-        );
-        if (!ref($service_val)) {
-            # component 'TT' => 'My::App::View' => (...)
-            $args{class} = $service_val;
-        }
-        elsif (ref($service_val) eq 'CODE') {
-            # component 'TT' => sub { My::App::View->new }, (...)
-            $args{block} = $service_val;
-        }
-        elsif (ref($service_val) eq 'HASH') {
-            # component 'TT' => { class => 'My::App::View', ... }
-            %args = (%args, %$service_val);
-        }
-        else {
-            die 'XXX';
-        }
-    }
-
-    Class::MOP::load_class($args{class})
-        if exists $args{class};
-
-    my $class = _service_class_from_args(%args);
-    my $service = $class->new(%args);
-
+    my $service = _parse_service_sugar('class', @_);
     $meta->add_component($service);
 }
 
 sub config {
     my $meta = shift;
-    my $name = shift;
+
+    my $service = _parse_service_sugar('value', @_);
+    $meta->add_config($service);
+}
+
+sub _parse_service_sugar {
+    my ($bare_string) = shift;
 
     my %args;
-    if (@_ == 1 && !ref($_[0])) {
-        # config email => 'foo@example.com'
-        my ($service_val) = @_;
-        %args = (
-            name  => $name,
-            value => $service_val,
-        );
+
+    if (@_ >= 1 && !ref($_[0])) {
+        $args{name} = shift;
     }
-    elsif (@_ == 1 && ref($_[0]) eq 'HASH') {
-        # config { name => 'email', ... }
-        %args = %{ $_[0] };
+
+    if (@_ >= 1) {
+        if (!ref($_[0])) {
+            $args{$bare_string} = shift;
+        }
+        elsif (ref($_[0]) eq 'CODE') {
+            $args{block} = shift;
+        }
     }
-    elsif (@_ == 2 && !ref($_[0]) && ref($_[1]) eq 'HASH') {
-        # config email => { ... }
-        my ($name, $params) = @_;
-        %args = (name => $name, %$params);
+
+    if (@_ == 1 && ref($_[0]) eq 'HASH') {
+        %args = (%args, %{ $_[0] });
     }
-    elsif ((@_ % 2) == 1) {
-        # config id => sub { state $i++ }, (...)
-        my ($service_val, %deps) = @_;
-        die "config must be either a string or a coderef"
-            unless ref($service_val) eq 'CODE';
-        %args = (
-            name  => $name,
-            block => $service_val,
-            %deps ? (dependencies => \%deps) : (),
-        );
-    }
-    else {
-        die "config must be either a string or a coderef";
+    elsif ((@_ % 2) == 0) {
+        %args = (%args, (@_ > 0) ? (dependencies => { @_ }) : ());
     }
 
     Class::MOP::load_class($args{class})
         if exists $args{class};
 
     my $class = _service_class_from_args(%args);
-    my $service = $class->new(%args);
-    $meta->add_config($service);
+    return $class->new(%args);
 }
 
 sub _service_class_from_args {
