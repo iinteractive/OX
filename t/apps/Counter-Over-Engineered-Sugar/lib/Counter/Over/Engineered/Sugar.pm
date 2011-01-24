@@ -9,7 +9,7 @@ component Counter => {
     class     => 'Counter::Over::Engineered::Sugar::Model',
     lifecycle => 'Singleton',
 };
-component TT => 'OX::View::TT' => (
+component TT => 'Counter::Over::Engineered::Sugar::View' => (
     template_root => depends_on('/Config/template_root'),
 );
 component CounterController => 'Counter::Over::Engineered::Sugar::Controller' => (

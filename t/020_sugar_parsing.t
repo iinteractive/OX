@@ -5,6 +5,17 @@ use Test::More;
 use Test::Fatal;
 
 {
+    package View;
+    use Moose;
+
+    has template_root => (
+        is       => 'ro',
+        isa      => 'Str',
+        required => 1,
+    );
+}
+
+{
     package Foo;
     use OX;
 
@@ -35,28 +46,28 @@ use Test::Fatal;
         lifecycle => 'Singleton',
     };
     config view_as_config => {
-        class => 'OX::View::TT',
+        class => 'View',
         dependencies => {
             template_root => depends_on('/Config/template_root4'),
         },
     };
 
-    component View1 => 'OX::View::TT';
-    component View2 => 'OX::View::TT' => (
+    component View1 => 'View';
+    component View2 => 'View' => (
         template_root => depends_on('/Config/template_root1'),
     );
-    component View3 => 'OX::View::TT' => {
+    component View3 => 'View' => {
         lifecycle    => 'Singleton',
         dependencies => {
             template_root => depends_on('/Config/template_root2'),
         },
     };
-    component View4 => sub { OX::View::TT->new(template_root => '/') };
+    component View4 => sub { View->new(template_root => '/') };
     component View5 => sub {
-        OX::View::TT->new(template_root => shift->param('template_root'))
+        View->new(template_root => shift->param('template_root'))
     }, (template_root => depends_on('/Config/template_root3'));
     component View6 => sub {
-        OX::View::TT->new(template_root => shift->param('template_root'))
+        View->new(template_root => shift->param('template_root'))
     }, {
         lifecycle    => 'Singleton',
         dependencies => {
@@ -64,7 +75,7 @@ use Test::Fatal;
         },
     };
     component View7 => {
-        class        => 'OX::View::TT',
+        class        => 'View',
         lifecycle    => 'Singleton',
         dependencies => {
             template_root => depends_on('/Config/template_root5'),
@@ -72,7 +83,7 @@ use Test::Fatal;
     };
     component View8 => {
         block        => sub {
-            OX::View::TT->new(template_root => shift->param('template_root'))
+            View->new(template_root => shift->param('template_root'))
         },
         lifecycle    => 'Singleton',
         dependencies => {
@@ -81,14 +92,14 @@ use Test::Fatal;
     };
     component {
         name         => 'View9',
-        class        => 'OX::View::TT',
+        class        => 'View',
         dependencies => {
             template_root => depends_on('/Config/template_root7'),
         },
     };
     component {
         name  => 'View10',
-        block => sub { OX::View::TT->new(template_root => '/') },
+        block => sub { View->new(template_root => '/') },
     };
 }
 
@@ -171,7 +182,7 @@ my $foo = Foo->new;
 {
     my $service = $foo->fetch('/Config/view_as_config');
     isa_ok($service, 'Bread::Board::ConstructorInjection');
-    is($service->class, 'OX::View::TT', "correct class");
+    is($service->class, 'View', "correct class");
     my $deps = $service->dependencies;
     is(scalar(keys %$deps), 1, "only one dependency");
     my $dep = $service->get_dependency('template_root');
@@ -180,14 +191,14 @@ my $foo = Foo->new;
     ok(!$service->does('Bread::Board::LifeCycle::Singleton'),
        "not a singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, 'foo', "correct attr value");
 }
 
 {
     my $service = $foo->fetch('/Component/View1');
     isa_ok($service, 'Bread::Board::ConstructorInjection');
-    is($service->class, 'OX::View::TT', "correct class");
+    is($service->class, 'View', "correct class");
     my $deps = $service->dependencies;
     is(scalar(keys %$deps), 0, "no dependencies");
     ok(!$service->does('Bread::Board::LifeCycle::Singleton'),
@@ -199,7 +210,7 @@ my $foo = Foo->new;
 {
     my $service = $foo->fetch('/Component/View2');
     isa_ok($service, 'Bread::Board::ConstructorInjection');
-    is($service->class, 'OX::View::TT', "correct class");
+    is($service->class, 'View', "correct class");
     my $deps = $service->dependencies;
     is(scalar(keys %$deps), 1, "only one dependency");
     my $dep = $service->get_dependency('template_root');
@@ -208,14 +219,14 @@ my $foo = Foo->new;
     ok(!$service->does('Bread::Board::LifeCycle::Singleton'),
        "not a singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, 'foo', "correct attr value");
 }
 
 {
     my $service = $foo->fetch('/Component/View3');
     isa_ok($service, 'Bread::Board::ConstructorInjection');
-    is($service->class, 'OX::View::TT', "correct class");
+    is($service->class, 'View', "correct class");
     my $deps = $service->dependencies;
     is(scalar(keys %$deps), 1, "only one dependency");
     my $dep = $service->get_dependency('template_root');
@@ -224,7 +235,7 @@ my $foo = Foo->new;
     ok($service->does('Bread::Board::LifeCycle::Singleton'),
        "singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, 'foo', "correct attr value");
 }
 
@@ -236,7 +247,7 @@ my $foo = Foo->new;
     ok(!$service->does('Bread::Board::LifeCycle::Singleton'),
        "not a singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, '/', "correct attr value");
 }
 
@@ -251,7 +262,7 @@ my $foo = Foo->new;
     ok(!$service->does('Bread::Board::LifeCycle::Singleton'),
        "not a singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, 'foo', "correct attr value");
 }
 
@@ -266,14 +277,14 @@ my $foo = Foo->new;
     ok($service->does('Bread::Board::LifeCycle::Singleton'),
        "singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, 'foo', "correct attr value");
 }
 
 {
     my $service = $foo->fetch('/Component/View7');
     isa_ok($service, 'Bread::Board::ConstructorInjection');
-    is($service->class, 'OX::View::TT', "correct class");
+    is($service->class, 'View', "correct class");
     my $deps = $service->dependencies;
     is(scalar(keys %$deps), 1, "only one dependency");
     my $dep = $service->get_dependency('template_root');
@@ -282,7 +293,7 @@ my $foo = Foo->new;
     ok($service->does('Bread::Board::LifeCycle::Singleton'),
        "singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, 'foo', "correct attr value");
 }
 
@@ -297,14 +308,14 @@ my $foo = Foo->new;
     ok($service->does('Bread::Board::LifeCycle::Singleton'),
        "singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, 'foo', "correct attr value");
 }
 
 {
     my $service = $foo->fetch('/Component/View9');
     isa_ok($service, 'Bread::Board::ConstructorInjection');
-    is($service->class, 'OX::View::TT', "correct class");
+    is($service->class, 'View', "correct class");
     my $deps = $service->dependencies;
     is(scalar(keys %$deps), 1, "only one dependency");
     my $dep = $service->get_dependency('template_root');
@@ -313,7 +324,7 @@ my $foo = Foo->new;
     ok(!$service->does('Bread::Board::LifeCycle::Singleton'),
        "not a singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, 'foo', "correct attr value");
 }
 
@@ -325,7 +336,7 @@ my $foo = Foo->new;
     ok(!$service->does('Bread::Board::LifeCycle::Singleton'),
        "not a singleton");
     my $view = $service->get;
-    isa_ok($view, 'OX::View::TT');
+    isa_ok($view, 'View');
     is($view->template_root, '/', "correct attr value");
 }
 

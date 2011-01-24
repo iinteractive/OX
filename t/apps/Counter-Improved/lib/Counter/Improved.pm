@@ -21,9 +21,9 @@ sub BUILD {
     container $self => as {
         container 'View' => as {
             service 'TT' => (
-                class        => 'OX::View::TT',
+                class        => 'Template',
                 dependencies => {
-                    template_root => (service 'template_root' => (
+                    INCLUDE_PATH => (service 'template_root' => (
                         block => sub {
                             (shift)->param('app_root')->subdir(qw[ root templates ])
                         },
@@ -44,7 +44,9 @@ sub configure_router {
         defaults => { page => 'index' },
         target   => sub {
             my $r = shift;
-            $view->render( $r, 'index.tmpl', { count => $self->count } );
+            my $out;
+            $view->process( 'index.tmpl', { count => $self->count }, \$out );
+            $out;
         }
     );
 
@@ -53,7 +55,9 @@ sub configure_router {
         target   => sub {
             my $r = shift;
             $self->inc_counter;
-            $view->render( $r, 'index.tmpl', { count => $self->count } );
+            my $out;
+            $view->process( 'index.tmpl', { count => $self->count }, \$out );
+            $out;
         }
     );
 
@@ -62,7 +66,9 @@ sub configure_router {
         target   => sub {
             my $r = shift;
             $self->dec_counter;
-            $view->render( $r, 'index.tmpl', { count => $self->count } );
+            my $out;
+            $view->process( 'index.tmpl', { count => $self->count }, \$out );
+            $out;
         }
     );
 
@@ -71,7 +77,9 @@ sub configure_router {
         target   => sub {
             my $r = shift;
             $self->reset_counter;
-            $view->render( $r, 'index.tmpl', { count => $self->count } );
+            my $out;
+            $view->process( 'index.tmpl', { count => $self->count }, \$out );
+            $out;
         }
     );
 }

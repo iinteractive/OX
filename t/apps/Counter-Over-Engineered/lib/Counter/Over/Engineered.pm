@@ -18,7 +18,7 @@ sub BUILD {
 
         container 'View' => as {
             service 'TT' => (
-                class        => 'OX::View::TT',
+                class        => 'Counter::Over::Engineered::View',
                 dependencies => {
                     template_root => (service 'template_root' => (
                         block => sub {

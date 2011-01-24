@@ -8,6 +8,7 @@ use Test::Exception;
 use Test::Moose;
 use Test::Path::Router;
 use Plack::Test;
+use Test::Requires 'Template';
 
 BEGIN {
     use_ok('OX::Application');

@@ -9,7 +9,7 @@ has 'model' => (
 
 has 'view' => (
     is       => 'ro',
-    isa      => 'OX::View::TT',
+    isa      => 'Counter::Over::Engineered::Sugar::View',
     required => 1,
 );
 
