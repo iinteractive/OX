@@ -107,6 +107,9 @@ sub _parse_service_sugar {
         elsif (ref($_[0]) eq 'CODE') {
             $args{block} = shift;
         }
+        elsif (ref($_[0]) ne 'HASH') {
+            Carp::confess "Value given must be a string or coderef, not $_[0]";
+        }
     }
 
     if (@_ == 1 && ref($_[0]) eq 'HASH') {
