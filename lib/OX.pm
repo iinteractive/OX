@@ -38,12 +38,12 @@ sub router {
 
     if (!ref($body)) {
         Class::MOP::load_class($body);
-        die "A router must be a subclass of Path::Router, not $body"
+        Carp::confess "A router must be a subclass of Path::Router, not $body"
             unless $body->isa('Path::Router');
         $meta->router($body->new);
     }
     elsif (ref($body) eq 'CODE') {
-        die "only one top level router is allowed"
+        Carp::confess "only one top level router is allowed"
             if $meta->has_router_config;
 
         local $ROUTES = {};
@@ -61,7 +61,7 @@ sub router {
         $meta->router($body);
     }
     else {
-        die "Unknown argument to 'router': $body";
+        Carp::confess "Unknown argument to 'router': $body";
     }
 }
 
@@ -126,7 +126,7 @@ sub _parse_service_sugar {
 sub _service_class_from_args {
     my %args = @_;
 
-    die "Must provide a value"
+    Carp::confess "Must provide a value"
         unless exists $args{class}
             || exists $args{value}
             || exists $args{block};
