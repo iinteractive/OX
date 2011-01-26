@@ -7,6 +7,10 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 extends 'Plack::Response';
 
+sub BUILDARGS {
+    return {};
+}
+
 __PACKAGE__->meta->make_immutable;
 
 no Moose; 1;

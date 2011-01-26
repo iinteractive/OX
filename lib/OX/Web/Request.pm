@@ -9,6 +9,10 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 extends 'Plack::Request';
 
+sub BUILDARGS {
+    return {};
+}
+
 sub router { (shift)->env->{'plack.router'} }
 
 sub uri_for {
