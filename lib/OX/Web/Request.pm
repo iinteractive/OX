@@ -17,7 +17,8 @@ sub router { (shift)->env->{'plack.router'} }
 
 sub uri_for {
     my ($self, $route) = @_;
-    $self->router->uri_for( %$route );
+    my $uri_base = $self->script_name || '/';
+    return $uri_base . $self->router->uri_for( %$route );
 }
 
 sub new_response {
