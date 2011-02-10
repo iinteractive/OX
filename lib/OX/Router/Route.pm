@@ -1,6 +1,8 @@
 package OX::Router::Route;
 use Moose;
 
+use OX::Web::Request;
+
 extends 'Path::Router::Route';
 
 around BUILDARGS => sub {

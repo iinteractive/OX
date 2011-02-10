@@ -4,6 +4,8 @@ use Bread::Board;
 
 extends 'OX::Application';
 
+with 'OX::Role::WithAppRoot';
+
 has 'count' => (
     traits  => [ 'Counter' ],
     is      => 'ro',
@@ -85,7 +87,7 @@ sub configure_router {
 }
 
 sub router_dependencies {
-    +{ view => depends_on('View/TT') }
+    +{ view => depends_on('/View/TT') }
 }
 
 no Moose; no Bread::Board; 1;

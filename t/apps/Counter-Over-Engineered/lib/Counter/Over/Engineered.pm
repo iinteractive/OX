@@ -4,6 +4,8 @@ use Bread::Board;
 
 extends 'OX::Application';
 
+with 'OX::Role::WithAppRoot', 'OX::Role::RouteBuilder';
+
 sub BUILD {
     my $self = shift;
 
@@ -40,36 +42,38 @@ sub BUILD {
             );
         };
 
-        service 'router_config' => (
-            block => sub {
-                +{
-                    '/' => {
-                        controller => 'root',
-                        action     => 'index',
-                    },
-                    '/inc' => {
-                        controller => 'root',
-                        action     => 'inc',
-                    },
-                    '/dec' => {
-                        controller => 'root',
-                        action     => 'dec',
-                    },
-                    '/reset' => {
-                        controller => 'root',
-                        action     => 'reset',
-                    },
-                    '/set/:number' => {
-                        controller => 'root',
-                        action     => 'set',
-                        number     => { isa => 'Int' }
-                    },
+        container $self->fetch('Router') => as {
+            service 'config' => (
+                block => sub {
+                    +{
+                        '/' => {
+                            controller => 'root',
+                            action     => 'index',
+                        },
+                        '/inc' => {
+                            controller => 'root',
+                            action     => 'inc',
+                        },
+                        '/dec' => {
+                            controller => 'root',
+                            action     => 'dec',
+                        },
+                        '/reset' => {
+                            controller => 'root',
+                            action     => 'reset',
+                        },
+                        '/set/:number' => {
+                            controller => 'root',
+                            action     => 'set',
+                            number     => { isa => 'Int' }
+                        },
+                    }
+                },
+                dependencies => {
+                    root => depends_on('/Controller/Root')
                 }
-            },
-            dependencies => {
-                root => depends_on('/Controller/Root')
-            }
-        );
+            );
+        };
     };
 }
 

@@ -19,7 +19,7 @@ my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     class_metaroles => {
         class => ['OX::Meta::Role::Class'],
     },
-    base_class_roles => ['OX::Role::Object'],
+    base_class_roles => ['OX::Role::Object', 'OX::Role::RouteBuilder'],
 );
 
 sub init_meta {
@@ -51,7 +51,7 @@ sub router {
         my $routes = $ROUTES;
         $meta->router_config(
             Bread::Board::BlockInjection->new(
-                name         => 'router_config',
+                name         => 'config',
                 block        => sub { $routes },
                 dependencies => \%params,
             )

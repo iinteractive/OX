@@ -22,18 +22,23 @@ sub BUILD {
             };
         }
 
-        if ($meta->has_router_config) {
-            $self->add_service($meta->router_config);
+        if ($meta->has_router_config || $meta->has_router) {
+            container $self->fetch('Router') => as {
+                my $c = shift;
+                if ($meta->has_router_config) {
+                    $c->add_service($meta->router_config);
+                }
+                if ($meta->has_router) {
+                    $c->add_service(
+                        Bread::Board::Literal->new(
+                            name  => 'router',
+                            value => $meta->router,
+                        )
+                    );
+                }
+            };
         }
 
-        if ($meta->has_router) {
-            $self->add_service(
-                Bread::Board::Literal->new(
-                    name  => 'Router',
-                    value => $meta->router,
-                )
-            );
-        }
     };
 }
 

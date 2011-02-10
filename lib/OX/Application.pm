@@ -2,13 +2,8 @@ package OX::Application;
 use Moose;
 use Bread::Board;
 
-use Path::Class;
-use Class::Inspector;
-
 use OX::Router;
 use Plack::App::Path::Router::PSGI;
-
-use OX::Web::Request;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -18,12 +13,6 @@ extends 'Bread::Board::Container';
 has '+name' => ( lazy => 1, default => sub { (shift)->meta->name } );
 
 has '_app' => ( is => 'rw', isa => 'CodeRef' );
-
-has 'route_builder_class' => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => 'OX::Application::RouteBuilder::ControllerAction',
-);
 
 # can override this to Path::Router to deal with PSGI coderefs directly
 has 'router_class' => (
@@ -36,62 +25,26 @@ sub BUILD {
     my $self = shift;
     container $self => as {
 
-        service 'app_root' => do {
-            my $class = $self->meta->name;
-            my $root  = file( Class::Inspector->resolved_filename( $class ) );
-            # climb out of the lib/ directory
-            $root = $root->parent foreach split /\:\:/ => $class;
-            $root = $root->parent; # one last time for lib/
-            $root;
+        container 'Router' => as {
+
+            service 'router' => (
+                class => $self->router_class,
+                block => sub {
+                    my $s      = shift;
+                    my $router = $self->router_class->new;
+                    $self->configure_router( $s, $router );
+                    $router;
+                },
+                dependencies => $self->router_dependencies
+            );
+
         };
-
-        service 'route_builder' => (
-            class      => $self->route_builder_class,
-            parameters => {
-                path       => { isa => 'Str'                   },
-                route_spec => { isa => 'HashRef'               },
-                service    => { isa => 'Bread::Board::Service' },
-            }
-        );
-
-        service 'Router' => (
-            class => 'Path::Router',
-            block => sub {
-                my $s      = shift;
-                my $router = $self->router_class->new;
-                $self->configure_router( $s, $router );
-                $router;
-            },
-            dependencies => $self->router_dependencies
-        );
 
     };
 }
 
 sub router_dependencies { [] }
-sub configure_router {
-    my ($self, $s, $router) = @_;
-
-    if ($s->parent->has_service('router_config')) {
-
-        my $service = $s->parent->get_service('router_config');
-        my $routes  = $service->get;
-
-        foreach my $path ( keys %$routes ) {
-
-            ($s->parent->has_service('route_builder'))
-                || confess "You must define a route_builder service in order to use the router_config";
-
-            map {
-                $router->add_route( @$_ )
-            } $s->parent->get_service('route_builder')->get(
-                path       => $path,
-                route_spec => $routes->{ $path },
-                service    => $service,
-            )->compile_routes;
-        }
-    }
-}
+sub configure_router { }
 
 # ... Plack::Component API
 
@@ -99,7 +52,7 @@ sub prepare_app {
     my $self = shift;
     $self->_app(
         Plack::App::Path::Router::PSGI->new(
-            router => $self->resolve( service => 'Router' ),
+            router => $self->resolve( service => 'Router/router' ),
         )->to_app
     );
 }

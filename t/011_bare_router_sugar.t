@@ -91,7 +91,7 @@ use Plack::Test;
 
 for my $class (qw(Foo Bar Baz)) {
     my $app = Foo->new;
-    my $router = $app->resolve(service => 'Router');
+    my $router = $app->resolve(service => 'Router/router');
 
     path_ok($router, $_, '... ' . $_ . ' is a valid path')
         for qw[

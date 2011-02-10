@@ -1,6 +1,8 @@
 package Counter::Over::Engineered::Sugar;
 use OX;
 
+with 'OX::Role::WithAppRoot';
+
 config template_root => sub {
     (shift)->param('app_root')->subdir(qw[ root templates ])
 }, (app_root => depends_on('/app_root'));
