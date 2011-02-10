@@ -40,6 +40,11 @@ sub BUILD {
 
         };
 
+        service App => (
+            class        => 'Plack::App::Path::Router::PSGI',
+            dependencies => ['Router/router'],
+        );
+
     };
 }
 
@@ -50,11 +55,7 @@ sub configure_router { }
 
 sub prepare_app {
     my $self = shift;
-    $self->_app(
-        Plack::App::Path::Router::PSGI->new(
-            router => $self->resolve( service => 'Router/router' ),
-        )->to_app
-    );
+    $self->_app( $self->resolve(service => 'App')->to_app );
 }
 
 sub call {
