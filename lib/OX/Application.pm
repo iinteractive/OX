@@ -46,7 +46,6 @@ sub BUILD {
         container 'Router' => as {
 
             service 'router' => (
-                class => $self->router_class,
                 block => sub {
                     my $s      = shift;
                     my $router = $self->router_class->new;
