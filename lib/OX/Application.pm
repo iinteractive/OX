@@ -1,6 +1,8 @@
 package OX::Application;
 use Moose;
 use Bread::Board;
+use Moose::Util::TypeConstraints
+    qw(class_type subtype where match_on_type), as => { -as => 'mutc_as' };
 
 use OX::Router;
 use Plack::App::Path::Router::PSGI;
@@ -19,6 +21,22 @@ has 'router_class' => (
     is      => 'ro',
     isa     => 'Str',
     default => 'OX::Router',
+);
+
+class_type('Plack::Middleware');
+subtype 'OX::Types::MiddlewareClass',
+        mutc_as 'Str',
+        where { Class::MOP::load_class($_); $_->isa('Plack::Middleware') };
+subtype 'OX::Types::Middleware',
+        mutc_as 'CodeRef|OX::Types::MiddlewareClass|Plack::Middleware';
+
+has middleware => (
+    traits  => ['Array'],
+    isa     => 'ArrayRef[OX::Types::Middleware]',
+    default => sub { [] },
+    handles => {
+        middleware => 'elements',
+    },
 );
 
 sub BUILD {
@@ -41,7 +59,32 @@ sub BUILD {
         };
 
         service App => (
-            class        => 'Plack::App::Path::Router::PSGI',
+            block        => sub {
+                my $s = shift;
+
+                my $app = Plack::App::Path::Router::PSGI->new(
+                    router => $s->param('router'),
+                )->to_app;
+
+                for my $middleware ($self->middleware) {
+                    match_on_type $middleware => (
+                        'CodeRef' => sub {
+                            $app = $middleware->($app);
+                        },
+                        'OX::Types::MiddlewareClass' => sub {
+                            $app = $middleware->wrap($app);
+                        },
+                        'Plack::Middleware' => sub {
+                            $app = $middleware->wrap($app);
+                        },
+                        sub {
+                            warn "not applying $middleware!";
+                        },
+                    );
+                }
+
+                return $app;
+            },
             dependencies => ['Router/router'],
         );
 
@@ -55,7 +98,7 @@ sub configure_router { }
 
 sub prepare_app {
     my $self = shift;
-    $self->_app( $self->resolve(service => 'App')->to_app );
+    $self->_app( $self->resolve(service => 'App') );
 }
 
 sub call {
@@ -76,7 +119,7 @@ sub _dump_bread_board {
     Bread::Board::Dumper->new->dump( (shift)->bread_board );
 }
 
-no Moose; no Bread::Board; 1;
+no Moose; no Bread::Board; no Moose::Util::TypeConstraints; 1;
 
 __END__
 
