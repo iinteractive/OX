@@ -115,7 +115,7 @@ sub to_app {
 
 sub _dump_bread_board {
     require Bread::Board::Dumper;
-    Bread::Board::Dumper->new->dump( (shift)->bread_board );
+    Bread::Board::Dumper->new->dump(shift());
 }
 
 no Moose; no Bread::Board; no Moose::Util::TypeConstraints; 1;
