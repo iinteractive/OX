@@ -46,8 +46,8 @@ use HTTP::Request;
     );
 
     component 'BazRoot' => sub {
-        my $s = shift;
-        $s->parent->parent->root;
+        my ($s, $app) = @_;
+        $app->root;
     };
 
     router as {
@@ -67,8 +67,8 @@ use HTTP::Request;
     );
 
     component 'BarRoot' => sub {
-        my $s = shift;
-        $s->parent->parent->root;
+        my ($s, $app) = @_;
+        $app->root;
     };
 
     router as {

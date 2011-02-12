@@ -13,14 +13,30 @@ sub BUILD {
         if ($meta->has_components) {
             container Component => as {
                 my $c = shift;
-                $c->add_service($_) for $meta->components;
+                for my $component ($meta->components) {
+                    if ($component->isa('Bread::Board::BlockInjection')) {
+                        my $block = $component->block;
+                        $component->block(sub {
+                            $block->(@_, $self);
+                        });
+                    }
+                    $c->add_service($component);
+                }
             };
         }
 
         if ($meta->has_config) {
             container Config => as {
                 my $c = shift;
-                $c->add_service($_) for $meta->config;
+                for my $config ($meta->config) {
+                    if ($config->isa('Bread::Board::BlockInjection')) {
+                        my $block = $config->block;
+                        $config->block(sub {
+                            $block->(@_, $self);
+                        });
+                    }
+                    $c->add_service($config);
+                }
             };
         }
 
