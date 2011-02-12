@@ -22,7 +22,7 @@ sub compile_routes {
         defaults    => $defaults,
         target      => sub {
             my $path = $s->get_dependency($c)->service_path;
-            my $component = $s->get_root_container->resolve(service => $path);
+            my $component = $s->parent->resolve(service => $path);
             return $component->$a(@_);
         },
         validations => $validations,
