@@ -35,6 +35,18 @@ has config => (
     },
 );
 
+has mounts => (
+    traits  => ['Hash'],
+    isa     => 'HashRef[HashRef]',
+    default => sub { {} },
+    handles => {
+        has_mounts  => 'count',
+        mount_paths => 'keys',
+        add_mount   => 'set',
+        mount       => 'get',
+    },
+);
+
 no Moose::Role;
 
 1;

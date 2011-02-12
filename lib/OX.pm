@@ -9,7 +9,7 @@ use Scalar::Util qw(blessed);
 
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose'],
-    with_meta => [qw(router component config)],
+    with_meta => [qw(router component config mount)],
     as_is     => [
         'route',
         \&Bread::Board::depends_on,
@@ -49,13 +49,22 @@ sub router {
         local $ROUTES = {};
         $body->();
         my $routes = $ROUTES;
-        $meta->router_config(
-            Bread::Board::BlockInjection->new(
-                name         => 'config',
-                block        => sub { $routes },
-                dependencies => \%params,
-            )
+        my $router_config = Bread::Board::BlockInjection->new(
+            name         => 'config',
+            block        => sub { $routes },
+            dependencies => \%params,
         );
+        for my $dep_name (keys %{ $router_config->dependencies }) {
+            my $dep = $router_config->get_dependency($dep_name);
+            if ($dep->service_path !~ m+^/+) {
+                $router_config->add_dependency(
+                    $dep_name => $dep->clone(
+                        service_path => '../' . $dep->service_path,
+                    )
+                );
+            }
+        }
+        $meta->router_config($router_config);
     }
     elsif (blessed($body) && $body->isa('Path::Router')) {
         $meta->router($body);
@@ -75,6 +84,19 @@ sub route {
         action     => $action,
         %params,
     };
+}
+
+sub mount {
+    my ($meta, $path, $class, %params) = @_;
+
+    Class::MOP::load_class($class);
+    die "Only subclasses of OX::Application can be mounted"
+        unless $class->isa('OX::Application');
+
+    $meta->add_mount($path => {
+        class        => $class,
+        dependencies => \%params,
+    });
 }
 
 sub component {
