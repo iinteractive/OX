@@ -10,10 +10,10 @@ sub BUILD {
     my $meta = $self->meta;
 
     container $self => as {
-        if ($meta->has_components) {
+        if ($meta->has_any_components) {
             container Component => as {
                 my $c = shift;
-                for my $component ($meta->components) {
+                for my $component ($meta->get_all_components) {
                     if ($component->isa('Bread::Board::BlockInjection')) {
                         my $block = $component->block;
                         $component->block(sub {
@@ -25,10 +25,10 @@ sub BUILD {
             };
         }
 
-        if ($meta->has_config) {
+        if ($meta->has_any_config) {
             container Config => as {
                 my $c = shift;
-                for my $config ($meta->config) {
+                for my $config ($meta->get_all_config) {
                     if ($config->isa('Bread::Board::BlockInjection')) {
                         my $block = $config->block;
                         $config->block(sub {
@@ -44,7 +44,7 @@ sub BUILD {
             container $self->fetch('Router') => as {
                 my $c = shift;
                 if ($meta->has_router_config) {
-                    $c->add_service($meta->router_config);
+                    $c->add_service($meta->full_router_config);
                 }
                 if ($meta->has_router) {
                     $c->add_service(

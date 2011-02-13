@@ -44,7 +44,7 @@ sub router {
     }
     elsif (ref($body) eq 'CODE') {
         Carp::confess "only one top level router is allowed"
-            if $meta->has_router_config;
+            if $meta->has_local_router_config;
 
         local $ROUTES = {};
         $body->();
