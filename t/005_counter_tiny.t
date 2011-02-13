@@ -4,8 +4,6 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
-use Test::Moose;
 use Test::Path::Router;
 use Plack::Test;
 use Plack::Util;
