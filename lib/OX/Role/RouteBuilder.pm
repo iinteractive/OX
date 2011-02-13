@@ -2,49 +2,36 @@ package OX::Role::RouteBuilder;
 use Moose::Role;
 use Bread::Board;
 
-has 'route_builder_class' => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => 'OX::Application::RouteBuilder::ControllerAction',
-);
-
-after BUILD => sub {
-    my $self = shift;
-
-    container $self->fetch('Router') => as {
-
-        service 'builder' => (
-            class      => $self->route_builder_class,
-            parameters => {
-                path       => { isa => 'Str'                   },
-                route_spec => { isa => 'HashRef'               },
-                service    => { isa => 'Bread::Board::Service' },
-            }
-        );
-
-    };
-};
-
 sub configure_router {
     my ($self, $s, $router) = @_;
 
-    if ($s->parent->has_service('config')) {
-        my $service = $s->parent->get_service('config');
-        my $routes  = $service->get;
+    return unless $s->parent->has_service('config');
 
-        foreach my $path ( keys %$routes ) {
+    my $service = $s->parent->get_service('config');
+    my $routes  = $service->get;
 
-            ($s->parent->has_service('builder'))
-                || confess "You must define a builder service in order to use the Router config";
-
-            map {
-                $router->add_route( @$_ )
-            } $s->parent->get_service('builder')->get(
-                path       => $path,
-                route_spec => $routes->{ $path },
-                service    => $service,
-            )->compile_routes;
+    foreach my $path ( keys %$routes ) {
+        my $route = $routes->{$path};
+        # backcompat, and convenience sugar if people are working at a
+        # lower level
+        if (ref($route) eq 'HASH'
+            && exists($route->{controller})
+            && exists($route->{action})) {
+            $route = {
+                class      => 'OX::Application::RouteBuilder::ControllerAction',
+                route_spec => $route,
+            };
         }
+
+        Class::MOP::load_class($route->{class});
+        my $builder = $route->{class}->new(
+            path       => $path,
+            route_spec => $route->{route_spec},
+            service    => $service,
+        );
+
+        $router->add_route(@$_)
+            for $builder->compile_routes;
     }
 }
 

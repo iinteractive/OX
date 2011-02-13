@@ -77,13 +77,27 @@ sub router {
 sub route {
     my ($path, $action_spec, %params) = @_;
 
-    my ($controller, $action) = split /\./, $action_spec;
+    if (!ref($action_spec) && $action_spec =~ /\./) {
+        my ($controller, $action) = split /\./, $action_spec;
 
-    $ROUTES->{$path} = {
-        controller => $controller,
-        action     => $action,
-        %params,
-    };
+        $ROUTES->{$path} = {
+            class      => 'OX::Application::RouteBuilder::ControllerAction',
+            route_spec => {
+                controller => $controller,
+                action     => $action,
+                %params,
+            },
+        };
+    }
+    elsif (ref($action_spec) eq 'CODE') {
+        $ROUTES->{$path} = {
+            class      => 'OX::Application::RouteBuilder::Code',
+            route_spec => $action_spec,
+        };
+    }
+    else {
+        die "Unknown route spec $action_spec for $path";
+    }
 }
 
 sub mount {

@@ -12,7 +12,6 @@ has 'path' => (
 
 has 'route_spec' => (
     is       => 'ro',
-    isa      => 'HashRef',
     required => 1,
 );
 
