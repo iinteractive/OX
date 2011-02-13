@@ -16,16 +16,33 @@ sub compile_routes {
     $defaults = { %$spec, %$defaults };
 
     my $s = $self->service;
-    my $c = $defaults->{controller};
-    my $a = $defaults->{action};
 
     return [
         $self->path,
         defaults    => $defaults,
         target      => sub {
+            my ($req) = @_;
+
+            my %match = (
+                %$defaults,
+                %{ $req->env->{'plack.router.match'}->mapping },
+            );
+            my $c = $match{controller};
+            my $a = $match{action};
+
             my $path = $s->get_dependency($c)->service_path;
             my $component = $s->parent->resolve(service => $path);
-            return $component->$a(@_);
+
+            if ($component->can($a)) {
+                return $component->$a(@_);
+            }
+            else {
+                return [
+                    500,
+                    [],
+                    ["Component $component has no action $a"]
+                ];
+            }
         },
         validations => $validations,
     ];
