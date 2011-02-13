@@ -9,7 +9,7 @@ use Scalar::Util qw(blessed);
 
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose'],
-    with_meta => [qw(router component config mount)],
+    with_meta => [qw(router component config mount xo)],
     as_is     => [
         'route',
         \&Bread::Board::depends_on,
@@ -173,6 +173,11 @@ sub _service_class_from_args {
     return exists $args{class} ? "Bread::Board::ConstructorInjection"
          : exists $args{value} ? "Bread::Board::Literal"
          :                       "Bread::Board::BlockInjection";
+}
+
+sub xo {
+    my $meta = shift;
+    $meta->new_object->to_app;
 }
 
 1;
