@@ -27,8 +27,7 @@ sub compile_routes {
             my $c = $match{controller};
             my $a = $match{action};
 
-            my $path = $s->get_dependency($c)->service_path;
-            my $component = $s->parent->resolve(service => $path);
+            my $component = $s->get_dependency($c)->get;
 
             if ($component->can($a)) {
                 return $component->$a(@_);
