@@ -6,9 +6,13 @@ with 'OX::Application::RouteBuilder';
 sub compile_routes {
     my $self = shift;
 
+    my ($defaults, $validations) = $self->extract_defaults_and_validations($self->params);
+
     return [
         $self->path,
-        target => $self->route_spec,
+        defaults    => $defaults,
+        target      => $self->route_spec,
+        validations => $validations,
     ];
 }
 

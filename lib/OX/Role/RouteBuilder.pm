@@ -17,9 +17,16 @@ sub configure_router {
         if (ref($route) eq 'HASH'
             && exists($route->{controller})
             && exists($route->{action})) {
+            my $controller = delete $route->{controller};
+            my $action     = delete $route->{action};
+
             $route = {
                 class      => 'OX::Application::RouteBuilder::ControllerAction',
-                route_spec => $route,
+                route_spec => {
+                    controller => $controller,
+                    action     => $action,
+                },
+                params     => $route,
             };
         }
 
@@ -27,6 +34,7 @@ sub configure_router {
         my $builder = $route->{class}->new(
             path       => $path,
             route_spec => $route->{route_spec},
+            params     => $route->{params},
             service    => $service,
         );
 

@@ -85,14 +85,15 @@ sub route {
             route_spec => {
                 controller => $controller,
                 action     => $action,
-                %params,
             },
+            params     => \%params,
         };
     }
     elsif (ref($action_spec) eq 'CODE') {
         $ROUTES->{$path} = {
             class      => 'OX::Application::RouteBuilder::Code',
             route_spec => $action_spec,
+            params     => \%params,
         };
     }
     else {

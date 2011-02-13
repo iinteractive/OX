@@ -10,8 +10,10 @@ sub compile_routes {
     my $self = shift;
 
     my $spec = $self->route_spec;
+    my $params = $self->params;
 
-    my ($defaults, $validations) = $self->extract_defaults_and_validations( $spec );
+    my ($defaults, $validations) = $self->extract_defaults_and_validations($params);
+    $defaults = { %$spec, %$defaults };
 
     my $s = $self->service;
     my $c = $defaults->{controller};

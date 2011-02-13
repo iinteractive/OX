@@ -21,17 +21,23 @@ has 'service' => (
     required => 1
 );
 
+has params => (
+    is       => 'ro',
+    isa      => 'HashRef',
+    required => 1,
+);
+
 sub extract_defaults_and_validations {
-    my ($self, $spec) = @_;
+    my ($self, $params) = @_;
 
     my ($defaults, $validations) = ({}, {});
 
-    foreach my $key ( keys %$spec ) {
-        if (ref $spec->{ $key }) {
-            $validations->{ $key } = $spec->{ $key }->{'isa'};
+    foreach my $key ( keys %$params ) {
+        if (ref $params->{ $key }) {
+            $validations->{ $key } = $params->{ $key }->{'isa'};
         }
         else {
-            $defaults->{ $key } = $spec->{ $key };
+            $defaults->{ $key } = $params->{ $key };
         }
     }
 
