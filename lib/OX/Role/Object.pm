@@ -72,7 +72,16 @@ after prepare_app => sub {
         my %deps = %{ $self->meta->mount($path)->{dependencies} };
         my %params;
         for my $dep_name (keys %deps) {
-            $params{$dep_name} = $self->fetch($deps{$dep_name}->service_path)->get;
+            my $dep = $deps{$dep_name};
+            if ($dep->isa('Bread::Board::Dependency')) {
+                $params{$dep_name} = $self->fetch($deps{$dep_name}->service_path)->get;
+            }
+            elsif ($dep->does('Bread::Board::Service')) {
+                $params{$dep_name} = $dep->get;
+            }
+            else {
+                die "Unknown dependency: $dep";
+            }
         }
         my $app = $class->new(%params);
         $urlmap->map($path => $app->to_app);

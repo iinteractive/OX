@@ -56,7 +56,7 @@ sub router {
         );
         for my $dep_name (keys %{ $router_config->dependencies }) {
             my $dep = $router_config->get_dependency($dep_name);
-            if ($dep->service_path !~ m+^/+) {
+            if ($dep->has_service_path && $dep->service_path !~ m+^/+) {
                 $router_config->add_dependency(
                     $dep_name => $dep->clone(
                         service_path => '../' . $dep->service_path,
@@ -119,6 +119,7 @@ sub component {
 
     my $service = _parse_service_sugar('class', @_);
     $meta->add_component($service);
+    return $service;
 }
 
 sub config {
@@ -126,6 +127,7 @@ sub config {
 
     my $service = _parse_service_sugar('value', @_);
     $meta->add_config($service);
+    return $service;
 }
 
 sub _parse_service_sugar {
