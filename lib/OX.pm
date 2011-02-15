@@ -29,8 +29,6 @@ sub init_meta {
     $package->$init_meta(%options);
 }
 
-our $ROUTES;
-
 sub router {
     my $meta = shift;
     my ($body, %params) = @_;
@@ -63,9 +61,8 @@ sub router {
             route_spec => sub { $_[0] },
         );
 
-        local $ROUTES = {};
         $body->();
-        my $routes = $ROUTES;
+        my $routes = $meta->routes;
         my $router_config = Bread::Board::BlockInjection->new(
             name         => 'config',
             block        => sub { $routes },
@@ -95,11 +92,11 @@ sub route {
     my ($meta, $path, $action_spec, %params) = @_;
 
     my ($class, $route_spec) = $meta->route_builder_for($action_spec);
-    $ROUTES->{$path} = {
+    $meta->add_route($path => {
         class      => $class,
         route_spec => $route_spec,
         params     => \%params,
-    };
+    });
 }
 
 sub mount {

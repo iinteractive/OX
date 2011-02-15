@@ -9,6 +9,16 @@ has router => (
     predicate => 'has_router',
 );
 
+has routes => (
+    traits  => ['Hash'],
+    is      => 'ro',
+    isa     => 'HashRef[HashRef]',
+    default => sub { {} },
+    handles => {
+        add_route => 'set',
+    },
+);
+
 has router_config => (
     is        => 'rw',
     isa       => 'Bread::Board::Service',
