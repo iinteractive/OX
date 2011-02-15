@@ -137,14 +137,21 @@ sub route_builder_for {
     my $self = shift;
     my ($action_spec) = @_;
 
-    for my $route_builder ($self->route_builders) {
-        my $route_spec = $route_builder->{route_spec}->($action_spec);
-
-        return ($route_builder->{class}, $route_spec)
-            if defined $route_spec;
+    my @route_specs = grep { defined $_->[1] }
+                      map { [ $_->{class}, $_->{route_spec}->($action_spec) ] }
+                      $self->route_builders;
+    if (@route_specs < 1) {
+        die "Unknown route spec $action_spec";
+    }
+    elsif (@route_specs > 1) {
+        die "Ambiguous route spec $action_spec (matched by "
+          . join(', ', map { $_->[0] } @route_specs)
+          . ")";
+    }
+    else {
+        return @{ $route_specs[0] };
     }
 
-    die "Unknown route spec $action_spec";
 }
 
 no Moose::Role;
