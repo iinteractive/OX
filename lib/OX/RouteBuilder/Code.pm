@@ -1,7 +1,7 @@
-package OX::Application::RouteBuilder::Code;
+package OX::RouteBuilder::Code;
 use Moose;
 
-with 'OX::Application::RouteBuilder';
+with 'OX::RouteBuilder';
 
 sub compile_routes {
     my $self = shift;

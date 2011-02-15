@@ -8,7 +8,7 @@ use Plack::Test;
     package RouteBuilder::REST;
     use Moose;
 
-    with 'OX::Application::RouteBuilder';
+    with 'OX::RouteBuilder';
 
     sub compile_routes {
         my $self = shift;

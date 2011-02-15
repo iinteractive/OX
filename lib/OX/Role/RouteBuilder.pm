@@ -21,7 +21,7 @@ sub configure_router {
             my $action     = delete $route->{action};
 
             $route = {
-                class      => 'OX::Application::RouteBuilder::ControllerAction',
+                class      => 'OX::RouteBuilder::ControllerAction',
                 route_spec => {
                     controller => $controller,
                     action     => $action,

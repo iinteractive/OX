@@ -44,7 +44,7 @@ sub router {
             if $meta->has_local_router_config;
 
         $meta->add_route_builder(
-            class      => 'OX::Application::RouteBuilder::ControllerAction',
+            class      => 'OX::RouteBuilder::ControllerAction',
             route_spec => sub {
                 my ($action_spec) = @_;
                 return unless !ref($action_spec)
@@ -58,7 +58,7 @@ sub router {
             },
         );
         $meta->add_route_builder(
-            class      => 'OX::Application::RouteBuilder::Code',
+            class      => 'OX::RouteBuilder::Code',
             route_spec => sub {
                 my ($action_spec) = @_;
                 return unless ref($action_spec) eq 'CODE';

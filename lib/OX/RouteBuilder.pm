@@ -1,4 +1,4 @@
-package OX::Application::RouteBuilder;
+package OX::RouteBuilder;
 use Moose::Role;
 
 our $VERSION   = '0.01';
@@ -54,11 +54,11 @@ __END__
 
 =head1 NAME
 
-OX::Application::RouteBuilder - A Moosey solution to this problem
+OX::RouteBuilder - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use OX::Application::RouteBuilder;
+  use OX::RouteBuilder;
 
 =head1 DESCRIPTION
 

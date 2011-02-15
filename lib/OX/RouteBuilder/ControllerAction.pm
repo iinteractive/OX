@@ -1,10 +1,10 @@
-package OX::Application::RouteBuilder::ControllerAction;
+package OX::RouteBuilder::ControllerAction;
 use Moose;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-with 'OX::Application::RouteBuilder';
+with 'OX::RouteBuilder';
 
 sub compile_routes {
     my $self = shift;
@@ -54,11 +54,11 @@ __END__
 
 =head1 NAME
 
-OX::Application::RouteBuilder::ControllerAction - A Moosey solution to this problem
+OX::RouteBuilder::ControllerAction - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use OX::Application::RouteBuilder::ControllerAction;
+  use OX::RouteBuilder::ControllerAction;
 
 =head1 DESCRIPTION
 
