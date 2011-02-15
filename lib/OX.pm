@@ -9,9 +9,8 @@ use Scalar::Util qw(blessed);
 
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose'],
-    with_meta => [qw(router component config mount xo)],
+    with_meta => [qw(router route component config mount xo)],
     as_is     => [
-        'route',
         \&Bread::Board::depends_on,
         \&Bread::Board::as,
     ],
@@ -46,6 +45,24 @@ sub router {
         Carp::confess "only one top level router is allowed"
             if $meta->has_local_router_config;
 
+        $meta->add_route_builder(
+            class      => 'OX::Application::RouteBuilder::ControllerAction',
+            condition  => sub { !ref($_[0]) && $_[0] =~ /^[^\.]+\.[^\.]+$/ },
+            route_spec => sub {
+                my ($action_spec) = @_;
+                my ($controller, $action) = split /\./, $action_spec;
+                return {
+                    controller => $controller,
+                    action     => $action,
+                };
+            },
+        );
+        $meta->add_route_builder(
+            class      => 'OX::Application::RouteBuilder::Code',
+            condition  => sub { ref($_[0]) eq 'CODE' },
+            route_spec => sub { $_[0] },
+        );
+
         local $ROUTES = {};
         $body->();
         my $routes = $ROUTES;
@@ -75,30 +92,14 @@ sub router {
 }
 
 sub route {
-    my ($path, $action_spec, %params) = @_;
+    my ($meta, $path, $action_spec, %params) = @_;
 
-    if (!ref($action_spec) && $action_spec =~ /\./) {
-        my ($controller, $action) = split /\./, $action_spec;
-
-        $ROUTES->{$path} = {
-            class      => 'OX::Application::RouteBuilder::ControllerAction',
-            route_spec => {
-                controller => $controller,
-                action     => $action,
-            },
-            params     => \%params,
-        };
-    }
-    elsif (ref($action_spec) eq 'CODE') {
-        $ROUTES->{$path} = {
-            class      => 'OX::Application::RouteBuilder::Code',
-            route_spec => $action_spec,
-            params     => \%params,
-        };
-    }
-    else {
-        die "Unknown route spec $action_spec for $path";
-    }
+    my ($class, $route_spec) = $meta->route_builder_for($action_spec);
+    $ROUTES->{$path} = {
+        class      => $class,
+        route_spec => $route_spec,
+        params     => \%params,
+    };
 }
 
 sub mount {

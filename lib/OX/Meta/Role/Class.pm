@@ -49,6 +49,16 @@ has mounts => (
     },
 );
 
+has route_builders => (
+    traits  => ['Array'],
+    isa     => 'ArrayRef[HashRef]',
+    default => sub { [] },
+    handles => {
+        _add_route_builder => 'push',
+        route_builders     => 'elements',
+    }
+);
+
 sub has_any_config {
     my $self = shift;
     return any { $_->has_config }
@@ -105,6 +115,28 @@ sub full_router_config {
         block        => sub { \%routes },
         dependencies => \%dependencies,
     );
+}
+
+sub add_route_builder {
+    my $self = shift;
+    my %params = @_;
+    $self->_add_route_builder(\%params);
+}
+
+sub route_builder_for {
+    my $self = shift;
+    my ($action_spec) = @_;
+
+    for my $route_builder ($self->route_builders) {
+        if ($route_builder->{condition}->($action_spec)) {
+            return (
+                $route_builder->{class},
+                $route_builder->{route_spec}->($action_spec),
+            );
+        }
+    }
+
+    die "Unknown route spec $action_spec";
 }
 
 no Moose::Role;
