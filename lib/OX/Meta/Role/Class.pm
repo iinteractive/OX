@@ -138,12 +138,10 @@ sub route_builder_for {
     my ($action_spec) = @_;
 
     for my $route_builder ($self->route_builders) {
-        if ($route_builder->{condition}->($action_spec)) {
-            return (
-                $route_builder->{class},
-                $route_builder->{route_spec}->($action_spec),
-            );
-        }
+        my $route_spec = $route_builder->{route_spec}->($action_spec);
+
+        return ($route_builder->{class}, $route_spec)
+            if defined $route_spec;
     }
 
     die "Unknown route spec $action_spec";

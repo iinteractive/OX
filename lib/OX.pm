@@ -45,9 +45,11 @@ sub router {
 
         $meta->add_route_builder(
             class      => 'OX::Application::RouteBuilder::ControllerAction',
-            condition  => sub { !ref($_[0]) && $_[0] =~ /^[^\.]+\.[^\.]+$/ },
             route_spec => sub {
                 my ($action_spec) = @_;
+                return unless !ref($action_spec)
+                           && $action_spec =~ /^[^\.]+\.[^\.]+$/;
+
                 my ($controller, $action) = split /\./, $action_spec;
                 return {
                     controller => $controller,
@@ -57,8 +59,11 @@ sub router {
         );
         $meta->add_route_builder(
             class      => 'OX::Application::RouteBuilder::Code',
-            condition  => sub { ref($_[0]) eq 'CODE' },
-            route_spec => sub { $_[0] },
+            route_spec => sub {
+                my ($action_spec) = @_;
+                return unless ref($action_spec) eq 'CODE';
+                return $action_spec;
+            },
         );
 
         $body->();

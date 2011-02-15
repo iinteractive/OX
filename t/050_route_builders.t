@@ -58,8 +58,7 @@ use Plack::Test;
         my $meta = Class::MOP::class_of(caller);
         $meta->add_route_builder(
             class      => 'RouteBuilder::REST',
-            condition  => sub { !ref($_[0]) },
-            route_spec => sub { { action => $_[0] } },
+            route_spec => sub { ref($_[0]) ? () : { action => $_[0] } },
         );
     }
 }
