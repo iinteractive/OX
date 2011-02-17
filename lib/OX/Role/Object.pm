@@ -68,23 +68,32 @@ after prepare_app => sub {
     my $urlmap = Plack::App::URLMap->new;
 
     for my $path ($self->meta->mount_paths) {
-        my $class = $self->meta->mount($path)->{class};
-        my %deps = %{ $self->meta->mount($path)->{dependencies} };
-        my %params;
-        for my $dep_name (keys %deps) {
-            my $dep = $deps{$dep_name};
-            if ($dep->isa('Bread::Board::Dependency')) {
-                $params{$dep_name} = $self->fetch($deps{$dep_name}->service_path)->get;
-            }
-            elsif ($dep->does('Bread::Board::Service')) {
-                $params{$dep_name} = $dep->get;
-            }
-            else {
-                die "Unknown dependency: $dep";
-            }
+        my $mount = $self->meta->mount($path);
+        if (exists $mount->{app}) {
+            $urlmap->map($path => $mount->{app});
         }
-        my $app = $class->new(%params);
-        $urlmap->map($path => $app->to_app);
+        elsif (exists $mount->{class}) {
+            my $class = $mount->{class};
+            my %deps = %{ $mount->{dependencies} };
+            my %params;
+            for my $dep_name (keys %deps) {
+                my $dep = $deps{$dep_name};
+                if ($dep->isa('Bread::Board::Dependency')) {
+                    $params{$dep_name} = $self->fetch($deps{$dep_name}->service_path)->get;
+                }
+                elsif ($dep->does('Bread::Board::Service')) {
+                    $params{$dep_name} = $dep->get;
+                }
+                else {
+                    die "Unknown dependency: $dep";
+                }
+            }
+            my $app = $class->new(%params);
+            $urlmap->map($path => $app->to_app);
+        }
+        else {
+            die "Unknown mount spec for path $path";
+        }
     }
 
     $urlmap->map('/' => $self->_app);

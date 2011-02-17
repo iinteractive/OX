@@ -105,16 +105,26 @@ sub route {
 }
 
 sub mount {
-    my ($meta, $path, $class, %params) = @_;
+    my ($meta, $path, $mount, %params) = @_;
 
-    Class::MOP::load_class($class);
-    die "Only subclasses of OX::Application can be mounted"
-        unless $class->isa('OX::Application');
+    if (ref($mount) eq 'CODE') {
+        $meta->add_mount($path => {
+            app => $mount,
+        });
+    }
+    elsif (!ref($mount)) {
+        Class::MOP::load_class($mount);
+        die "Class $mount doesn't implement a to_app method"
+            unless $mount->can('to_app');
 
-    $meta->add_mount($path => {
-        class        => $class,
-        dependencies => \%params,
-    });
+        $meta->add_mount($path => {
+            class        => $mount,
+            dependencies => \%params,
+        });
+    }
+    else {
+        die "Unknown mount $mount";
+    }
 }
 
 sub component {
