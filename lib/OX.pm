@@ -7,6 +7,8 @@ our $AUTHORITY = 'cpan:STEVAN';
 use Bread::Board ();
 use Scalar::Util qw(blessed);
 
+use OX::Meta::Role::Attribute::Config;
+
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose'],
     with_meta => [qw(router route component config mount xo)],
