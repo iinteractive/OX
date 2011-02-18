@@ -44,6 +44,19 @@ sub compile_routes {
     ];
 }
 
+sub parse_action_spec {
+    my $class = shift;
+    my ($action_spec) = @_;
+
+    return if ref($action_spec) || $action_spec !~ /^[^\.]+\.[^\.]+$/;
+
+    my ($controller, $action) = split /\./, $action_spec;
+    return {
+        controller => $controller,
+        action     => $action,
+    };
+}
+
 __PACKAGE__->meta->make_immutable;
 
 no Moose; 1;

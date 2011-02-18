@@ -16,6 +16,13 @@ sub compile_routes {
     ];
 }
 
+sub parse_action_spec {
+    my $class = shift;
+    my ($action_spec) = @_;
+    return unless ref($action_spec) eq 'CODE';
+    return $action_spec;
+}
+
 __PACKAGE__->meta->make_immutable;
 
 no Moose;

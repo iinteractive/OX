@@ -50,19 +50,16 @@ use Plack::Test;
             validations => $validations,
         ];
     }
-}
 
-{
-    package OX::REST;
-    sub import {
-        my $meta = Class::MOP::class_of(caller);
-        $meta->add_route_builder(
-            class      => 'RouteBuilder::REST',
-            route_spec => sub { ref($_[0]) ? () : { action => $_[0] } },
-        );
+    sub parse_action_spec {
+        my $self = shift;
+        my ($action_spec) = @_;
+        return if ref($action_spec);
+        return {
+            action => $action_spec,
+        }
     }
 }
-BEGIN { $INC{'OX/REST.pm'} = 1 }
 
 {
     package Root;
@@ -79,11 +76,10 @@ BEGIN { $INC{'OX/REST.pm'} = 1 }
 {
     package Foo;
     use OX;
-    use OX::REST;
 
     component Root => 'Root';
 
-    router as {
+    router ['RouteBuilder::REST'], as {
         route '/' => 'root';
     }, (root => depends_on('Component/Root'));
 }

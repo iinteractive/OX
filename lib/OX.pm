@@ -31,6 +31,12 @@ sub init_meta {
 
 sub router {
     my $meta = shift;
+
+    if (ref($_[0]) eq 'ARRAY') {
+        $meta->add_route_builder($_) for @{ $_[0] };
+        shift;
+    }
+
     my ($body, %params) = @_;
 
     if (!ref($body)) {
@@ -43,30 +49,11 @@ sub router {
         Carp::confess "only one top level router is allowed"
             if $meta->has_local_router_config;
 
-        $meta->add_route_builder(
-            class      => 'OX::RouteBuilder::ControllerAction',
-            route_spec => sub {
-                my ($action_spec) = @_;
-                return unless !ref($action_spec)
-                           && $action_spec =~ /^[^\.]+\.[^\.]+$/;
-
-                my ($controller, $action) = split /\./, $action_spec;
-                return {
-                    controller => $controller,
-                    action     => $action,
-                };
-            },
-        );
-        $meta->add_route_builder(
-            class      => 'OX::RouteBuilder::Code',
-            route_spec => sub {
-                my ($action_spec) = @_;
-                return unless ref($action_spec) eq 'CODE';
-                return $action_spec;
-            },
-        );
+        $meta->add_route_builder('OX::RouteBuilder::ControllerAction');
+        $meta->add_route_builder('OX::RouteBuilder::Code');
 
         $body->();
+
         my $routes = $meta->routes;
         my $router_config = Bread::Board::BlockInjection->new(
             name         => 'config',

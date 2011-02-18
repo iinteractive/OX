@@ -61,11 +61,11 @@ has mounts => (
 
 has route_builders => (
     traits  => ['Array'],
-    isa     => 'ArrayRef[HashRef]',
+    isa     => 'ArrayRef[Str]',
     default => sub { [] },
     handles => {
-        _add_route_builder => 'push',
-        route_builders     => 'elements',
+        add_route_builder => 'push',
+        route_builders    => 'elements',
     }
 );
 
@@ -127,18 +127,18 @@ sub full_router_config {
     );
 }
 
-sub add_route_builder {
+before add_route_builder => sub {
     my $self = shift;
-    my %params = @_;
-    $self->_add_route_builder(\%params);
-}
+    my ($routebuilder) = @_;
+    Class::MOP::load_class($routebuilder);
+};
 
 sub route_builder_for {
     my $self = shift;
     my ($action_spec) = @_;
 
     my @route_specs = grep { defined $_->[1] }
-                      map { [ $_->{class}, $_->{route_spec}->($action_spec) ] }
+                      map { [ $_, $_->parse_action_spec($action_spec) ] }
                       $self->route_builders;
     if (@route_specs < 1) {
         die "Unknown route spec $action_spec";

@@ -44,7 +44,7 @@ sub extract_defaults_and_validations {
     return ($defaults, $validations);
 }
 
-requires 'compile_routes';
+requires 'compile_routes', 'parse_action_spec';
 
 no Moose::Role; 1;
 
