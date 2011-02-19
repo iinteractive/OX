@@ -14,11 +14,11 @@ use Plack::Test;
             my $req = shift;
             return "foo: " . $req->script_name . ' ' . $req->path_info;
         };
-    };
 
-    mount '/bar' => sub {
-        my $env = shift;
-        return [200, [], ["bar: $env->{SCRIPT_NAME} $env->{PATH_INFO}"]];
+        mount '/bar' => sub {
+            my $env = shift;
+            return [200, [], ["bar: $env->{SCRIPT_NAME} $env->{PATH_INFO}"]];
+        };
     };
 }
 

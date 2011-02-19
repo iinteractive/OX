@@ -74,11 +74,11 @@ use HTTP::Request;
     router as {
         route '/'    => 'root.index';
         route '/foo' => 'root.foo';
-    }, ('root' => depends_on('Component/BarRoot'));
 
-    mount '/baz' => 'Baz' => (
-        root => depends_on('Component/BarRoot'),
-    );
+        mount '/baz' => 'Baz' => (
+            root => depends_on('Component/BarRoot'),
+        );
+    }, ('root' => depends_on('Component/BarRoot'));
 }
 
 {
@@ -92,11 +92,11 @@ use HTTP::Request;
     router as {
         route '/'    => 'root.index';
         route '/foo' => 'root.foo';
-    }, ('root' => depends_on('Component/FooRoot'));
 
-    mount '/bar' => 'Bar' => (
-        root => depends_on('Component/FooRoot'),
-    );
+        mount '/bar' => 'Bar' => (
+            root => depends_on('Component/FooRoot'),
+        );
+    }, ('root' => depends_on('Component/FooRoot'));
 }
 
 test_psgi

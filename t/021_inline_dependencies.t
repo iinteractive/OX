@@ -61,6 +61,10 @@ use Plack::Test;
 
     router as {
         route '/foo' => 'root.index';
+
+        mount '/bar' => 'Bar' => (
+            middleware => config('bar_middleware' => sub { ['Bar::Middleware'] }),
+        );
     }, (root => component('Root' => 'Foo::Root' => (
                               # XXX: it'd be nice if these worked without the
                               # leading / too, but that's complicated
@@ -69,9 +73,6 @@ use Plack::Test;
                           )),
     );
 
-    mount '/bar' => 'Bar' => (
-        middleware => config('bar_middleware' => sub { ['Bar::Middleware'] }),
-    );
 }
 
 test_psgi

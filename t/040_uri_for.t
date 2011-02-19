@@ -37,9 +37,9 @@ use Plack::Test;
             'foo' => 'bar',
         );
         route '/bar' => 'bar.index';
-    };
 
-    mount '/baz' => 'Baz';
+        mount '/baz' => 'Baz';
+    };
 }
 
 test_psgi
