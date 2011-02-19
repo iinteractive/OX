@@ -65,7 +65,10 @@ sub BUILD {
                     router => $s->param('router'),
                 )->to_app;
 
-                for my $middleware ($self->middleware) {
+                my @middleware = $self->middleware;
+                unshift @middleware, $self->meta->middleware
+                    if Moose::Util::does_role($self->meta, 'OX::Meta::Role::Class');
+                for my $middleware (@middleware) {
                     match_on_type $middleware => (
                         'CodeRef' => sub {
                             $app = $middleware->($app);

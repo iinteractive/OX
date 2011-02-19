@@ -11,7 +11,7 @@ use OX::Meta::Role::Attribute::Config;
 
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose'],
-    with_meta => [qw(router route component config mount xo)],
+    with_meta => [qw(router route component config mount wrap xo)],
     as_is     => [
         \&Bread::Board::depends_on,
         \&Bread::Board::as,
@@ -114,6 +114,11 @@ sub mount {
     else {
         die "Unknown mount $mount";
     }
+}
+
+sub wrap {
+    my $meta = shift;
+    $meta->add_middleware($_[0]);
 }
 
 sub component {

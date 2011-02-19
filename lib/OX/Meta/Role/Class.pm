@@ -66,7 +66,17 @@ has route_builders => (
     handles => {
         add_route_builder => 'push',
         route_builders    => 'elements',
-    }
+    },
+);
+
+has middleware => (
+    traits => ['Array'],
+    isa     => 'ArrayRef',
+    default => sub { [] },
+    handles => {
+        add_middleware => 'push',
+        middleware     => 'elements',
+    },
 );
 
 sub has_any_config {
@@ -153,6 +163,13 @@ sub route_builder_for {
     }
 
 }
+
+before add_middleware => sub {
+    my $self = shift;
+    my ($middleware) = @_;
+    Class::MOP::load_class($middleware)
+        unless ref($middleware);
+};
 
 no Moose::Role;
 
