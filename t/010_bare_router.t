@@ -11,7 +11,7 @@ use Plack::Test;
     use Bread::Board;
     extends 'OX::Application';
 
-    has '+router_class' => (default => 'Path::Router');
+    sub router_class { 'Path::Router' }
 
     sub configure_router {
         my $self = shift;

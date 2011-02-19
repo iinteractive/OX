@@ -2,8 +2,6 @@ package OX::Role::WithAppRoot;
 use Moose::Role;
 use Bread::Board;
 
-use Bread::Board::Container;
-use Bread::Board::Literal;
 use Class::Inspector;
 use Path::Class;
 

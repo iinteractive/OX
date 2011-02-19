@@ -18,7 +18,8 @@ my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     ],
     install => [qw(import unimport)],
     class_metaroles => {
-        class => ['OX::Meta::Role::Class'],
+        class => ['OX::Meta::Role::Class',
+                  'OX::Meta::Role::Class::RouteBuilder'],
     },
     base_class_roles => ['OX::Role::Object', 'OX::Role::RouteBuilder'],
 );

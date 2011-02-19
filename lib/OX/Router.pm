@@ -1,9 +1,9 @@
 package OX::Router;
 use Moose;
 
-extends 'Path::Router';
-
 use OX::Router::Route;
+
+extends 'Path::Router';
 
 has '+route_class' => (default => 'OX::Router::Route');
 

@@ -101,6 +101,15 @@ after prepare_app => sub {
     $self->_app($urlmap->to_app);
 };
 
+around middleware => sub {
+    my $orig = shift;
+    my $self = shift;
+    return (
+        $self->meta->middleware,
+        $self->$orig(@_),
+    );
+};
+
 no Moose::Role;
 
 1;

@@ -4,7 +4,6 @@ use Bread::Board;
 use Moose::Util::TypeConstraints
     qw(class_type subtype where match_on_type), as => { -as => 'mutc_as' };
 
-use OX::Router;
 use Plack::App::Path::Router::PSGI;
 
 our $VERSION   = '0.01';
@@ -12,15 +11,14 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 extends 'Bread::Board::Container';
 
-has '+name' => ( lazy => 1, default => sub { (shift)->meta->name } );
+has '+name' => (
+    lazy    => 1,
+    default => sub { shift->meta->name },
+);
 
-has '_app' => ( is => 'rw', isa => 'CodeRef' );
-
-# can override this to Path::Router to deal with PSGI coderefs directly
-has 'router_class' => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => 'OX::Router',
+has _app => (
+    is  => 'rw',
+    isa => 'CodeRef'
 );
 
 class_type('Plack::Middleware');
@@ -39,6 +37,8 @@ has middleware => (
     },
 );
 
+sub router_class { 'OX::Router' }
+
 sub BUILD {
     my $self = shift;
     container $self => as {
@@ -48,7 +48,9 @@ sub BUILD {
             service 'router' => (
                 block => sub {
                     my $s      = shift;
-                    my $router = $self->router_class->new;
+                    my $router_class = $self->router_class;
+                    Class::MOP::load_class($router_class);
+                    my $router = $router_class->new;
                     $self->configure_router( $s, $router );
                     $router;
                 },
@@ -65,10 +67,7 @@ sub BUILD {
                     router => $s->param('router'),
                 )->to_app;
 
-                my @middleware = $self->middleware;
-                unshift @middleware, $self->meta->middleware
-                    if Moose::Util::does_role($self->meta, 'OX::Meta::Role::Class');
-                for my $middleware (@middleware) {
+                for my $middleware ($self->middleware) {
                     match_on_type $middleware => (
                         'CodeRef' => sub {
                             $app = $middleware->($app);

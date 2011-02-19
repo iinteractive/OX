@@ -5,6 +5,8 @@ use Test::More;
 use Test::Path::Router;
 use Plack::Test;
 
+use Path::Router;
+
 {
     package Foo;
     use OX;
