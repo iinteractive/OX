@@ -5,7 +5,7 @@ use List::MoreUtils qw(any);
 
 has router => (
     is        => 'rw',
-    isa       => 'Path::Router',
+    does      => 'Bread::Board::Service',
     predicate => 'has_router',
 );
 
@@ -21,7 +21,7 @@ has routes => (
 
 has router_config => (
     is        => 'rw',
-    isa       => 'Bread::Board::Service',
+    does      => 'Bread::Board::Service',
     predicate => 'has_local_router_config',
 );
 

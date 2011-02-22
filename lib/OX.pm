@@ -41,6 +41,20 @@ sub init_meta {
     }
 }
 
+sub _fix_router_dependencies {
+    my ($router_service) = @_;
+    for my $dep_name (keys %{ $router_service->dependencies }) {
+        my $dep = $router_service->get_dependency($dep_name);
+        if ($dep->has_service_path && $dep->service_path !~ m+^/+) {
+            $router_service->add_dependency(
+                $dep_name => $dep->clone(
+                    service_path => '../' . $dep->service_path,
+                )
+            );
+        }
+    }
+}
+
 sub router {
     my $meta = shift;
 
@@ -53,9 +67,13 @@ sub router {
 
     if (!ref($body)) {
         Class::MOP::load_class($body);
-        Carp::confess "A router must be a subclass of Path::Router, not $body"
-            unless $body->isa('Path::Router');
-        $meta->router($body->new);
+        my $service = Bread::Board::ConstructorInjection->new(
+            name         => 'router',
+            class        => $body,
+            dependencies => \%params,
+        );
+        _fix_router_dependencies($service);
+        $meta->router($service);
     }
     elsif (ref($body) eq 'CODE') {
         Carp::confess "only one top level router is allowed"
@@ -72,20 +90,15 @@ sub router {
             block        => sub { $routes },
             dependencies => \%params,
         );
-        for my $dep_name (keys %{ $router_config->dependencies }) {
-            my $dep = $router_config->get_dependency($dep_name);
-            if ($dep->has_service_path && $dep->service_path !~ m+^/+) {
-                $router_config->add_dependency(
-                    $dep_name => $dep->clone(
-                        service_path => '../' . $dep->service_path,
-                    )
-                );
-            }
-        }
+        _fix_router_dependencies($router_config);
         $meta->router_config($router_config);
     }
-    elsif (blessed($body) && $body->isa('Path::Router')) {
-        $meta->router($body);
+    elsif (blessed($body)) {
+        my $service = Bread::Board::Literal->new(
+            name  => 'router',
+            value => $body,
+        );
+        $meta->router($service);
     }
     else {
         Carp::confess "Unknown argument to 'router': $body";

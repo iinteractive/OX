@@ -14,7 +14,10 @@ sub BUILD {
         if ($meta->has_router_config || $meta->has_router) {
             container $self->fetch('Router') => as {
                 my $c = shift;
-                if ($meta->has_router_config) {
+                if ($meta->has_router) {
+                    $c->add_service($meta->router->clone);
+                }
+                elsif ($meta->has_router_config) {
                     my $config = $meta->full_router_config;
                     for my $dep (values %{ $config->dependencies }) {
                         if (!$dep->has_service_path) {
@@ -22,14 +25,6 @@ sub BUILD {
                         }
                     }
                     $c->add_service($config);
-                }
-                if ($meta->has_router) {
-                    $c->add_service(
-                        Bread::Board::Literal->new(
-                            name  => 'router',
-                            value => $meta->router,
-                        )
-                    );
                 }
             };
         }

@@ -5,7 +5,6 @@ use Bread::Board::Declare;
 use Bread::Board;
 use Moose::Util::TypeConstraints
     qw(class_type subtype where match_on_type), as => { -as => 'mutc_as' };
-use Plack::App::Path::Router::PSGI;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -57,9 +56,7 @@ sub BUILD {
             block        => sub {
                 my $s = shift;
 
-                my $app = Plack::App::Path::Router::PSGI->new(
-                    router => $s->param('router'),
-                )->to_app;
+                my $app = $self->app_from_router($s->param('router'));
 
                 for my $middleware ($self->middleware) {
                     match_on_type $middleware => (
@@ -88,6 +85,15 @@ sub BUILD {
 
 sub router_dependencies { [] }
 sub configure_router { }
+sub app_from_router {
+    my $self = shift;
+    my ($router) = @_;
+
+    require Plack::App::Path::Router::PSGI;
+    return Plack::App::Path::Router::PSGI->new(
+        router => $router,
+    )->to_app;
+}
 
 # can't use 'router', since that's used as a keyword
 sub get_router { shift->resolve(service => 'Router/router') }
