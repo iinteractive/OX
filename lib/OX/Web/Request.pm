@@ -13,7 +13,7 @@ sub BUILDARGS {
     return {};
 }
 
-sub router { (shift)->env->{'plack.router'} }
+sub router { (shift)->env->{'ox.router'} }
 
 sub uri_for {
     my ($self, $route) = @_;

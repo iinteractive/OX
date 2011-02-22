@@ -53,7 +53,7 @@ use OX::Web::Request;
         my ($router) = @_;
         return sub {
             my $req = OX::Web::Request->new(shift);
-            [200, [], [$router->model->val . ': ' . $req->path]];
+            [200, [], [$req->router->model->val . ': ' . $req->path]];
         };
     }
 }

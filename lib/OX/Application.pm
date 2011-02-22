@@ -54,7 +54,15 @@ sub BUILD {
             block        => sub {
                 my $s = shift;
 
-                my $app = $self->app_from_router($s->param('router'));
+                my $router = $s->param('router');
+                my $_app = $self->app_from_router($router);
+
+                my $app = sub {
+                    my $env = shift;
+                    $env->{'ox.router'} = $router;
+                    # ...?
+                    $_app->($env);
+                };
 
                 for my $middleware ($self->middleware) {
                     match_on_type $middleware => (
