@@ -28,6 +28,13 @@ sub configure_router {
                 params     => $route,
             };
         }
+        elsif (ref($route) eq 'CODE') {
+            $route = {
+                class      => 'OX::RouteBuilder::Code',
+                route_spec => $route,
+                params     => {},
+            };
+        }
 
         Class::MOP::load_class($route->{class});
         my $builder = $route->{class}->new(
