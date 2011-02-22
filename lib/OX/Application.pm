@@ -89,6 +89,9 @@ sub BUILD {
 sub router_dependencies { [] }
 sub configure_router { }
 
+# can't use 'router', since that's used as a keyword
+sub get_router { shift->resolve(service => 'Router/router') }
+
 # ... Plack::Component API
 
 sub prepare_app {

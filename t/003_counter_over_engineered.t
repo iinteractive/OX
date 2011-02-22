@@ -26,7 +26,7 @@ my $root = $app->resolve( service => 'app_root' );
 isa_ok($root, 'Path::Class::Dir');
 is($root, 't/apps/Counter-Over-Engineered', '... got the right root dir');
 
-my $router = $app->resolve( service => 'Router/router' );
+my $router = $app->get_router;
 isa_ok($router, 'Path::Router');
 
 path_ok($router, $_, '... ' . $_ . ' is a valid path')
