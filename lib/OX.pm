@@ -12,6 +12,7 @@ my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
     with_meta => [qw(router route mount wrap xo)],
     as_is     => [
+        'service',
         \&Bread::Board::depends_on,
         \&Bread::Board::as,
     ],
@@ -29,6 +30,15 @@ sub init_meta {
     $options{base_class} = 'OX::Application';
     Moose->init_meta(%options);
     $package->$init_meta(%options);
+}
+
+{
+    my $anon = 0;
+    sub service {
+        my $name = '__ANON__:' . $anon++;
+        local $Bread::Board::CC = Bread::Board::Container->new(name => $name);
+        return Bread::Board::service($name, @_);
+    }
 }
 
 sub router {

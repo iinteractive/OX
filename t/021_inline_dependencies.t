@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More skip_all => "this is broken for now";
+use Test::More;
 use Plack::Test;
 
 {
@@ -57,7 +57,7 @@ use Plack::Test;
             return $s->param('param');
         },
         dependencies => {
-            param => service(foo_param => 'foo_param'),
+            param => service('foo_param'),
         },
     );
 
@@ -69,17 +69,23 @@ use Plack::Test;
             return $s->param('param');
         },
         dependencies => {
-            param => service(bar_param => 'bar_param'),
+            param => service('bar_param'),
         },
+    );
+
+    has root => (
+        is => 'ro',
+        isa => 'Foo::Root',
+        dependencies => ['foo', 'bar'],
     );
 
     router as {
         route '/foo' => 'root.index';
 
         mount '/bar' => 'Bar' => (
-            middleware => service('bar_middleware' => sub { ['Bar::Middleware'] }),
+            middleware => service(block => sub { ['Bar::Middleware'] }),
         );
-    }, (root => service('root' => (class => 'Foo::Root', dependencies => ['foo', 'bar'])));
+    }, (root => service(class => 'Foo::Root', dependencies => ['foo', 'bar']));
 
 }
 
