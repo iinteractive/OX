@@ -42,18 +42,12 @@ use HTTP::Request;
     has root => (
         is       => 'ro',
         isa      => 'Foo::Root',
-        required => 1,
     );
-
-    component 'BazRoot' => sub {
-        my ($s, $app) = @_;
-        $app->root;
-    };
 
     router as {
         route '/'    => 'root.index';
         route '/foo' => 'root.foo';
-    }, ('root' => depends_on('Component/BazRoot'));
+    }, ('root' => depends_on('root'));
 }
 
 {
@@ -66,37 +60,34 @@ use HTTP::Request;
         required => 1,
     );
 
-    component 'BarRoot' => sub {
-        my ($s, $app) = @_;
-        $app->root;
-    };
-
     router as {
         route '/'    => 'root.index';
         route '/foo' => 'root.foo';
 
         mount '/baz' => 'Baz' => (
-            root => depends_on('Component/BarRoot'),
+            root => depends_on('root'),
         );
-    }, ('root' => depends_on('Component/BarRoot'));
+    }, ('root' => depends_on('root'));
 }
 
 {
     package Foo;
     use OX;
 
-    component 'FooRoot' => 'Foo::Root' => {
+    has root => (
+        is        => 'ro',
+        isa       => 'Foo::Root',
         lifecycle => 'Singleton',
-    };
+    );
 
     router as {
         route '/'    => 'root.index';
         route '/foo' => 'root.foo';
 
         mount '/bar' => 'Bar' => (
-            root => depends_on('Component/FooRoot'),
+            root => depends_on('root'),
         );
-    }, ('root' => depends_on('Component/FooRoot'));
+    }, ('root' => depends_on('root'));
 }
 
 test_psgi

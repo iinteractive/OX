@@ -5,13 +5,12 @@ our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Bread::Board ();
+use Bread::Board::Declare ();
 use Scalar::Util qw(blessed);
 
-use OX::Meta::Role::Attribute::Config;
-
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
-    also      => ['Moose'],
-    with_meta => [qw(router route component config mount wrap xo)],
+    also      => ['Moose', 'Bread::Board::Declare'],
+    with_meta => [qw(router route mount wrap xo)],
     as_is     => [
         \&Bread::Board::depends_on,
         \&Bread::Board::as,
@@ -120,70 +119,6 @@ sub mount {
 sub wrap {
     my $meta = shift;
     $meta->add_middleware($_[0]);
-}
-
-sub component {
-    my $meta = shift;
-
-    my $service = _parse_service_sugar('class', @_);
-    $meta->add_component($service);
-    return $service;
-}
-
-sub config {
-    my $meta = shift;
-
-    my $service = _parse_service_sugar('value', @_);
-    $meta->add_config($service);
-    return $service;
-}
-
-sub _parse_service_sugar {
-    my ($bare_string) = shift;
-
-    my %args;
-
-    if (@_ >= 1 && !ref($_[0])) {
-        $args{name} = shift;
-    }
-
-    if (@_ >= 1) {
-        if (!ref($_[0])) {
-            $args{$bare_string} = shift;
-        }
-        elsif (ref($_[0]) eq 'CODE') {
-            $args{block} = shift;
-        }
-        elsif (ref($_[0]) ne 'HASH') {
-            Carp::confess "Value given must be a string or coderef, not $_[0]";
-        }
-    }
-
-    if (@_ == 1 && ref($_[0]) eq 'HASH') {
-        %args = (%args, %{ $_[0] });
-    }
-    elsif ((@_ % 2) == 0) {
-        %args = (%args, (@_ > 0) ? (dependencies => { @_ }) : ());
-    }
-
-    Class::MOP::load_class($args{class})
-        if exists $args{class};
-
-    my $class = _service_class_from_args(%args);
-    return $class->new(%args);
-}
-
-sub _service_class_from_args {
-    my %args = @_;
-
-    Carp::confess "Must provide a value"
-        unless exists $args{class}
-            || exists $args{value}
-            || exists $args{block};
-
-    return exists $args{class} ? "Bread::Board::ConstructorInjection"
-         : exists $args{value} ? "Bread::Board::Literal"
-         :                       "Bread::Board::BlockInjection";
 }
 
 sub xo {

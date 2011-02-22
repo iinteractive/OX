@@ -10,35 +10,6 @@ sub BUILD {
     my $meta = $self->meta;
 
     container $self => as {
-        if ($meta->has_any_components) {
-            container Component => as {
-                my $c = shift;
-                for my $component ($meta->get_all_components) {
-                    if ($component->isa('Bread::Board::BlockInjection')) {
-                        my $block = $component->block;
-                        $component->block(sub {
-                            $block->(@_, $self);
-                        });
-                    }
-                    $c->add_service($component);
-                }
-            };
-        }
-
-        if ($meta->has_any_config) {
-            container Config => as {
-                my $c = shift;
-                for my $config ($meta->get_all_config) {
-                    if ($config->isa('Bread::Board::BlockInjection')) {
-                        my $block = $config->block;
-                        $config->block(sub {
-                            $block->(@_, $self);
-                        });
-                    }
-                    $c->add_service($config);
-                }
-            };
-        }
 
         if ($meta->has_router_config || $meta->has_router) {
             container $self->fetch('Router') => as {

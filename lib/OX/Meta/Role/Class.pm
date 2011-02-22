@@ -25,28 +25,6 @@ has router_config => (
     predicate => 'has_local_router_config',
 );
 
-has components => (
-    traits  => ['Array'],
-    isa     => 'ArrayRef[Bread::Board::Service]',
-    default => sub { [] },
-    handles => {
-        has_components => 'count',
-        components     => 'elements',
-        add_component  => 'push',
-    },
-);
-
-has config => (
-    traits  => ['Array'],
-    isa     => 'ArrayRef[Bread::Board::Service]',
-    default => sub { [] },
-    handles => {
-        has_config => 'count',
-        config     => 'elements',
-        add_config => 'push',
-    },
-);
-
 has mounts => (
     traits  => ['Hash'],
     isa     => 'HashRef[HashRef]',
@@ -69,38 +47,6 @@ has middleware => (
     },
 );
 
-sub has_any_config {
-    my $self = shift;
-    return any { $_->has_config }
-           grep { Moose::Util::does_role($_, __PACKAGE__) }
-           map { $_->meta }
-           $self->linearized_isa;
-}
-
-sub get_all_config {
-    my $self = shift;
-    return map { $_->config }
-           grep { Moose::Util::does_role($_, __PACKAGE__) }
-           map { $_->meta }
-           $self->linearized_isa;
-}
-
-sub has_any_components {
-    my $self = shift;
-    return any { $_->has_components }
-           grep { Moose::Util::does_role($_, __PACKAGE__) }
-           map { $_->meta }
-           $self->linearized_isa;
-}
-
-sub get_all_components {
-    my $self = shift;
-    return map { $_->components }
-           grep { Moose::Util::does_role($_, __PACKAGE__) }
-           map { $_->meta }
-           $self->linearized_isa;
-}
-
 sub has_router_config {
     my $self = shift;
     return any { $_->has_local_router_config }
@@ -112,7 +58,7 @@ sub has_router_config {
 sub full_router_config {
     my $self = shift;
 
-    my @router_configs = map { $_->router_config }
+    my @router_configs = map { $_->router_config->clone }
                          grep { $_->has_local_router_config }
                          grep { Moose::Util::does_role($_, __PACKAGE__) }
                          map { $_->meta }

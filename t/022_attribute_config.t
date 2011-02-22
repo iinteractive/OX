@@ -36,22 +36,26 @@ use Plack::Test;
     use OX;
 
     has bar => (
-        traits  => ['OX::Config'],
-        is      => 'ro',
-        isa     => 'Str',
-        default => 'BAR',
+        is    => 'ro',
+        isa   => 'Str',
+        value => 'BAR',
     );
 
-    component Model => 'Foo::Model', (
-        bar => depends_on('/Config/bar'),
+    has model => (
+        is           => 'ro',
+        isa          => 'Foo::Model',
+        dependencies => ['bar'],
     );
-    component Root => 'Foo::Root', (
-        model => depends_on('/Component/Model'),
+
+    has root => (
+        is           => 'ro',
+        isa          => 'Foo::Root',
+        dependencies => ['model'],
     );
 
     router as {
         route '/' => 'root.index';
-    }, (root => depends_on('/Component/Root'));
+    }, (root => depends_on('root'));
 }
 
 test_psgi

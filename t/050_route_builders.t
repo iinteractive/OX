@@ -77,11 +77,14 @@ use Plack::Test;
     package Foo;
     use OX;
 
-    component Root => 'Root';
+    has root => (
+        is  => 'ro',
+        isa => 'Root',
+    );
 
     router ['RouteBuilder::REST'], as {
         route '/' => 'root';
-    }, (root => depends_on('Component/Root'));
+    }, (root => depends_on('root'));
 }
 
 test_psgi

@@ -14,11 +14,14 @@ use Plack::Test;
     package Foo;
     use OX;
 
-    component Foo => 'Foo::Controller';
+    has foo => (
+        is  => 'ro',
+        isa => 'Foo::Controller',
+    );
 
     router as {
         route '/foo' => 'foo.foo';
-    }, (foo => depends_on('Component/Foo'));
+    }, (foo => depends_on('foo'));
 }
 
 {
@@ -33,12 +36,15 @@ use Plack::Test;
 
     extends 'Foo';
 
-    component Bar => 'Bar::Controller';
+    has bar => (
+        is  => 'ro',
+        isa => 'Bar::Controller',
+    );
 
     router as {
         route '/bar' => 'bar.bar';
         route '/baz' => 'foo.foo';
-    }, (bar => depends_on('Component/Bar'));
+    }, (bar => depends_on('bar'));
 }
 
 test_psgi

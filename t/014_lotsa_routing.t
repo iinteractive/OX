@@ -45,9 +45,20 @@ use Plack::Test;
     use OX;
     use Moose::Util::TypeConstraints qw(enum);
 
-    component Foo => 'Foo::Controller';
-    component Bar => 'Bar::Controller';
-    component Baz => 'Baz::Controller';
+    has foo => (
+        is  => 'ro',
+        isa => 'Foo::Controller',
+    );
+
+    has bar => (
+        is  => 'ro',
+        isa => 'Bar::Controller',
+    );
+
+    has baz => (
+        is  => 'ro',
+        isa => 'Baz::Controller',
+    );
 
     router as {
 
@@ -65,9 +76,9 @@ use Plack::Test;
         route '/controller/:controller'         => '_.index';
         route '/controller/:controller/:action' => '_._';
 
-    }, (foo => depends_on('Component/Foo'),
-        bar => depends_on('Component/Bar'),
-        baz => depends_on('Component/Baz'));
+    }, (foo => depends_on('foo'),
+        bar => depends_on('bar'),
+        baz => depends_on('baz'));
 }
 
 my %expected = (

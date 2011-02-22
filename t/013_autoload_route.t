@@ -17,13 +17,16 @@ use Plack::Test;
     package Foo;
     use OX;
 
-    component Foo => 'FooController';
+    has foo => (
+        is  => 'ro',
+        isa => 'FooController',
+    );
 
     router as {
         route '/:action' => 'foo._' => (
             action => { isa => 'Str' },
         );
-    }, (foo => depends_on('Component/Foo'));
+    }, (foo => depends_on('foo'));
 }
 
 test_psgi
@@ -57,13 +60,16 @@ test_psgi
     use OX;
     use Moose::Util::TypeConstraints qw(enum);
 
-    component Foo => 'FooController';
+    has foo => (
+        is  => 'ro',
+        isa => 'FooController',
+    );
 
     router as {
         route '/:action' => 'foo._' => (
             action => { isa => enum(['foo', 'bar', 'baz']) },
         );
-    }, (foo => depends_on('Component/Foo'));
+    }, (foo => depends_on('foo'));
 }
 
 test_psgi

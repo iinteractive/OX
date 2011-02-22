@@ -3,20 +3,34 @@ use OX;
 
 with 'OX::Role::WithAppRoot';
 
-config template_root => sub {
-    (shift)->param('app_root')->subdir(qw[ root templates ])
-}, (app_root => depends_on('/app_root'));
-
-component Counter => {
-    class     => 'Counter::Over::Engineered::Sugar::Model',
-    lifecycle => 'Singleton',
-};
-component TT => 'Counter::Over::Engineered::Sugar::View' => (
-    template_root => depends_on('/Config/template_root'),
+has template_root => (
+    is    => 'ro',
+    isa   => 'Str',
+    block => sub {
+        (shift)->param('app_root')->subdir(qw[ root templates ])
+    },
+    dependencies => ['app_root'],
 );
-component CounterController => 'Counter::Over::Engineered::Sugar::Controller' => (
-    view  => depends_on('/Component/TT'),
-    model => depends_on('/Component/Counter')
+
+has counter => (
+    is        => 'ro',
+    isa       => 'Counter::Over::Engineered::Sugar::Model',
+    lifecycle => 'Singleton',
+);
+
+has tt => (
+    is           => 'ro',
+    isa          => 'Counter::Over::Engineered::Sugar::View',
+    dependencies => ['template_root'],
+);
+
+has counter_controller => (
+    is           => 'ro',
+    isa          => 'Counter::Over::Engineered::Sugar::Controller',
+    dependencies => {
+        view  => 'tt',
+        model => 'counter',
+    },
 );
 
 router as {
@@ -27,9 +41,8 @@ router as {
     route '/set/:number' => 'root.set' => (
         number => { isa => 'Int' },
     );
-}, (root => depends_on('/Component/CounterController'));
+}, (root => depends_on('counter_controller'));
 
 no OX;
-1;
 
-__END__
+1;

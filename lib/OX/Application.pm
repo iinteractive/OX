@@ -1,20 +1,14 @@
 package OX::Application;
 use Moose;
+use Bread::Board::Declare;
+
 use Bread::Board;
 use Moose::Util::TypeConstraints
     qw(class_type subtype where match_on_type), as => { -as => 'mutc_as' };
-
 use Plack::App::Path::Router::PSGI;
 
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
-
-extends 'Bread::Board::Container';
-
-has '+name' => (
-    lazy    => 1,
-    default => sub { shift->meta->name },
-);
 
 has _app => (
     is  => 'rw',
