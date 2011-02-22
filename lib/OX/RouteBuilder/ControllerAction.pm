@@ -23,7 +23,7 @@ sub compile_routes {
         target      => sub {
             my ($req) = @_;
 
-            my %match = %{ $req->env->{'plack.router.match'}->mapping };
+            my %match = $req->mapping;
             my $c = $match{controller};
             my $a = $match{action};
 

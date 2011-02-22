@@ -27,7 +27,7 @@ use Plack::Test;
             target      => sub {
                 my ($req) = @_;
 
-                my %match = %{ $req->env->{'plack.router.match'}->mapping };
+                my %match = $req->mapping;
                 my $a = $match{action};
                 my $component = $s->get_dependency($a)->get;
                 my $method = lc($req->method);

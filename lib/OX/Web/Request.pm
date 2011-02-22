@@ -15,6 +15,13 @@ sub BUILDARGS {
 
 sub router { (shift)->env->{'ox.router'} }
 
+sub mapping {
+    my $self = shift;
+    my $match = $self->env->{'plack.router.match'};
+    return unless $match;
+    return %{ $match->mapping };
+}
+
 sub uri_for {
     my ($self, $route) = @_;
     my $uri_base = $self->script_name || '/';
