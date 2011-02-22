@@ -1,6 +1,5 @@
 package OX::Role::RouteBuilder;
 use Moose::Role;
-use Bread::Board;
 
 sub configure_router {
     my ($self, $s, $router) = @_;
@@ -43,7 +42,6 @@ sub configure_router {
     }
 }
 
-no Bread::Board;
 no Moose::Role;
 
 1;
