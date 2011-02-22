@@ -2,6 +2,7 @@ package Counter;
 use Moose;
 
 extends 'OX::Application';
+with 'OX::Role::Path::Router';
 
 has 'count' => (
     traits  => [ 'Counter' ],

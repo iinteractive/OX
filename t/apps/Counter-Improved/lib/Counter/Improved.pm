@@ -4,7 +4,7 @@ use Bread::Board;
 
 extends 'OX::Application';
 
-with 'OX::Role::WithAppRoot';
+with 'OX::Role::WithAppRoot', 'OX::Role::Path::Router';
 
 has 'count' => (
     traits  => [ 'Counter' ],

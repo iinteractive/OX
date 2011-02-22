@@ -11,6 +11,7 @@ use HTTP::Request;
     use Moose;
 
     extends 'OX::Application';
+    with 'OX::Role::Path::Router';
 
     sub configure_router {
         my ($self, $s, $router) = @_;

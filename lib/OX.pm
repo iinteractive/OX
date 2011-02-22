@@ -21,7 +21,11 @@ my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
         class => ['OX::Meta::Role::Class',
                   'OX::Meta::Role::Class::RouteBuilder'],
     },
-    base_class_roles => ['OX::Role::Object', 'OX::Role::RouteBuilder'],
+    base_class_roles => [
+        'OX::Role::Object',
+        'OX::Role::RouteBuilder',
+        'OX::Role::Path::Router',
+    ],
 );
 
 sub init_meta {

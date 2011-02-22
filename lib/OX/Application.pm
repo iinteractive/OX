@@ -30,8 +30,6 @@ has middleware => (
     },
 );
 
-sub router_class { 'OX::Router' }
-
 sub BUILD {
     my $self = shift;
     container $self => as {
@@ -83,17 +81,13 @@ sub BUILD {
     };
 }
 
+sub router_class { die "No router_class specified" }
+sub app_from_router {
+    die "You must override app_from_router to specify how to create a PSGI"
+      . " app from your router object";
+}
 sub router_dependencies { [] }
 sub configure_router { }
-sub app_from_router {
-    my $self = shift;
-    my ($router) = @_;
-
-    require Plack::App::Path::Router::PSGI;
-    return Plack::App::Path::Router::PSGI->new(
-        router => $router,
-    )->to_app;
-}
 
 # can't use 'router', since that's used as a keyword
 sub get_router { shift->resolve(service => 'Router/router') }

@@ -10,6 +10,7 @@ use Plack::Test;
     use Moose;
     use Bread::Board;
     extends 'OX::Application';
+    with 'OX::Role::Path::Router';
 
     sub router_class { 'Path::Router' }
 

@@ -4,7 +4,9 @@ use Bread::Board;
 
 extends 'OX::Application';
 
-with 'OX::Role::WithAppRoot', 'OX::Role::RouteBuilder';
+with 'OX::Role::WithAppRoot',
+     'OX::Role::RouteBuilder',
+     'OX::Role::Path::Router';
 
 sub BUILD {
     my $self = shift;
