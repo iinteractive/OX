@@ -1,4 +1,4 @@
-package OX::Router::Route;
+package OX::Router::Path::Router::Route;
 use Moose;
 
 use OX::Web::Request;

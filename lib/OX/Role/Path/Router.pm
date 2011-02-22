@@ -3,7 +3,7 @@ use Moose::Role;
 
 use Plack::App::Path::Router::PSGI;
 
-sub router_class { 'OX::Router' }
+sub router_class { 'OX::Router::Path::Router' }
 
 sub app_from_router {
     my $self = shift;

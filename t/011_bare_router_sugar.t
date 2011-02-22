@@ -63,7 +63,7 @@ use Path::Router;
 {
     package Baz::Router;
     use Moose;
-    extends 'OX::Router';
+    extends 'OX::Router::Path::Router';
 
     sub BUILD {
         my $self = shift;
