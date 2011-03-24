@@ -3,12 +3,13 @@ use Moose::Role;
 use Bread::Board::Declare; # XXX: OX::Role?
 
 use Class::Inspector;
-use Path::Class;
+use MooseX::Types::Path::Class;
 
 has app_root => (
-    is    => 'ro',
-    isa   => 'Str',
-    block => sub {
+    is     => 'ro',
+    isa    => 'Path::Class::Dir',
+    coerce => 1,
+    block  => sub {
         my ($s, $self) = @_;
         my $class = $self->meta->name;
         my $root  = file(Class::Inspector->resolved_filename($class));
