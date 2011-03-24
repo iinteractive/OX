@@ -4,6 +4,7 @@ use Bread::Board::Declare; # XXX: OX::Role?
 
 use Class::Inspector;
 use MooseX::Types::Path::Class;
+use Path::Class;
 
 has app_root => (
     is     => 'ro',
