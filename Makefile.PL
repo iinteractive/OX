@@ -21,5 +21,6 @@ build_requires 'Test::Exception' => '0.21';
 tests('t/*.t');
 author_tests('t/author/*.t');
 
+auto_install;
 WriteAll();
 
