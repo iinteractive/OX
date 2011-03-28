@@ -1,12 +1,15 @@
 package Counter::Over::Engineered::Sugar;
 use OX;
 
+use MooseX::Types::Path::Class;
+
 with 'OX::Role::WithAppRoot';
 
 has template_root => (
-    is    => 'ro',
-    isa   => 'Path::Class::Dir',
-    block => sub {
+    is     => 'ro',
+    isa    => 'Path::Class::Dir',
+    coerce => 1,
+    block  => sub {
         (shift)->param('app_root')->subdir(qw[ root templates ])
     },
     dependencies => ['app_root'],
