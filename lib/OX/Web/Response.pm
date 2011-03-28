@@ -2,9 +2,6 @@ package OX::Web::Response;
 use Moose;
 use MooseX::NonMoose;
 
-our $VERSION   = '0.01';
-our $AUTHORITY = 'cpan:STEVAN';
-
 extends 'Plack::Response';
 
 sub BUILDARGS {

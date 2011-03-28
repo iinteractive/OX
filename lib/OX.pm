@@ -1,9 +1,6 @@
 package OX;
 use Moose::Exporter;
 
-our $VERSION   = '0.01';
-our $AUTHORITY = 'cpan:STEVAN';
-
 use Bread::Board ();
 use Bread::Board::Declare ();
 use Scalar::Util qw(blessed);

@@ -4,9 +4,6 @@ use MooseX::NonMoose;
 
 use OX::Web::Response;
 
-our $VERSION   = '0.01';
-our $AUTHORITY = 'cpan:STEVAN';
-
 extends 'Plack::Request';
 
 sub BUILDARGS {

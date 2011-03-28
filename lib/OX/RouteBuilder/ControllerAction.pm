@@ -1,9 +1,6 @@
 package OX::RouteBuilder::ControllerAction;
 use Moose;
 
-our $VERSION   = '0.01';
-our $AUTHORITY = 'cpan:STEVAN';
-
 with 'OX::RouteBuilder';
 
 sub compile_routes {

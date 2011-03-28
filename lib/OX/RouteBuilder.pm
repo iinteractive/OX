@@ -1,9 +1,6 @@
 package OX::RouteBuilder;
 use Moose::Role;
 
-our $VERSION   = '0.01';
-our $AUTHORITY = 'cpan:STEVAN';
-
 has 'path' => (
     is       => 'ro',
     isa      => 'Str',

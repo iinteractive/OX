@@ -6,9 +6,6 @@ use Bread::Board;
 use Moose::Util::TypeConstraints
     qw(class_type subtype where match_on_type), as => { -as => 'mutc_as' };
 
-our $VERSION   = '0.01';
-our $AUTHORITY = 'cpan:STEVAN';
-
 has _app => (
     is  => 'rw',
     isa => 'CodeRef'
