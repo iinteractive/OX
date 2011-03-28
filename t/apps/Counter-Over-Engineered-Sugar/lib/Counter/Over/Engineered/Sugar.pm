@@ -5,7 +5,7 @@ with 'OX::Role::WithAppRoot';
 
 has template_root => (
     is    => 'ro',
-    isa   => 'Str',
+    isa   => 'Path::Class::Dir',
     block => sub {
         (shift)->param('app_root')->subdir(qw[ root templates ])
     },
