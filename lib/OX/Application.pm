@@ -122,9 +122,22 @@ sub call {
     my ($self, $env) = @_;
     my $res = $self->_app->( $env );
 
-    Plack::Util::response_cb($res, sub {
-        $self->_flush_request_services();
-    });
+    # flush all services that are request-scoped
+    # after the response is returned
+    my $flush_callback = sub {
+        my $content = shift;
+
+        $self->_flush_request_services
+            unless defined $content;
+
+        return $content;
+    };
+
+    Plack::Util::response_cb(
+        $res, sub { $flush_callback }
+    );
+
+    return $res;
 }
 
 sub to_app {
