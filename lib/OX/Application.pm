@@ -99,7 +99,6 @@ sub _flush_request_services {
     foreach my $service (@services) {
         my $injection = $self->get_service($service);
         if ($injection->does('Bread::Board::LifeCycle::Request')) {
-            warn "FLUSHING " . $injection->instance;
             $injection->flush_instance;
         }
     }
