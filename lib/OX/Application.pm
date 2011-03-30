@@ -1,6 +1,7 @@
 package OX::Application;
 use Moose;
 use Bread::Board::Declare;
+use Plack::Util;
 
 use Bread::Board;
 use Moose::Util::TypeConstraints
@@ -78,13 +79,7 @@ sub BUILD {
                     );
                 }
 
-                # clear service instances that are request-scoped
-                return sub {
-                    my $response = $app->(@_);
-                    $self->_flush_request_services;
-                    return $response;
-                };
-
+                return $app;
             },
             dependencies => ['Router/router'],
         );
@@ -125,7 +120,11 @@ sub prepare_app {
 
 sub call {
     my ($self, $env) = @_;
-    $self->_app->( $env );
+    my $res = $self->_app->( $env );
+
+    Plack::Util::response_cb($res, sub {
+        $self->_flush_request_services();
+    });
 }
 
 sub to_app {
