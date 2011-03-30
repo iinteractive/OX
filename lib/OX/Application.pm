@@ -78,13 +78,33 @@ sub BUILD {
                     );
                 }
 
-                return $app;
+                # clear service instances that are request-scoped
+                return sub {
+                    my $response = $app->(@_);
+                    $self->_flush_request_services;
+                    return $response;
+                };
+
             },
             dependencies => ['Router/router'],
         );
 
     };
 }
+
+sub _flush_request_services {
+    my $self = shift;
+    my @services = $self->get_service_list;
+
+    foreach my $service (@services) {
+        my $injection = $self->get_service($service);
+        if ($injection->does('Bread::Board::LifeCycle::Request')) {
+            warn "FLUSHING " . $injection->instance;
+            $injection->flush_instance;
+        }
+    }
+}
+
 
 sub router_class { die "No router_class specified" }
 sub app_from_router {

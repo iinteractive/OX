@@ -5,6 +5,8 @@ use Bread::Board ();
 use Bread::Board::Declare ();
 use Scalar::Util qw(blessed);
 
+use Bread::Board::LifeCycle::Request;
+
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
     with_meta => [qw(router route mount wrap xo)],
