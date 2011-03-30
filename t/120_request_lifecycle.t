@@ -24,7 +24,16 @@ my $n = 0;
         required => 1,
     );
 
-    sub index { $n }
+    has thing2 => (
+        is       => 'ro',
+        isa      => 'Thing',
+        required => 1,
+    );
+
+    sub index {
+        my $self = shift;
+        $self->thing == $self->thing2 ? "$n 1" : "$n 0";
+    }
 }
 
 {
@@ -39,8 +48,10 @@ my $n = 0;
     has root => (
         is           => 'ro',
         isa          => 'Foo::Root',
-        lifecycle    => 'Request',
-        dependencies => ['thing'],
+        dependencies => {
+            thing  => 'thing',
+            thing2 => 'thing',
+        },
     );
 
     router as {
@@ -55,7 +66,7 @@ test_psgi
         for (1 .. 2) {
             my $req = HTTP::Request->new(GET => "http://localhost");
             my $res = $cb->($req);
-            is($res->content, $_);
+            is($res->content, "$_ 1");
         }
     };
 
