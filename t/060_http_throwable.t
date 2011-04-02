@@ -35,7 +35,6 @@ use Try::Tiny;
     }, (controller => depends_on('controller'));
 }
 
-my $stacktrace;
 my $app = sub {
     my $env = shift;
     return try {
