@@ -6,6 +6,7 @@ use Plack::Util;
 use Bread::Board;
 use Moose::Util::TypeConstraints
     qw(class_type subtype where match_on_type), as => { -as => 'mutc_as' };
+use Try::Tiny;
 
 has _app => (
     is  => 'rw',
@@ -59,7 +60,18 @@ sub BUILD {
                     my $env = shift;
                     $env->{'ox.router'} = $router;
                     # ...?
-                    $_app->($env);
+                    try {
+                        return $_app->($env);
+                    }
+                    catch {
+                        if (blessed($_)
+                         && Moose::Util::does_role($_, 'HTTP::Throwable')) {
+                            return $_->as_psgi;
+                        }
+                        else {
+                            die $_;
+                        }
+                    };
                 };
 
                 for my $middleware ($self->middleware) {
