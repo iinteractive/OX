@@ -50,7 +50,10 @@ after prepare_app => sub {
             my %params;
             for my $dep_name (keys %deps) {
                 my $dep = $deps{$dep_name};
-                if ($dep->isa('Bread::Board::Dependency')) {
+                if (!ref($dep)) {
+                    $params{$dep_name} = $self->fetch($dep)->get;
+                }
+                elsif ($dep->isa('Bread::Board::Dependency')) {
                     $params{$dep_name} = $self->fetch($deps{$dep_name}->service_path)->get;
                 }
                 elsif ($dep->does('Bread::Board::Service')) {
