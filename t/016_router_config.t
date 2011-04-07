@@ -39,7 +39,7 @@ use Plack::Test;
                         }
                     },
                     dependencies => {
-                        root => depends_on('../root')
+                        root => '../root',
                     }
                 );
             };

@@ -55,7 +55,7 @@ use Plack::Test;
 
     router as {
         route '/' => 'root.index';
-    }, (root => depends_on('root'));
+    }, (root => 'root');
 }
 
 test_psgi

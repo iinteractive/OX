@@ -84,7 +84,7 @@ use Plack::Test;
 
     router ['RouteBuilder::REST'], as {
         route '/' => 'root';
-    }, (root => depends_on('root'));
+    }, (root => 'root');
 }
 
 test_psgi

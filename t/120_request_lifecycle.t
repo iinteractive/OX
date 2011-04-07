@@ -56,7 +56,7 @@ my $n = 0;
 
     router as {
         route '/' => 'root.index'
-    }, (root => depends_on('root'));
+    }, (root => 'root');
 }
 
 test_psgi

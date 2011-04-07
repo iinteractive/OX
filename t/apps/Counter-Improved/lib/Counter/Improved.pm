@@ -29,7 +29,7 @@ sub BUILD {
                         block => sub {
                             (shift)->param('app_root')->subdir(qw[ root templates ])
                         },
-                        dependencies => [ depends_on('/app_root') ]
+                        dependencies => [ '/app_root' ]
                     ))
                 }
             );
@@ -87,7 +87,7 @@ sub configure_router {
 }
 
 sub router_dependencies {
-    +{ view => depends_on('/View/TT') }
+    +{ view => '/View/TT' }
 }
 
 no Moose; no Bread::Board; 1;

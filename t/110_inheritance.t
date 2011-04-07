@@ -21,7 +21,7 @@ use Plack::Test;
 
     router as {
         route '/foo' => 'foo.foo';
-    }, (foo => depends_on('foo'));
+    }, (foo => 'foo');
 }
 
 {
@@ -44,7 +44,7 @@ use Plack::Test;
     router as {
         route '/bar' => 'bar.bar';
         route '/baz' => 'foo.foo';
-    }, (bar => depends_on('bar'));
+    }, (bar => 'bar');
 }
 
 test_psgi

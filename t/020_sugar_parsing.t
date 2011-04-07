@@ -55,7 +55,7 @@ use Test::Fatal;
         isa          => 'Str',
         block        => sub { shift->param('template_root') },
         dependencies => {
-            template_root => depends_on('template_root3'),
+            template_root => 'template_root3',
         },
         lifecycle    => 'Singleton',
     );

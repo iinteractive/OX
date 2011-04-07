@@ -47,7 +47,7 @@ use HTTP::Request;
     router as {
         route '/'    => 'root.index';
         route '/foo' => 'root.foo';
-    }, ('root' => depends_on('root'));
+    }, ('root' => 'root');
 }
 
 {
@@ -65,9 +65,9 @@ use HTTP::Request;
         route '/foo' => 'root.foo';
 
         mount '/baz' => 'Baz' => (
-            root => depends_on('root'),
+            root => 'root',
         );
-    }, ('root' => depends_on('root'));
+    }, ('root' => 'root');
 }
 
 {
@@ -85,9 +85,9 @@ use HTTP::Request;
         route '/foo' => 'root.foo';
 
         mount '/bar' => 'Bar' => (
-            root => depends_on('root'),
+            root => 'root',
         );
-    }, ('root' => depends_on('root'));
+    }, ('root' => 'root');
 }
 
 test_psgi

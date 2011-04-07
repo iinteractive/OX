@@ -28,7 +28,7 @@ sub BUILD {
                         block => sub {
                             (shift)->param('app_root')->subdir(qw[ root templates ])
                         },
-                        dependencies => [ depends_on('/app_root') ]
+                        dependencies => [ '/app_root' ]
                     ))
                 }
             );
@@ -38,8 +38,8 @@ sub BUILD {
             service 'Root' => (
                 class        => 'Counter::Over::Engineered::Controller',
                 dependencies => {
-                    view  => depends_on('/View/TT'),
-                    model => depends_on('/Model/Counter')
+                    view  => '/View/TT',
+                    model => '/Model/Counter',
                 }
             );
         };
@@ -72,7 +72,7 @@ sub BUILD {
                     }
                 },
                 dependencies => {
-                    root => depends_on('/Controller/Root')
+                    root => '/Controller/Root',
                 }
             );
         };

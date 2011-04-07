@@ -45,7 +45,7 @@ use OX::Web::Request;
     );
 
     router 'Foo::Router' => (
-        model => depends_on('model'),
+        model => 'model',
     );
 
     sub app_from_router {

@@ -44,7 +44,7 @@ router as {
     route '/set/:number' => 'root.set' => (
         number => { isa => 'Int' },
     );
-}, (root => depends_on('counter_controller'));
+}, (root => 'counter_controller');
 
 no OX;
 

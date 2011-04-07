@@ -76,9 +76,9 @@ use Plack::Test;
         route '/controller/:controller'         => '_.index';
         route '/controller/:controller/:action' => '_._';
 
-    }, (foo => depends_on('foo'),
-        bar => depends_on('bar'),
-        baz => depends_on('baz'));
+    }, (foo => 'foo',
+        bar => 'bar',
+        baz => 'baz');
 }
 
 my %expected = (
