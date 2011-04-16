@@ -28,12 +28,9 @@ has tt => (
 );
 
 has counter_controller => (
-    is           => 'ro',
-    isa          => 'Counter::Over::Engineered::Sugar::Controller',
-    dependencies => {
-        view  => 'tt',
-        model => 'counter',
-    },
+    is    => 'ro',
+    isa   => 'Counter::Over::Engineered::Sugar::Controller',
+    infer => 1,
 );
 
 router as {

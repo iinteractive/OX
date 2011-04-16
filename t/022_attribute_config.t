@@ -48,9 +48,9 @@ use Plack::Test;
     );
 
     has root => (
-        is           => 'ro',
-        isa          => 'Foo::Root',
-        dependencies => ['model'],
+        is    => 'ro',
+        isa   => 'Foo::Root',
+        infer => 1,
     );
 
     router as {

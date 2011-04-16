@@ -46,12 +46,9 @@ my $n = 0;
         lifecycle => 'Request',
     );
     has root => (
-        is           => 'ro',
-        isa          => 'Foo::Root',
-        dependencies => {
-            thing  => 'thing',
-            thing2 => 'thing',
-        },
+        is    => 'ro',
+        isa   => 'Foo::Root',
+        infer => 1,
     );
 
     router as {
