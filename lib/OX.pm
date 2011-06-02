@@ -10,11 +10,7 @@ use Bread::Board::LifeCycle::Request;
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
     with_meta => [qw(router route mount wrap xo)],
-    as_is     => [
-        'service',
-        \&Bread::Board::depends_on,
-        \&Bread::Board::as,
-    ],
+    as_is     => [qw(service as)],
     install => [qw(import unimport)],
     class_metaroles => {
         class => ['OX::Meta::Role::Class',
@@ -43,6 +39,8 @@ sub init_meta {
         return Bread::Board::service($name, @_);
     }
 }
+
+sub as (&) { $_[0] }
 
 sub _fix_router_dependencies {
     my ($router_service) = @_;
