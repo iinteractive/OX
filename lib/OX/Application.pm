@@ -23,7 +23,8 @@ subtype 'OX::Types::Middleware',
 has middleware => (
     traits  => ['Array'],
     isa     => 'ArrayRef[OX::Types::Middleware]',
-    default => sub { [] },
+    lazy    => 1,
+    builder => 'build_middleware',
     handles => {
         middleware => 'elements',
     },
@@ -119,6 +120,7 @@ sub app_from_router {
 }
 sub router_dependencies { [] }
 sub configure_router { }
+sub build_middleware { [] }
 
 # can't use 'router', since that's used as a keyword
 sub get_router { shift->resolve(service => 'Router/router') }

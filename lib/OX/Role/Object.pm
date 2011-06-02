@@ -76,13 +76,12 @@ after prepare_app => sub {
     $self->_app($urlmap->to_app);
 };
 
-around middleware => sub {
+around build_middleware => sub {
     my $orig = shift;
     my $self = shift;
-    return (
-        $self->meta->middleware,
-        $self->$orig(@_),
-    );
+    my $ret = $self->$orig(@_);
+    unshift @$ret, $self->meta->middleware;
+    return $ret;
 };
 
 no Moose::Role;

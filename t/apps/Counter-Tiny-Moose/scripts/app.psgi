@@ -12,21 +12,22 @@ has counter => (
     },
 );
 
-has '+middleware' => (
-    default => sub {
-        my $self = shift;
-        return [
-            sub {
-                my $app = shift;
-                return sub {
-                    my $env = shift;
-                    $env->{'ox.app'} = $self;
-                    $app->($env);
-                };
-            }
-        ]
-    },
-);
+# XXX can't use wrap here because i need access to $self - can something
+# be done about this?
+around build_middleware => sub {
+    my $orig = shift;
+    my $self = shift;
+    my $middleware = $self->$orig(@_);
+    push @$middleware, sub {
+        my $app = shift;
+        return sub {
+            my $env = shift;
+            $env->{'ox.app'} = $self;
+            $app->($env);
+        };
+    };
+    return $middleware;
+};
 
 router as {
     route '/'         => sub { $_[0]->env->{'ox.app'}->counter        };
