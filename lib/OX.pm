@@ -44,6 +44,9 @@ sub as (&) { $_[0] }
 
 sub _fix_dependencies {
     my ($service) = @_;
+
+    return unless $service->does('Bread::Board::Service::WithDependencies');
+
     for my $dep_name (keys %{ $service->dependencies }) {
         my $dep = $service->get_dependency($dep_name);
         if ($dep->has_service_path && $dep->service_path !~ m+^/+) {
@@ -149,20 +152,34 @@ sub mount {
         my $name = '_mw' . $count++;
 
         my $service;
-        if (ref $middleware) {
-            $service = Bread::Board::Literal->new(
-                name  => $name,
-                value => $middleware,
-            );
-        }
-        else {
+        if (!ref $middleware) {
             $service = Bread::Board::ConstructorInjection->new(
                 name         => $name,
                 class        => $middleware,
                 dependencies => \%deps,
             );
-            _fix_dependencies($service);
         }
+        elsif (ref($middleware) eq 'CODE') {
+            $service = Bread::Board::BlockInjection->new(
+                name => $name,
+                block => sub {
+                    my $s = shift;
+                    return sub {
+                        my $app = shift;
+                        return $middleware->($app, $s);
+                    };
+                },
+                dependencies => \%deps,
+            );
+        }
+        else {
+            $service = Bread::Board::Literal->new(
+                name  => $name,
+                value => $middleware,
+            );
+        }
+
+        _fix_dependencies($service);
 
         $meta->add_middleware($service);
     }
