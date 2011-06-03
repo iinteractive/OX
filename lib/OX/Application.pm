@@ -42,7 +42,9 @@ sub BUILD {
                     my $s      = shift;
                     my $router_class = $self->router_class;
                     Class::MOP::load_class($router_class);
-                    my $router = $router_class->new;
+                    my $router = $router_class->new(
+                        request_class => $self->request_class
+                    );
                     $self->configure_router( $s, $router );
                     $router;
                 },
@@ -50,18 +52,6 @@ sub BUILD {
             );
 
         };
-
-        service Request => (
-            block => sub {
-                my $s = shift;
-                my $request_class = $self->request_class;
-                Class::MOP::load_class($request_class);
-                return $request_class->new($s->param('env'));
-            },
-            parameters => {
-                env => { isa => 'HashRef' },
-            },
-        );
 
         service App => (
             block        => sub {
@@ -77,7 +67,6 @@ sub BUILD {
                         my $app = shift;
                         return sub {
                             my $env = shift;
-                            $env->{'ox.application'} = $self;
                             $env->{'ox.router'} = $router;
                             $app->($env);
                         }
@@ -134,12 +123,6 @@ sub build_middleware { [] }
 
 # can't use 'router', since that's used as a keyword
 sub get_router { shift->resolve(service => 'Router/router') }
-
-sub new_request {
-    my $self = shift;
-    my ($env) = @_;
-    return $self->resolve(service => 'Request', parameters => { env => $env });
-}
 
 # ... Plack::Component API
 

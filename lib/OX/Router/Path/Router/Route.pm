@@ -3,17 +3,18 @@ use Moose;
 
 extends 'Path::Router::Route';
 
-around BUILDARGS => sub {
-    my $orig = shift;
-    my $class = shift;
+has '+target' => (
+    writer => '_set_target',
+);
 
-    my $args = $class->$orig(@_);
+sub BUILD {
+    my $self = shift;
 
-    if (exists $args->{target}) {
-        my $target = $args->{target};
-        $args->{target} = sub {
+    if ($self->has_target) {
+        my $target = $self->target;
+        $self->_set_target(sub {
             my $env = shift;
-            my $req = $env->{'ox.application'}->new_request($env);
+            my $req = $env->{'plack.router'}->new_request($env);
 
             my $res = $target->($req, @{ $env->{'plack.router.match.args'} });
 
@@ -26,11 +27,9 @@ around BUILDARGS => sub {
             else {
                 return $res;
             }
-        };
+        });
     }
-
-    return $args;
-};
+}
 
 __PACKAGE__->meta->make_immutable;
 no Moose;
