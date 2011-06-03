@@ -59,8 +59,6 @@ sub BUILD {
 
                 my $app = sub {
                     my $env = shift;
-                    $env->{'ox.router'} = $router;
-                    # ...?
                     try {
                         return $_app->($env);
                     }
@@ -92,7 +90,11 @@ sub BUILD {
                     );
                 }
 
-                return $app;
+                return sub {
+                    my $env = shift;
+                    $env->{'ox.router'} = $router;
+                    $app->($env);
+                };
             },
             dependencies => ['Router/router'],
         );
