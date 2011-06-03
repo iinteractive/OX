@@ -27,6 +27,13 @@ sub BUILD {
                     $c->add_service($config);
                 }
             };
+
+            container 'Middleware' => as {
+                my $c = shift;
+                for my $service ($meta->middleware) {
+                    $c->add_service($service->clone);
+                }
+            };
         }
 
     };
@@ -80,7 +87,8 @@ around build_middleware => sub {
     my $orig = shift;
     my $self = shift;
     my $ret = $self->$orig(@_);
-    unshift @$ret, $self->meta->middleware;
+    unshift @$ret, map { $self->resolve(service => 'Middleware/' . $_->name) }
+                       $self->meta->middleware;
     return $ret;
 };
 

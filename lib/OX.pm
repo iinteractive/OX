@@ -42,12 +42,12 @@ sub init_meta {
 
 sub as (&) { $_[0] }
 
-sub _fix_router_dependencies {
-    my ($router_service) = @_;
-    for my $dep_name (keys %{ $router_service->dependencies }) {
-        my $dep = $router_service->get_dependency($dep_name);
+sub _fix_dependencies {
+    my ($service) = @_;
+    for my $dep_name (keys %{ $service->dependencies }) {
+        my $dep = $service->get_dependency($dep_name);
         if ($dep->has_service_path && $dep->service_path !~ m+^/+) {
-            $router_service->add_dependency(
+            $service->add_dependency(
                 $dep_name => $dep->clone(
                     service_path => '../' . $dep->service_path,
                 )
@@ -73,7 +73,7 @@ sub router {
             class        => $body,
             dependencies => \%params,
         );
-        _fix_router_dependencies($service);
+        _fix_dependencies($service);
         $meta->router($service);
     }
     elsif (ref($body) eq 'CODE') {
@@ -91,7 +91,7 @@ sub router {
             block        => sub { $routes },
             dependencies => \%params,
         );
-        _fix_router_dependencies($router_config);
+        _fix_dependencies($router_config);
         $meta->router_config($router_config);
     }
     elsif (blessed($body)) {
@@ -140,9 +140,32 @@ sub mount {
     }
 }
 
-sub wrap {
-    my $meta = shift;
-    $meta->add_middleware($_[0]);
+{
+    my $count = 0;
+    sub wrap {
+        my $meta = shift;
+        my ($middleware, %deps) = @_;
+
+        my $name = '_mw' . $count++;
+
+        my $service;
+        if (ref $middleware) {
+            $service = Bread::Board::Literal->new(
+                name  => $name,
+                value => $middleware,
+            );
+        }
+        else {
+            $service = Bread::Board::ConstructorInjection->new(
+                name         => $name,
+                class        => $middleware,
+                dependencies => \%deps,
+            );
+            _fix_dependencies($service);
+        }
+
+        $meta->add_middleware($service);
+    }
 }
 
 sub xo {

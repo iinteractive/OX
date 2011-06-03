@@ -39,7 +39,7 @@ has mounts => (
 
 has middleware => (
     traits => ['Array'],
-    isa     => 'ArrayRef',
+    isa     => 'ArrayRef[Bread::Board::Service]',
     default => sub { [] },
     handles => {
         add_middleware => 'push',
@@ -76,8 +76,8 @@ sub full_router_config {
 before add_middleware => sub {
     my $self = shift;
     my ($middleware) = @_;
-    Class::MOP::load_class($middleware)
-        unless ref($middleware);
+    Class::MOP::load_class($middleware->class)
+        if $middleware->does('Bread::Board::Service::WithClass');
 };
 
 no Moose::Role;
