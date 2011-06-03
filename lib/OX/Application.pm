@@ -51,6 +51,18 @@ sub BUILD {
 
         };
 
+        service Request => (
+            block => sub {
+                my $s = shift;
+                my $request_class = $self->request_class;
+                Class::MOP::load_class($request_class);
+                return $request_class->new($s->param('env'));
+            },
+            parameters => {
+                env => { isa => 'HashRef' },
+            },
+        );
+
         service App => (
             block        => sub {
                 my $s = shift;
@@ -65,6 +77,7 @@ sub BUILD {
                         my $app = shift;
                         return sub {
                             my $env = shift;
+                            $env->{'ox.application'} = $self;
                             $env->{'ox.router'} = $router;
                             $app->($env);
                         }
@@ -110,6 +123,7 @@ sub _flush_request_services {
 
 
 sub router_class { die "No router_class specified" }
+sub request_class { 'OX::Web::Request' }
 sub app_from_router {
     die "You must override app_from_router to specify how to create a PSGI"
       . " app from your router object";
@@ -120,6 +134,12 @@ sub build_middleware { [] }
 
 # can't use 'router', since that's used as a keyword
 sub get_router { shift->resolve(service => 'Router/router') }
+
+sub new_request {
+    my $self = shift;
+    my ($env) = @_;
+    return $self->resolve(service => 'Request', parameters => { env => $env });
+}
 
 # ... Plack::Component API
 

@@ -1,8 +1,6 @@
 package OX::Router::Path::Router::Route;
 use Moose;
 
-use OX::Web::Request;
-
 extends 'Path::Router::Route';
 
 around BUILDARGS => sub {
@@ -15,7 +13,7 @@ around BUILDARGS => sub {
         my $target = $args->{target};
         $args->{target} = sub {
             my $env = shift;
-            my $req = OX::Web::Request->new($env);
+            my $req = $env->{'ox.application'}->new_request($env);
 
             my $res = $target->($req, @{ $env->{'plack.router.match.args'} });
 
