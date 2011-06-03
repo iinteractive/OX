@@ -6,6 +6,7 @@ use Plack::Util;
 use Bread::Board;
 use Moose::Util::TypeConstraints
     qw(class_type subtype where match_on_type), as => { -as => 'mutc_as' };
+use Plack::Middleware::HTTPExceptions;
 use Try::Tiny;
 
 has _app => (
@@ -55,25 +56,22 @@ sub BUILD {
                 my $s = shift;
 
                 my $router = $s->param('router');
-                my $_app = $self->app_from_router($router);
+                my $app = $self->app_from_router($router);
 
-                my $app = sub {
-                    my $env = shift;
-                    try {
-                        return $_app->($env);
-                    }
-                    catch {
-                        if (blessed($_)
-                         && Moose::Util::does_role($_, 'HTTP::Throwable')) {
-                            return $_->as_psgi;
+                my @middleware = (
+                    $self->middleware,
+                    Plack::Middleware::HTTPExceptions->new(rethrow => 1),
+                    sub {
+                        my $app = shift;
+                        return sub {
+                            my $env = shift;
+                            $env->{'ox.router'} = $router;
+                            $app->($env);
                         }
-                        else {
-                            die $_;
-                        }
-                    };
-                };
+                    },
+                );
 
-                for my $middleware ($self->middleware) {
+                for my $middleware (@middleware) {
                     match_on_type $middleware => (
                         'CodeRef' => sub {
                             $app = $middleware->($app);
@@ -90,11 +88,7 @@ sub BUILD {
                     );
                 }
 
-                return sub {
-                    my $env = shift;
-                    $env->{'ox.router'} = $router;
-                    $app->($env);
-                };
+                return $app;
             },
             dependencies => ['Router/router'],
         );
