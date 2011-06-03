@@ -123,7 +123,7 @@ sub _flush_request_services {
 
 
 sub router_class { die "No router_class specified" }
-sub request_class { 'OX::Web::Request' }
+sub request_class { 'OX::Request' }
 sub app_from_router {
     die "You must override app_from_router to specify how to create a PSGI"
       . " app from your router object";

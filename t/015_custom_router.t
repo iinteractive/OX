@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use Plack::Test;
 
-use OX::Web::Request;
+use OX::Request;
 
 {
     package Foo::Model;
@@ -52,7 +52,7 @@ use OX::Web::Request;
         my $self = shift;
         my ($router) = @_;
         return sub {
-            my $req = OX::Web::Request->new(shift);
+            my $req = OX::Request->new(shift);
             [200, [], [$req->router->model->val . ': ' . $req->path]];
         };
     }

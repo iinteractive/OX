@@ -1,11 +1,34 @@
-package OX::Web::Response;
+package OX::Request;
 use Moose;
 use MooseX::NonMoose;
 
-extends 'Plack::Response';
+use OX::Response;
+
+extends 'Plack::Request';
 
 sub BUILDARGS {
     return {};
+}
+
+sub router { (shift)->env->{'ox.router'} }
+
+sub mapping {
+    my $self = shift;
+    my $match = $self->env->{'plack.router.match'};
+    return unless $match;
+    return %{ $match->mapping };
+}
+
+sub uri_for {
+    my ($self, $route) = @_;
+    my $uri_base = $self->script_name || '/';
+    $uri_base .= '/' unless $uri_base =~ m+/$+;
+    return $uri_base . $self->router->uri_for( %$route );
+}
+
+sub new_response {
+    my $self = shift;
+    OX::Response->new( @_ );
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -18,11 +41,11 @@ __END__
 
 =head1 NAME
 
-OX::Web::Response - A Moosey solution to this problem
+OX::Request - A Moosey solution to this problem
 
 =head1 SYNOPSIS
 
-  use OX::Web::Response;
+  use OX::Request;
 
 =head1 DESCRIPTION
 
