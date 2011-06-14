@@ -1,6 +1,7 @@
 package OX::Request;
 use Moose;
 use MooseX::NonMoose;
+use namespace::autoclean;
 
 use OX::Response;
 
@@ -33,7 +34,7 @@ sub new_response {
 
 __PACKAGE__->meta->make_immutable;
 
-no Moose; 1;
+1;
 
 __END__
 

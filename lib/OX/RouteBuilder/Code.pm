@@ -1,5 +1,6 @@
 package OX::RouteBuilder::Code;
 use Moose;
+use namespace::autoclean;
 
 with 'OX::RouteBuilder';
 
@@ -24,7 +25,5 @@ sub parse_action_spec {
 }
 
 __PACKAGE__->meta->make_immutable;
-
-no Moose;
 
 1;

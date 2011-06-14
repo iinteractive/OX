@@ -1,5 +1,6 @@
 package OX::Router::Path::Router;
 use Moose;
+use namespace::autoclean;
 
 use OX::Router::Path::Router::Route;
 
@@ -22,6 +23,5 @@ sub BUILD {
 }
 
 __PACKAGE__->meta->make_immutable;
-no Moose;
 
 1;

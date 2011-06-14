@@ -1,5 +1,6 @@
 package OX::Role::RouteBuilder;
 use Moose::Role;
+use namespace::autoclean;
 
 sub configure_router {
     my ($self, $s, $router) = @_;
@@ -48,7 +49,5 @@ sub configure_router {
             for $builder->compile_routes;
     }
 }
-
-no Moose::Role;
 
 1;

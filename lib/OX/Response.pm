@@ -1,6 +1,7 @@
 package OX::Response;
 use Moose;
 use MooseX::NonMoose;
+use namespace::autoclean;
 
 extends 'Plack::Response';
 
@@ -10,7 +11,7 @@ sub BUILDARGS {
 
 __PACKAGE__->meta->make_immutable;
 
-no Moose; 1;
+1;
 
 __END__
 

@@ -1,5 +1,6 @@
 package OX::Meta::Role::Class::RouteBuilder;
 use Moose::Role;
+use namespace::autoclean;
 
 has route_builders => (
     traits  => ['Array'],
@@ -37,7 +38,5 @@ sub route_builder_for {
     }
 
 }
-
-no Moose::Role;
 
 1;

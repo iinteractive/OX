@@ -1,5 +1,6 @@
 package OX::Role::Path::Router;
 use Moose::Role;
+use namespace::autoclean;
 
 use Plack::App::Path::Router::PSGI;
 
@@ -13,7 +14,5 @@ sub app_from_router {
         router => $router,
     )->to_app;
 }
-
-no Moose::Role;
 
 1;

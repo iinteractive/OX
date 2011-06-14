@@ -1,5 +1,6 @@
 package OX::RouteBuilder;
 use Moose::Role;
+use namespace::autoclean;
 
 has 'path' => (
     is       => 'ro',
@@ -43,7 +44,7 @@ sub extract_defaults_and_validations {
 
 requires 'compile_routes', 'parse_action_spec';
 
-no Moose::Role; 1;
+1;
 
 __END__
 

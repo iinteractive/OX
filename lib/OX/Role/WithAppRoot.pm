@@ -1,6 +1,7 @@
 package OX::Role::WithAppRoot;
 use Moose::Role;
 use Bread::Board::Declare; # XXX: OX::Role?
+use namespace::autoclean;
 
 use Class::Inspector;
 use MooseX::Types::Path::Class;
@@ -20,7 +21,5 @@ has app_root => (
         $root;
     },
 );
-
-no Moose::Role;
 
 1;

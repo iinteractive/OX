@@ -1,5 +1,6 @@
 package OX::Meta::Role::Class;
 use Moose::Role;
+use namespace::autoclean;
 
 use List::MoreUtils qw(any);
 
@@ -79,7 +80,5 @@ before add_middleware => sub {
     Class::MOP::load_class($middleware->class)
         if $middleware->does('Bread::Board::Service::WithClass');
 };
-
-no Moose::Role;
 
 1;

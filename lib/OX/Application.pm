@@ -1,12 +1,13 @@
 package OX::Application;
 use Moose;
 use Bread::Board::Declare;
-use Plack::Util;
+use namespace::autoclean;
 
 use Bread::Board;
 use Moose::Util::TypeConstraints
     qw(class_type subtype where match_on_type), as => { -as => 'mutc_as' };
 use Plack::Middleware::HTTPExceptions;
+use Plack::Util;
 use Try::Tiny;
 
 has _app => (
@@ -166,7 +167,7 @@ sub _dump_bread_board {
     Bread::Board::Dumper->new->dump(shift());
 }
 
-no Moose; no Bread::Board; no Moose::Util::TypeConstraints; 1;
+1;
 
 __END__
 

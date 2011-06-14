@@ -1,7 +1,8 @@
 package OX::Role::Object;
 use Moose::Role;
-use Bread::Board;
+use namespace::autoclean;
 
+use Bread::Board;
 use Plack::App::URLMap;
 
 sub BUILD {
@@ -91,7 +92,5 @@ around build_middleware => sub {
                        $self->meta->middleware;
     return $ret;
 };
-
-no Moose::Role;
 
 1;
