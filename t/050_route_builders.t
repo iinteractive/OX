@@ -8,6 +8,8 @@ use Plack::Test;
     package RouteBuilder::REST;
     use Moose;
 
+    use Moose::Util::TypeConstraints qw(find_type_constraint);
+
     with 'OX::RouteBuilder';
 
     sub compile_routes {
@@ -29,7 +31,17 @@ use Plack::Test;
 
                 my %match = $req->mapping;
                 my $a = $match{action};
-                my $component = $s->get_dependency($a)->get;
+
+                my $deps = $s->fetch('dependencies')->get;
+
+                # XXX: this needs to find a better place
+                $deps = find_type_constraint('Bread::Board::Service::Dependencies')->assert_coerce($deps);
+                for my $dep (keys %$deps) {
+                    $deps->{$dep}->parent($s->parent->parent);
+                }
+
+                my $component = $deps->{$a}->get;
+
                 my $method = lc($req->method);
 
                 if ($component->can($method)) {

@@ -26,6 +26,12 @@ has router_config => (
     predicate => 'has_local_router_config',
 );
 
+has controller_dependencies => (
+    is        => 'rw',
+    does      => 'Bread::Board::Service',
+    predicate => 'has_local_controller_dependencies',
+);
+
 has mounts => (
     traits  => ['Hash'],
     isa     => 'HashRef[HashRef]',
@@ -65,12 +71,34 @@ sub full_router_config {
                          map { $_->meta }
                          $self->linearized_isa;
 
-    my %routes =       map { %{ $_->block->()    } } @router_configs;
-    my %dependencies = map { %{ $_->dependencies } } @router_configs;
-    return Bread::Board::BlockInjection->new(
-        name         => 'config',
-        block        => sub { \%routes },
-        dependencies => \%dependencies,
+    my %routes = map { %{ $_->value } } @router_configs;
+    return Bread::Board::Literal->new(
+        name  => 'config',
+        value => \%routes,
+    );
+}
+
+sub has_controller_dependencies {
+    my $self = shift;
+    return any { $_->has_local_controller_dependencies }
+           grep { Moose::Util::does_role($_, __PACKAGE__) }
+           map { $_->meta }
+           $self->linearized_isa;
+}
+
+sub full_controller_dependencies {
+    my $self = shift;
+
+    my @controller_deps = map { $_->controller_dependencies->clone }
+                          grep { $_->has_local_controller_dependencies }
+                          grep { Moose::Util::does_role($_, __PACKAGE__) }
+                          map { $_->meta }
+                          $self->linearized_isa;
+    my $deps = { map { %{ $_->value } } @controller_deps };
+
+    return Bread::Board::Literal->new(
+        name  => 'dependencies',
+        value => $deps,
     );
 }
 

@@ -45,6 +45,13 @@ sub BUILD {
         };
 
         container $self->fetch('Router') => as {
+            service 'dependencies' => (
+                block => sub {
+                    {
+                        root => '/Controller/Root',
+                    }
+                },
+            );
             service 'config' => (
                 block => sub {
                     +{
@@ -71,9 +78,6 @@ sub BUILD {
                         },
                     }
                 },
-                dependencies => {
-                    root => '/Controller/Root',
-                }
             );
         };
     };

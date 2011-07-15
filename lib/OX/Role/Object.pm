@@ -18,14 +18,11 @@ sub BUILD {
                 if ($meta->has_router) {
                     $c->add_service($meta->router->clone);
                 }
-                elsif ($meta->has_router_config) {
-                    my $config = $meta->full_router_config;
-                    for my $dep (values %{ $config->dependencies }) {
-                        if (!$dep->has_service_path) {
-                            $self->add_service($dep->service);
-                        }
-                    }
-                    $c->add_service($config);
+                if ($meta->has_router_config) {
+                    $c->add_service($meta->full_router_config);
+                }
+                if ($meta->has_controller_dependencies) {
+                    $c->add_service($meta->full_controller_dependencies);
                 }
             };
 

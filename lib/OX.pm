@@ -89,13 +89,16 @@ sub router {
         $body->();
 
         my $routes = $meta->routes;
-        my $router_config = Bread::Board::BlockInjection->new(
-            name         => 'config',
-            block        => sub { $routes },
-            dependencies => \%params,
+        my $router_config = Bread::Board::Literal->new(
+            name  => 'config',
+            value => $meta->routes
         );
-        _fix_dependencies($router_config);
         $meta->router_config($router_config);
+        my $controller_deps = Bread::Board::Literal->new(
+            name  => 'dependencies',
+            value => \%params,
+        );
+        $meta->controller_dependencies($controller_deps);
     }
     elsif (blessed($body)) {
         my $service = Bread::Board::Literal->new(

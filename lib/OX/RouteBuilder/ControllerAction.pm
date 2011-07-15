@@ -1,6 +1,7 @@
 package OX::RouteBuilder::ControllerAction;
 use Moose;
 use namespace::autoclean;
+use Moose::Util::TypeConstraints qw(find_type_constraint);
 
 with 'OX::RouteBuilder';
 
@@ -25,7 +26,15 @@ sub compile_routes {
             my $c = $match{controller};
             my $a = $match{action};
 
-            my $component = $s->get_dependency($c)->get;
+            my $deps = $s->fetch('dependencies')->get;
+
+            # XXX: this needs to find a better place
+            $deps = find_type_constraint('Bread::Board::Service::Dependencies')->assert_coerce($deps);
+            for my $dep (keys %$deps) {
+                $deps->{$dep}->parent($s->parent->parent);
+            }
+
+            my $component = $deps->{$c}->get;
 
             if ($component->can($a)) {
                 return $component->$a(@_);

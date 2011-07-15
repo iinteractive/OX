@@ -28,6 +28,13 @@ use Plack::Test;
             );
 
             container $self->fetch('Router') => as {
+                service 'dependencies' => (
+                    block => sub {
+                        {
+                            root => 'root',
+                        }
+                    },
+                );
                 service 'config' => (
                     block => sub {
                         +{
@@ -38,9 +45,6 @@ use Plack::Test;
                             '/foo' => sub { 'FOO' },
                         }
                     },
-                    dependencies => {
-                        root => '../root',
-                    }
                 );
             };
         };
