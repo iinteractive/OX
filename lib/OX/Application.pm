@@ -62,7 +62,7 @@ sub BUILD {
                 my $app = $self->app_from_router($router);
 
                 my @middleware = (
-                    $self->middleware,
+                    reverse($self->middleware),
                     Plack::Middleware::HTTPExceptions->new(rethrow => 1),
                     sub {
                         my $app = shift;

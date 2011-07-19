@@ -206,7 +206,7 @@ test_psgi
         my $cb = shift;
         my $req = HTTP::Request->new(GET => "http://localhost/foo");
         my $res = $cb->($req);
-        is($res->content, 'OOF/bar', "right content");
+        is($res->content, 'RABOOF/', "right content");
     };
 
 test_psgi
@@ -215,7 +215,7 @@ test_psgi
         my $cb = shift;
         my $req = HTTP::Request->new(GET => "http://localhost/foo");
         my $res = $cb->($req);
-        is($res->content, 'RABOOF/', "right content");
+        is($res->content, 'OOF/bar', "right content");
     };
 
 done_testing;
