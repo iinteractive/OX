@@ -2,111 +2,125 @@ package OX::Meta::Role::Class;
 use Moose::Role;
 use namespace::autoclean;
 
-use List::MoreUtils qw(any);
+use Class::Load 'load_class';
+use List::MoreUtils 'any';
+use Moose::Util::TypeConstraints 'find_type_constraint';
 
-has router => (
-    is        => 'rw',
-    does      => 'Bread::Board::Service',
-    predicate => 'has_router',
-);
+use OX::RouteBuilder;
 
-has routes => (
-    traits  => ['Hash'],
-    is      => 'ro',
-    isa     => 'HashRef[HashRef]',
-    default => sub { {} },
+has route_builders => (
+    traits  => ['Array'],
+    isa     => 'ArrayRef[Str]',
+    default => sub { [] },
     handles => {
-        add_route => 'set',
+        route_builders     => 'elements',
+        has_route_builders => 'count',
+        _add_route_builder => 'push',
     },
 );
 
-has router_config => (
-    is        => 'rw',
-    does      => 'Bread::Board::Service',
-    predicate => 'has_local_router_config',
-);
-
-has controller_dependencies => (
-    is        => 'rw',
-    does      => 'Bread::Board::Service',
-    predicate => 'has_local_controller_dependencies',
+has routes => (
+    traits  => ['Array'],
+    isa     => 'ArrayRef[HashRef]',
+    default => sub { [] },
+    handles => {
+        routes     => 'elements',
+        _add_route => 'push',
+    },
 );
 
 has mounts => (
-    traits  => ['Hash'],
-    isa     => 'HashRef[HashRef]',
-    default => sub { {} },
+    traits  => ['Array'],
+    isa     => 'ArrayRef[HashRef]',
+    default => sub { [] },
     handles => {
-        has_mounts  => 'count',
-        mount_paths => 'keys',
-        add_mount   => 'set',
-        mount       => 'get',
+        mounts     => 'elements',
+        has_mounts => 'count',
+        _add_mount => 'push',
     },
 );
 
 has middleware => (
-    traits => ['Array'],
-    isa     => 'ArrayRef[Bread::Board::Service]',
+    traits  => ['Array'],
+    isa     => 'ArrayRef[HashRef]',
     default => sub { [] },
     handles => {
-        add_middleware => 'push',
-        middleware     => 'elements',
+        middleware      => 'elements',
+        _add_middleware => 'push',
     },
 );
 
-sub has_router_config {
+sub add_route_builder {
     my $self = shift;
-    return any { $_->has_local_router_config }
-           grep { Moose::Util::does_role($_, __PACKAGE__) }
-           map { $_->meta }
-           $self->linearized_isa;
+    my ($route_builder) = @_;
+    load_class($route_builder);
+    $self->_add_route_builder($route_builder);
 }
 
-sub full_router_config {
+sub route_builder_for {
     my $self = shift;
+    my ($action_spec) = @_;
 
-    my @router_configs = map { $_->router_config->clone }
-                         grep { $_->has_local_router_config }
-                         grep { Moose::Util::does_role($_, __PACKAGE__) }
-                         map { $_->meta }
-                         $self->linearized_isa;
-
-    my %routes = map { %{ $_->value } } @router_configs;
-    return Bread::Board::Literal->new(
-        name  => 'config',
-        value => \%routes,
-    );
+    my @route_specs = grep { defined $_->[1] }
+                      map { [ $_, $_->parse_action_spec($action_spec) ] }
+                      $self->route_builders;
+    if (@route_specs < 1) {
+        die "Unknown action spec $action_spec";
+    }
+    elsif (@route_specs > 1) {
+        die "Ambiguous action spec $action_spec (matched by "
+          . join(', ', map { $_->[0] } @route_specs)
+          . ")";
+    }
+    else {
+        return @{ $route_specs[0] };
+    }
 }
 
-sub has_controller_dependencies {
+sub add_route {
     my $self = shift;
-    return any { $_->has_local_controller_dependencies }
-           grep { Moose::Util::does_role($_, __PACKAGE__) }
-           map { $_->meta }
-           $self->linearized_isa;
+    my $opts = @_ > 1 ? { @_ } : $_[0];
+
+    confess("A route already exists for $opts->{path}")
+        if $self->has_route_for($opts->{path});
+
+    $self->_add_route($opts);
 }
 
-sub full_controller_dependencies {
+sub has_route_for {
     my $self = shift;
+    my ($path) = @_;
 
-    my @controller_deps = map { $_->controller_dependencies->clone }
-                          grep { $_->has_local_controller_dependencies }
-                          grep { Moose::Util::does_role($_, __PACKAGE__) }
-                          map { $_->meta }
-                          $self->linearized_isa;
-    my $deps = { map { %{ $_->value } } @controller_deps };
-
-    return Bread::Board::Literal->new(
-        name  => 'dependencies',
-        value => $deps,
-    );
+    return any { $_->{path} eq $path } $self->routes;
 }
 
-before add_middleware => sub {
+sub router_config {
     my $self = shift;
-    my ($middleware) = @_;
-    Class::MOP::load_class($middleware->class)
-        if $middleware->does('Bread::Board::Service::WithClass');
-};
+
+    return { map { $_->{path} => $_ } $self->routes };
+}
+
+sub add_mount {
+    my $self = shift;
+    my $opts = @_ > 1 ? { @_ } : $_[0];
+
+    if (exists $opts->{class}) {
+        load_class($opts->{class});
+        confess "Class $opts->{class} must implement a to_app method"
+            unless $opts->{class}->can('to_app');
+    }
+
+    $self->_add_mount($opts);
+}
+
+sub add_middleware {
+    my $self = shift;
+    my $opts = @_ > 1 ? { @_ } : $_[0];
+
+    my $tc = find_type_constraint('OX::Types::Middleware');
+    $tc->assert_valid($opts->{middleware});
+
+    $self->_add_middleware($opts);
+}
 
 1;

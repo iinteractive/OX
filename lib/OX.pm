@@ -1,25 +1,24 @@
 package OX;
 use Moose::Exporter;
+# ABSTRACT: blah
 
-use Bread::Board ();
 use Bread::Board::Declare ();
-use Scalar::Util qw(blessed);
-
-use Bread::Board::LifeCycle::Request;
+use Carp 'confess';
+use Class::Load 'load_class';
+use Scalar::Util 'blessed';
 
 my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
     with_meta => [qw(router route mount wrap xo)],
     as_is     => [qw(service as)],
-    install => [qw(import unimport)],
+    install   => [qw(import unimport)],
     class_metaroles => {
-        class => ['OX::Meta::Role::Class',
-                  'OX::Meta::Role::Class::RouteBuilder'],
+        class => ['OX::Meta::Role::Class'],
     },
     base_class_roles => [
-        'OX::Role::Object',
-        'OX::Role::RouteBuilder',
-        'OX::Role::Path::Router',
+        'OX::Application::Role::Router::Path::Router',
+        'OX::Application::Role::RouteBuilder',
+        'OX::Application::Role::Sugar',
     ],
 );
 
@@ -42,73 +41,35 @@ sub init_meta {
 
 sub as (&) { $_[0] }
 
-sub _fix_dependencies {
-    my ($service) = @_;
-
-    return unless $service->does('Bread::Board::Service::WithDependencies');
-
-    for my $dep_name (keys %{ $service->dependencies }) {
-        my $dep = $service->get_dependency($dep_name);
-        if ($dep->has_service_path && $dep->service_path !~ m+^/+) {
-            $service->add_dependency(
-                $dep_name => $dep->clone(
-                    service_path => '../' . $dep->service_path,
-                )
-            );
-        }
-    }
-}
-
 sub router {
-    my $meta = shift;
+    my ($meta, @args) = @_;
+    confess "Only one top level router is allowed"
+        if $meta->has_route_builders;
 
-    if (ref($_[0]) eq 'ARRAY') {
-        $meta->add_route_builder($_) for @{ $_[0] };
-        shift;
+    if (ref($args[0]) eq 'ARRAY') {
+        $meta->add_route_builder($_) for @{ $args[0] };
+        shift @args;
     }
-
-    my ($body, %params) = @_;
+    my ($body, %params) = @args;
 
     if (!ref($body)) {
-        Class::MOP::load_class($body);
-        my $service = Bread::Board::ConstructorInjection->new(
-            name         => 'router',
-            class        => $body,
-            dependencies => \%params,
-        );
-        _fix_dependencies($service);
-        $meta->router($service);
-    }
-    elsif (ref($body) eq 'CODE') {
-        Carp::confess "only one top level router is allowed"
-            if $meta->has_local_router_config;
-
-        $meta->add_route_builder('OX::RouteBuilder::ControllerAction');
-        $meta->add_route_builder('OX::RouteBuilder::Code');
-
-        $body->();
-
-        my $routes = $meta->routes;
-        my $router_config = Bread::Board::Literal->new(
-            name  => 'config',
-            value => $meta->routes
-        );
-        $meta->router_config($router_config);
-        my $controller_deps = Bread::Board::Literal->new(
-            name  => 'dependencies',
-            value => \%params,
-        );
-        $meta->controller_dependencies($controller_deps);
+        load_class($body);
+        $meta->add_method(router_class        => sub { $body });
+        $meta->add_method(router_dependencies => sub { \%params });
     }
     elsif (blessed($body)) {
-        my $service = Bread::Board::Literal->new(
-            name  => 'router',
-            value => $body,
-        );
-        $meta->router($service);
+        $meta->add_method(build_router => sub { $body });
+    }
+    elsif (ref($body) eq 'CODE') {
+        if (!$meta->has_route_builders) {
+            $meta->add_route_builder('OX::RouteBuilder::ControllerAction');
+            $meta->add_route_builder('OX::RouteBuilder::Code');
+        }
+
+        $body->();
     }
     else {
-        Carp::confess "Unknown argument to 'router': $body";
+        confess "Unknown argument to 'router': $body";
     }
 }
 
@@ -116,130 +77,56 @@ sub route {
     my ($meta, $path, $action_spec, %params) = @_;
 
     my ($class, $route_spec) = $meta->route_builder_for($action_spec);
-    $meta->add_route($path => {
+    $meta->add_route(
+        path       => $path,
         class      => $class,
         route_spec => $route_spec,
         params     => \%params,
-    });
+    );
 }
 
 sub mount {
     my ($meta, $path, $mount, %params) = @_;
 
-    if (ref($mount) eq 'CODE') {
-        $meta->add_mount($path => {
-            app => $mount,
-        });
-    }
-    elsif (!ref($mount)) {
-        Class::MOP::load_class($mount);
-        die "Class $mount doesn't implement a to_app method"
-            unless $mount->can('to_app');
-
-        $meta->add_mount($path => {
+    if (!ref($mount)) {
+        $meta->add_mount(
+            path         => $path,
             class        => $mount,
             dependencies => \%params,
-        });
+        );
+    }
+    elsif (blessed($mount)) {
+        confess "Class " . blessed($mount) . " must implement a to_app method"
+            unless $mount->can('to_app');
+
+        $meta->add_mount(
+            path => $path,
+            app  => $mount->to_app,
+        );
+    }
+    elsif (ref($mount) eq 'CODE') {
+        $meta->add_mount(
+            path => $path,
+            app  => $mount,
+        )
     }
     else {
-        die "Unknown mount $mount";
+        confess "Unknown mount $mount";
     }
 }
 
-{
-    my $count = 0;
-    sub wrap {
-        my $meta = shift;
-        my ($middleware, %deps) = @_;
+sub wrap {
+    my ($meta, $middleware, %deps) = @_;
 
-        my $name = '_mw' . $count++;
-
-        my $service;
-        if (!ref $middleware) {
-            $service = Bread::Board::ConstructorInjection->new(
-                name         => $name,
-                class        => $middleware,
-                dependencies => \%deps,
-            );
-        }
-        elsif (ref($middleware) eq 'CODE') {
-            $service = Bread::Board::BlockInjection->new(
-                name => $name,
-                block => sub {
-                    my $s = shift;
-                    return sub {
-                        my $app = shift;
-                        return $middleware->($app, $s);
-                    };
-                },
-                dependencies => \%deps,
-            );
-        }
-        else {
-            $service = Bread::Board::Literal->new(
-                name  => $name,
-                value => $middleware,
-            );
-        }
-
-        _fix_dependencies($service);
-
-        $meta->add_middleware($service);
-    }
+    $meta->add_middleware(
+        middleware => $middleware,
+        deps       => \%deps,
+    );
 }
 
 sub xo {
-    my $meta = shift;
+    my ($meta) = @_;
     $meta->new_object->to_app;
 }
 
 1;
-
-__END__
-
-=pod
-
-=head1 NAME
-
-OX - A Moosey solution to this problem
-
-=head1 SYNOPSIS
-
-  use OX;
-
-  router as {
-      route '/' => sub { "Hello world" };
-  };
-
-  xo;
-
-=head1 DESCRIPTION
-
-=head1 METHODS
-
-=over 4
-
-=item B<>
-
-=back
-
-=head1 BUGS
-
-All complex software has bugs lurking in it, and this module is no
-exception. If you find a bug please either email me, or add the bug
-to cpan-RT.
-
-=head1 AUTHOR
-
-Stevan Little E<lt>stevan.little@iinteractive.comE<gt>
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright 2010 Infinity Interactive, Inc.
-
-L<http://www.iinteractive.com>
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
