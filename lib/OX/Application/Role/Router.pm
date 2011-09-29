@@ -29,9 +29,11 @@ sub router { shift->resolve(service => 'Router') }
 
 sub build_router {
     my $self = shift;
+    my ($s) = @_;
     my $router_class = $self->router_class;
     load_class($router_class);
     return $router_class->new(
+        %{ $s->params },
         request_class => $self->request_class,
     );
 }
