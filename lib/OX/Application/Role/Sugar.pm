@@ -46,14 +46,14 @@ sub _resolve_middleware {
         parent => $self,
     );
     my $mw_service;
-    if (!ref($_)) {
+    if (!ref($mw)) {
         $mw_service = Bread::Board::ConstructorInjection->new(
             %common,
             class        => $mw,
             dependencies => $deps,
         );
     }
-    elsif (blessed($_)) {
+    elsif (blessed($mw)) {
         $mw_service = Bread::Board::Literal->new(
             %common,
             value => $mw,
