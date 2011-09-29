@@ -9,15 +9,15 @@ sub BUILD { }
 after BUILD => sub {
     my $self = shift;
 
-    my $inherited_router_config = $self->has_service('RouterConfig')
+    my $manual_router_config = $self->has_service('RouterConfig')
         ? $self->resolve(service => 'RouterConfig')
         : {};
-    my $local_router_config = $self->meta->router_config;
+    my $sugar_router_config = $self->meta->router_config;
 
     container $self => as {
         service RouterConfig => {
-            %$inherited_router_config,
-            %$local_router_config,
+            %$manual_router_config,
+            %$sugar_router_config,
         };
     };
 };

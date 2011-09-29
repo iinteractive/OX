@@ -4,6 +4,7 @@ use namespace::autoclean;
 
 use Class::Load 'load_class';
 use List::MoreUtils 'any';
+use Moose::Util 'does_role', 'find_meta';
 use Moose::Util::TypeConstraints 'find_type_constraint';
 
 use OX::RouteBuilder;
@@ -95,6 +96,17 @@ sub has_route_for {
 }
 
 sub router_config {
+    my $self = shift;
+
+    return {
+        map { %{ $_->_local_router_config } }
+            grep { $_ && does_role($_, 'OX::Meta::Role::Class') }
+                 map { find_meta($_) }
+                     reverse $self->linearized_isa
+    };
+}
+
+sub _local_router_config {
     my $self = shift;
 
     return { map { $_->{path} => $_ } $self->routes };
