@@ -5,13 +5,14 @@ use Moose::Exporter;
 use Bread::Board::Declare ();
 use Carp 'confess';
 use Class::Load 'load_class';
+use namespace::autoclean ();
 use Scalar::Util 'blessed';
 
-my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
+my ($import, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
     with_meta => [qw(router route mount wrap xo)],
     as_is     => [qw(service as)],
-    install   => [qw(import unimport)],
+    install   => [qw(unimport)],
     class_metaroles => {
         class => ['OX::Meta::Role::Class'],
     },
@@ -21,6 +22,11 @@ my (undef, undef, $init_meta) = Moose::Exporter->build_import_methods(
         'OX::Application::Role::Sugar',
     ],
 );
+
+sub import {
+    namespace::autoclean->import(-cleanee => scalar(caller));
+    goto $import;
+}
 
 sub init_meta {
     my $package = shift;
