@@ -7,25 +7,6 @@ use Plack::Test;
 use HTTP::Request;
 
 {
-    package Foo;
-    use Moose;
-
-    extends 'OX::Application';
-    with 'OX::Role::Path::Router';
-
-    sub configure_router {
-        my ($self, $s, $router) = @_;
-
-        $router->add_route('/foo',
-            target => sub {
-                my $req = shift;
-                return [200, [], [$req->path]];
-            }
-        );
-    }
-}
-
-{
     package Foo::Middleware;
     use Moose;
     use MooseX::NonMoose;
@@ -67,8 +48,134 @@ my $mw1 = sub {
 my $mw2 = 'Foo::Middleware';
 my $mw3 = Foo::Middleware->new(uc => 0, append => 'bar');
 
+{
+    package Foo1;
+    use Moose;
+
+    extends 'OX::Application';
+    with 'OX::Application::Role::Router::Path::Router';
+
+    sub build_middleware { [] }
+
+    sub configure_router {
+        my ($self, $router) = @_;
+
+        $router->add_route('/foo',
+            target => sub {
+                my $req = shift;
+                return [200, [], [$req->path]];
+            }
+        );
+    }
+}
+
+{
+    package Foo2;
+    use Moose;
+
+    extends 'OX::Application';
+    with 'OX::Application::Role::Router::Path::Router';
+
+    sub build_middleware { [$mw1] }
+
+    sub configure_router {
+        my ($self, $router) = @_;
+
+        $router->add_route('/foo',
+            target => sub {
+                my $req = shift;
+                return [200, [], [$req->path]];
+            }
+        );
+    }
+}
+
+{
+    package Foo3;
+    use Moose;
+
+    extends 'OX::Application';
+    with 'OX::Application::Role::Router::Path::Router';
+
+    sub build_middleware { [$mw2] }
+
+    sub configure_router {
+        my ($self, $router) = @_;
+
+        $router->add_route('/foo',
+            target => sub {
+                my $req = shift;
+                return [200, [], [$req->path]];
+            }
+        );
+    }
+}
+
+{
+    package Foo4;
+    use Moose;
+
+    extends 'OX::Application';
+    with 'OX::Application::Role::Router::Path::Router';
+
+    sub build_middleware { [$mw3] }
+
+    sub configure_router {
+        my ($self, $router) = @_;
+
+        $router->add_route('/foo',
+            target => sub {
+                my $req = shift;
+                return [200, [], [$req->path]];
+            }
+        );
+    }
+}
+
+{
+    package Foo5;
+    use Moose;
+
+    extends 'OX::Application';
+    with 'OX::Application::Role::Router::Path::Router';
+
+    sub build_middleware { [$mw1, $mw2, $mw3] }
+
+    sub configure_router {
+        my ($self, $router) = @_;
+
+        $router->add_route('/foo',
+            target => sub {
+                my $req = shift;
+                return [200, [], [$req->path]];
+            }
+        );
+    }
+}
+
+{
+    package Foo6;
+    use Moose;
+
+    extends 'OX::Application';
+    with 'OX::Application::Role::Router::Path::Router';
+
+    sub build_middleware { [$mw3, $mw2, $mw1] }
+
+    sub configure_router {
+        my ($self, $router) = @_;
+
+        $router->add_route('/foo',
+            target => sub {
+                my $req = shift;
+                return [200, [], [$req->path]];
+            }
+        );
+    }
+}
+
 test_psgi
-    app    => Foo->new->to_app,
+    app    => Foo1->new->to_app,
     client => sub {
         my $cb = shift;
         my $req = HTTP::Request->new(GET => "http://localhost/foo");
@@ -77,7 +184,7 @@ test_psgi
     };
 
 test_psgi
-    app    => Foo->new(middleware => [$mw1])->to_app,
+    app    => Foo2->new->to_app,
     client => sub {
         my $cb = shift;
         my $req = HTTP::Request->new(GET => "http://localhost/foo");
@@ -86,7 +193,7 @@ test_psgi
     };
 
 test_psgi
-    app    => Foo->new(middleware => [$mw2])->to_app,
+    app    => Foo3->new->to_app,
     client => sub {
         my $cb = shift;
         my $req = HTTP::Request->new(GET => "http://localhost/foo");
@@ -95,7 +202,7 @@ test_psgi
     };
 
 test_psgi
-    app    => Foo->new(middleware => [$mw3])->to_app,
+    app    => Foo4->new->to_app,
     client => sub {
         my $cb = shift;
         my $req = HTTP::Request->new(GET => "http://localhost/foo");
@@ -104,7 +211,7 @@ test_psgi
     };
 
 test_psgi
-    app    => Foo->new(middleware => [$mw1, $mw2, $mw3])->to_app,
+    app    => Foo5->new->to_app,
     client => sub {
         my $cb = shift;
         my $req = HTTP::Request->new(GET => "http://localhost/foo");
@@ -113,7 +220,7 @@ test_psgi
     };
 
 test_psgi
-    app    => Foo->new(middleware => [$mw3, $mw2, $mw1])->to_app,
+    app    => Foo6->new->to_app,
     client => sub {
         my $cb = shift;
         my $req = HTTP::Request->new(GET => "http://localhost/foo");

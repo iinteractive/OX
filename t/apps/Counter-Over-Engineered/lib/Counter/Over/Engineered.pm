@@ -2,16 +2,23 @@ package Counter::Over::Engineered;
 use Moose;
 use Bread::Board;
 
+use Path::Class 'file';
+
 extends 'OX::Application';
 
-with 'OX::Role::WithAppRoot',
-     'OX::Role::RouteBuilder',
-     'OX::Role::Path::Router';
+with 'OX::Application::Role::RouterConfig',
+     'OX::Application::Role::Router::Path::Router';
 
 sub BUILD {
     my $self = shift;
 
     container $self => as {
+
+        service app_root => (
+            block => sub {
+                file(__FILE__)->parent->parent->parent->parent;
+            },
+        );
 
         container 'Model' => as {
             service 'Counter' => (
@@ -44,42 +51,33 @@ sub BUILD {
             );
         };
 
-        container $self->fetch('Router') => as {
-            service 'dependencies' => (
-                block => sub {
-                    {
-                        root => '/Controller/Root',
-                    }
-                },
-            );
-            service 'config' => (
-                block => sub {
-                    +{
-                        '/' => {
-                            controller => 'root',
-                            action     => 'index',
-                        },
-                        '/inc' => {
-                            controller => 'root',
-                            action     => 'inc',
-                        },
-                        '/dec' => {
-                            controller => 'root',
-                            action     => 'dec',
-                        },
-                        '/reset' => {
-                            controller => 'root',
-                            action     => 'reset',
-                        },
-                        '/set/:number' => {
-                            controller => 'root',
-                            action     => 'set',
-                            number     => { isa => 'Int' }
-                        },
-                    }
-                },
-            );
-        };
+        service 'RouterConfig' => (
+            block => sub {
+                +{
+                    '/' => {
+                        controller => '/Controller/Root',
+                        action     => 'index',
+                    },
+                    '/inc' => {
+                        controller => '/Controller/Root',
+                        action     => 'inc',
+                    },
+                    '/dec' => {
+                        controller => '/Controller/Root',
+                        action     => 'dec',
+                    },
+                    '/reset' => {
+                        controller => '/Controller/Root',
+                        action     => 'reset',
+                    },
+                    '/set/:number' => {
+                        controller => '/Controller/Root',
+                        action     => 'set',
+                        number     => { isa => 'Int' }
+                    },
+                }
+            },
+        );
     };
 }
 

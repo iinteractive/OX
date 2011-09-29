@@ -26,7 +26,7 @@ use Plack::Test;
         route '/:action' => 'foo._' => (
             action => { isa => 'Str' },
         );
-    }, (foo => 'foo');
+    };
 }
 
 test_psgi
@@ -69,7 +69,7 @@ test_psgi
         route '/:action' => 'foo._' => (
             action => { isa => enum(['foo', 'bar', 'baz']) },
         );
-    }, (foo => 'foo');
+    };
 }
 
 test_psgi

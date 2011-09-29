@@ -26,7 +26,7 @@ my $root = $app->resolve( service => 'app_root' );
 isa_ok($root, 'Path::Class::Dir');
 is($root, 't/apps/Counter-Over-Engineered', '... got the right root dir');
 
-my $router = $app->get_router;
+my $router = $app->router;
 isa_ok($router, 'Path::Router');
 
 path_ok($router, $_, '... ' . $_ . ' is a valid path')
@@ -39,11 +39,11 @@ for qw[
 ];
 
 routes_ok($router, {
-    ''       => { controller => 'root', action => 'index' },
-    'inc'    => { controller => 'root', action => 'inc'   },
-    'dec'    => { controller => 'root', action => 'dec'   },
-    'reset'  => { controller => 'root', action => 'reset' },
-    'set/10' => { controller => 'root', action => 'set',  number => 10 },
+    ''       => { controller => '/Controller/Root', action => 'index' },
+    'inc'    => { controller => '/Controller/Root', action => 'inc'   },
+    'dec'    => { controller => '/Controller/Root', action => 'dec'   },
+    'reset'  => { controller => '/Controller/Root', action => 'reset' },
+    'set/10' => { controller => '/Controller/Root', action => 'set',  number => 10 },
 },
 "... our routes are valid");
 

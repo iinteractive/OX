@@ -10,13 +10,13 @@ use Plack::Test;
     use Moose;
     use Bread::Board;
     extends 'OX::Application';
-    with 'OX::Role::Path::Router';
+    with 'OX::Application::Role::Router::Path::Router';
 
-    sub router_class { 'Path::Router' }
+    has '+router_class' => (default => 'Path::Router');
 
     sub configure_router {
         my $self = shift;
-        my ($s, $router) = @_;
+        my ($router) = @_;
 
         $router->add_route('/' => (
             target => sub { [200, [], ['root']] }
@@ -35,7 +35,7 @@ use Plack::Test;
 }
 
 my $app = Foo->new;
-my $router = $app->get_router;
+my $router = $app->router;
 
 path_ok($router, $_, '... ' . $_ . ' is a valid path')
     for qw[

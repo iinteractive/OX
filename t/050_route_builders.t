@@ -14,6 +14,7 @@ use Plack::Test;
 
     sub compile_routes {
         my $self = shift;
+        my ($app) = @_;
 
         my $spec = $self->route_spec;
         my $params = $self->params;
@@ -21,46 +22,45 @@ use Plack::Test;
         my ($defaults, $validations) = $self->extract_defaults_and_validations($params);
         $defaults = { %$spec, %$defaults };
 
-        my $s = $self->service;
+        my $target = sub {
+            my ($req) = @_;
 
-        return [
-            $self->path,
+            my %match = $req->mapping;
+            my $a = $match{action};
+
+            my $s = $app->fetch($a);
+            return [
+                500,
+                [],
+                [blessed($app) . " has no service $a"]
+            ] unless $s;
+
+            my $component = $s->get;
+
+            my $method = lc($req->method);
+
+            if ($component->can($method)) {
+                return $component->$method(@_);
+            }
+            elsif ($component->can('any')) {
+                return $component->any(@_);
+            }
+            else {
+                return [
+                    500,
+                    [],
+                    ["Component $component has no method $method"]
+                ];
+            }
+
+        };
+
+        return {
+            path        => $self->path,
             defaults    => $defaults,
-            target      => sub {
-                my ($req) = @_;
-
-                my %match = $req->mapping;
-                my $a = $match{action};
-
-                my $deps = $s->fetch('dependencies')->get;
-
-                # XXX: this needs to find a better place
-                $deps = find_type_constraint('Bread::Board::Service::Dependencies')->assert_coerce($deps);
-                for my $dep (keys %$deps) {
-                    $deps->{$dep}->parent($s->parent->parent);
-                }
-
-                my $component = $deps->{$a}->get;
-
-                my $method = lc($req->method);
-
-                if ($component->can($method)) {
-                    return $component->$method(@_);
-                }
-                elsif ($component->can('any')) {
-                    return $component->any(@_);
-                }
-                else {
-                    return [
-                        500,
-                        [],
-                        ["Component $component has no method $method"]
-                    ];
-                }
-
-            },
+            target      => $target,
             validations => $validations,
-        ];
+        };
     }
 
     sub parse_action_spec {

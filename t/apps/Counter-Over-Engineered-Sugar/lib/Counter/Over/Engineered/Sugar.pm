@@ -3,16 +3,13 @@ use OX;
 
 use MooseX::Types::Path::Class;
 
-with 'OX::Role::WithAppRoot';
-
 has template_root => (
     is     => 'ro',
     isa    => 'Path::Class::Dir',
     coerce => 1,
     block  => sub {
-        (shift)->param('app_root')->subdir(qw[ root templates ])
+        Path::Class::File->new(__FILE__)->parent->parent->parent->parent->parent->subdir(qw[ root templates ]);
     },
-    dependencies => ['app_root'],
 );
 
 has counter => (
@@ -27,7 +24,7 @@ has tt => (
     dependencies => ['template_root'],
 );
 
-has counter_controller => (
+has root => (
     is    => 'ro',
     isa   => 'Counter::Over::Engineered::Sugar::Controller',
     infer => 1,
@@ -41,7 +38,7 @@ router as {
     route '/set/:number' => 'root.set' => (
         number => { isa => 'Int' },
     );
-}, (root => 'counter_controller');
+};
 
 no OX;
 

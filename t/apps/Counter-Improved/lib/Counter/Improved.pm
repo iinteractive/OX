@@ -2,9 +2,10 @@ package Counter::Improved;
 use Moose;
 use Bread::Board;
 
-extends 'OX::Application';
+use Path::Class 'file';
 
-with 'OX::Role::WithAppRoot', 'OX::Role::Path::Router';
+extends 'OX::Application';
+with 'OX::Application::Role::Router::Path::Router';
 
 has 'count' => (
     traits  => [ 'Counter' ],
@@ -21,6 +22,12 @@ has 'count' => (
 sub BUILD {
     my $self = shift;
     container $self => as {
+        service 'app_root' => (
+            block => sub {
+                file(__FILE__)->parent->parent->parent
+            },
+        );
+
         container 'View' => as {
             service 'TT' => (
                 class        => 'Template',
@@ -38,9 +45,9 @@ sub BUILD {
 }
 
 sub configure_router {
-    my ($self, $s, $router) = @_;
+    my ($self, $router) = @_;
 
-    my $view = $s->param('view');
+    my $view = $self->resolve(service => 'View/TT');
 
     $router->add_route('/',
         defaults => { page => 'index' },
@@ -84,10 +91,6 @@ sub configure_router {
             $out;
         }
     );
-}
-
-sub router_dependencies {
-    +{ view => '/View/TT' }
 }
 
 no Moose; no Bread::Board; 1;

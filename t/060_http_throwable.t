@@ -32,7 +32,7 @@ use Try::Tiny;
 
     router as {
         route '/:action' => 'controller._';
-    }, (controller => 'controller');
+    };
 }
 
 my $app = sub {

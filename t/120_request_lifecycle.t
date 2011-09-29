@@ -53,7 +53,7 @@ my $n = 0;
 
     router as {
         route '/' => 'root.index'
-    }, (root => 'root');
+    };
 }
 
 test_psgi

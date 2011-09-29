@@ -3,14 +3,14 @@
 <body>
 <h1>[% this.model.count %]</h1>
 <hr/>
-<a href="[% uri_for({ controller => 'root', action => 'inc' }) %]">++</a>
+<a href="[% uri_for({ controller => '/Controller/Root', action => 'inc' }) %]">++</a>
 &nbsp;&nbsp;|&nbsp;&nbsp;
-<a href="[% uri_for({ controller => 'root', action => 'dec' }) %]">--</a>
+<a href="[% uri_for({ controller => '/Controller/Root', action => 'dec' }) %]">--</a>
 &nbsp;&nbsp;|&nbsp;&nbsp;
-<a href="[% uri_for({ controller => 'root', action => 'reset' }) %]">reset</a>
+<a href="[% uri_for({ controller => '/Controller/Root', action => 'reset' }) %]">reset</a>
 <hr/>
 [% FOREACH num IN [ 100, 200, 1000 ] %]
-    <a href="[% uri_for({ controller => 'root', action => 'set', number => num }) %]">set to [% num %]</a><br/>
+    <a href="[% uri_for({ controller => '/Controller/Root', action => 'set', number => num }) %]">set to [% num %]</a><br/>
 [% END %]
 </body>
 </html>

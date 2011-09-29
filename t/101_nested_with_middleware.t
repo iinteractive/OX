@@ -44,10 +44,17 @@ use HTTP::Request;
         isa => 'Foo::Root',
     );
 
+    has middleware => (
+        is  => 'ro',
+        isa => 'ArrayRef',
+    );
+
+    sub build_middleware { shift->middleware }
+
     router as {
         route '/'    => 'root.index';
         route '/foo' => 'root.foo';
-    }, ('root' => 'root');
+    };
 }
 
 {
@@ -103,7 +110,7 @@ use HTTP::Request;
             root       => 'root',
             middleware => 'baz_middleware',
         );
-    }, ('root' => 'root');
+    };
 }
 
 {
@@ -123,7 +130,7 @@ use HTTP::Request;
         mount '/bar' => 'Bar' => (
             root => 'root',
         );
-    }, ('root' => 'root');
+    };
 
 }
 

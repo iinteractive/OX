@@ -2,7 +2,7 @@ package Counter;
 use Moose;
 
 extends 'OX::Application';
-with 'OX::Role::Path::Router';
+with 'OX::Application::Role::Router::Path::Router';
 
 has 'count' => (
     traits  => [ 'Counter' ],
@@ -17,7 +17,7 @@ has 'count' => (
 );
 
 sub configure_router {
-    my ($self, $s, $router) = @_;
+    my ($self, $router) = @_;
 
     $router->add_route('/',
         defaults => { page => 'index' },

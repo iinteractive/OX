@@ -44,7 +44,7 @@ use Plack::Test;
             my $req = shift;
             return $req->path;
         };
-    }
+    };
 }
 
 test_psgi

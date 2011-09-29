@@ -93,7 +93,7 @@ use Path::Router;
 
 for my $class (qw(Foo Bar Baz)) {
     my $app = Foo->new;
-    my $router = $app->get_router;
+    my $router = $app->router;
 
     path_ok($router, $_, '... ' . $_ . ' is a valid path')
         for qw[

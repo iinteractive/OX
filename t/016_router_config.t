@@ -17,7 +17,8 @@ use Plack::Test;
     use Bread::Board;
 
     extends 'OX::Application';
-    with 'OX::Role::RouteBuilder', 'OX::Role::Path::Router';
+    with 'OX::Application::Role::RouterConfig',
+         'OX::Application::Role::Router::Path::Router';
 
     sub BUILD {
         my $self = shift;
@@ -27,26 +28,17 @@ use Plack::Test;
                 class => 'Foo::Root',
             );
 
-            container $self->fetch('Router') => as {
-                service 'dependencies' => (
-                    block => sub {
-                        {
-                            root => 'root',
-                        }
-                    },
-                );
-                service 'config' => (
-                    block => sub {
-                        +{
-                            '/' => {
-                                controller => 'root',
-                                action     => 'index',
-                            },
-                            '/foo' => sub { 'FOO' },
-                        }
-                    },
-                );
-            };
+            service 'RouterConfig' => (
+                block => sub {
+                    +{
+                        '/' => {
+                            controller => 'root',
+                            action     => 'index',
+                        },
+                        '/foo' => sub { 'FOO' },
+                    }
+                },
+            );
         };
     }
 }
