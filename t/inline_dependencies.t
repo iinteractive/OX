@@ -24,6 +24,14 @@ use Plack::Test;
     package Bar;
     use OX;
 
+    has middleware => (
+        is      => 'ro',
+        isa     => 'ArrayRef',
+        default => sub { [] },
+    );
+
+    sub build_middleware { shift->middleware }
+
     router as {
         route '/baz' => sub { "/bar/baz" };
     };
@@ -57,7 +65,7 @@ use Plack::Test;
             return $s->param('param');
         },
         dependencies => {
-            param => service('foo_param'),
+            param => dep(value => 'foo_param'),
         },
     );
 
@@ -69,7 +77,7 @@ use Plack::Test;
             return $s->param('param');
         },
         dependencies => {
-            param => service('bar_param'),
+            param => dep(value => 'bar_param'),
         },
     );
 
@@ -83,10 +91,9 @@ use Plack::Test;
         route '/foo' => 'root.index';
 
         mount '/bar' => 'Bar' => (
-            middleware => service(block => sub { ['Bar::Middleware'] }),
+            middleware => dep(block => sub { ['Bar::Middleware'] }),
         );
-    }, (root => service(class => 'Foo::Root', dependencies => ['foo', 'bar']));
-
+    };
 }
 
 test_psgi
