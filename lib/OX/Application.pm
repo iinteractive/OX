@@ -95,7 +95,36 @@ sub call {
     my $self = shift;
     my ($env) = @_;
 
-    return $self->_call_app($env);
+    my $res = $self->_call_app($env);
+
+    $self->response_cb(
+        $res,
+        sub {
+            return sub {
+                my $content = shift;
+
+                # flush all services that are request-scoped
+                # after the response is returned
+                $self->_flush_request_services
+                    unless defined $content;
+
+                return $content;
+            };
+        }
+    );
+
+    return $res;
+}
+
+sub _flush_request_services {
+    my $self = shift;
+
+    for my $service ($self->get_service_list) {
+        my $injection = $self->get_service($service);
+        if ($injection->does('Bread::Board::LifeCycle::Request')) {
+            $injection->flush_instance;
+        }
+    }
 }
 
 __PACKAGE__->meta->make_immutable;
