@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Test::Path::Router;
 use Plack::Test;
-use Test::Requires 'Template';
+use Test::Requires 'Template', 'MooseX::Types::Path::Class', 'Path::Class';
 
 BEGIN {
     use_ok('OX::Application');
