@@ -7,7 +7,7 @@ with 'OX::Application::Role::RouteBuilder';
 around parse_route => sub {
     my $orig = shift;
     my $self = shift;
-    my ($route) = @_;
+    my ($path, $route) = @_;
 
     if (ref($route) eq 'HASH'
      && exists($route->{controller})
@@ -32,7 +32,7 @@ around parse_route => sub {
         };
     }
 
-    return $self->$orig($route);
+    return $self->$orig($path, $route);
 };
 
 1;

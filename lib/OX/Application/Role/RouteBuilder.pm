@@ -16,7 +16,7 @@ after configure_router => sub {
     for my $path (keys %$routes) {
         my $route = $routes->{$path};
 
-        my $builder = $self->parse_route($route);
+        my $builder = $self->parse_route($path, $route);
 
         $router->add_compiled_route($_)
             for $builder->compile_routes($self);
@@ -25,12 +25,12 @@ after configure_router => sub {
 
 sub parse_route {
     my $self = shift;
-    my ($route) = @_;
+    my ($path, $route) = @_;
 
     load_class($route->{class});
 
     return $route->{class}->new(
-        path       => $route->{path},
+        path       => $path,
         route_spec => $route->{route_spec},
         params     => $route->{params},
     );
