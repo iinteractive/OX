@@ -11,6 +11,13 @@ use OX::Types;
 
 extends 'Bread::Board::Container', 'Plack::Component';
 
+has name => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    default => sub { shift->meta->name },
+);
+
 has request_class => (
     is      => 'ro',
     isa     => 'Str',
