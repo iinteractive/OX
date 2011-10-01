@@ -11,7 +11,7 @@ use Scalar::Util 'blessed';
 my ($import, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
     with_meta => [qw(router route mount wrap xo)],
-    as_is     => [qw(service as)],
+    as_is     => [qw(as)],
     install   => [qw(unimport)],
     class_metaroles => {
         class => ['OX::Meta::Role::Class'],
@@ -34,15 +34,6 @@ sub init_meta {
     $options{base_class} = 'OX::Application';
     Moose->init_meta(%options);
     $package->$init_meta(%options);
-}
-
-{
-    my $anon = 0;
-    sub service {
-        my $name = '__ANON__:' . $anon++;
-        local $Bread::Board::CC = Bread::Board::Container->new(name => $name);
-        return Bread::Board::service($name, @_);
-    }
 }
 
 sub as (&) { $_[0] }
