@@ -9,13 +9,10 @@ use Plack::Test;
     use OX;
 
     router as {
-        route '/' => sub {
-            my $req = shift;
-            return [200, [], ['index']];
-        };
+        route '/' => sub { 'index' };
         route '/foo' => sub {
             my $req = shift;
-            return [200, [], [$req->path]];
+            return $req->path;
         };
     };
 }
