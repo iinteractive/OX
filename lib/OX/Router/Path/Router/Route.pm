@@ -2,6 +2,8 @@ package OX::Router::Path::Router::Route;
 use Moose;
 use namespace::autoclean;
 
+use Plack::Util;
+
 extends 'Path::Router::Route';
 
 has '+target' => (
@@ -19,15 +21,27 @@ sub BUILD {
 
             my $res = $target->($req, @{ $env->{'plack.router.match.args'} });
 
+            my $psgi_res;
             if (blessed $res && $res->can('finalize')) {
-                return $res->finalize;
+                $psgi_res = $res->finalize;
             }
             elsif (!ref $res) {
-                return [ 200, [ 'Content-Type' => 'text/html' ], [ $res ] ];
+                $psgi_res = [ 200, [ 'Content-Type' => 'text/html' ], [ $res ] ];
             }
             else {
-                return $res;
+                $psgi_res = $res;
             }
+
+            Plack::Util::response_cb($psgi_res, sub {
+                my $res = shift;
+                return sub {
+                    my $chunk = shift;
+                    return unless defined $chunk;
+                    return $req->encode($chunk);
+                };
+            });
+
+            return $psgi_res;
         });
     }
 }
