@@ -11,7 +11,7 @@ sub BUILDARGS {
     return {};
 }
 
-sub router { (shift)->env->{'ox.router'} }
+sub _router { (shift)->env->{'ox.router'} }
 
 sub mapping {
     my $self = shift;
@@ -24,7 +24,7 @@ sub uri_for {
     my ($self, $route) = @_;
     my $uri_base = $self->script_name || '/';
     $uri_base .= '/' unless $uri_base =~ m+/$+;
-    return $uri_base . $self->router->uri_for( %$route );
+    return $uri_base . $self->_router->uri_for( %$route );
 }
 
 sub new_response {

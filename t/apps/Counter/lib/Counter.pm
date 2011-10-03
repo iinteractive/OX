@@ -45,8 +45,6 @@ sub render_view {
 
     $self->$method() if $method;
 
-    my $router = $request->router;
-
     [
         200,
         [ 'Content-type' => 'text/html' ],
@@ -56,11 +54,11 @@ sub render_view {
                 <body>
                     <h1>${ \$self->count }</h1>
                     <hr/>
-                    <a href="${ \$router->uri_for( page => 'inc' ) }">++</a>
+                    <a href="${ \$request->uri_for({page => 'inc'}) }">++</a>
                     &nbsp;&nbsp;|&nbsp;&nbsp;
-                    <a href="${ \$router->uri_for( page => 'dec' ) }">--</a>
+                    <a href="${ \$request->uri_for({page => 'dec'}) }">--</a>
                     &nbsp;&nbsp;|&nbsp;&nbsp;
-                    <a href="${ \$router->uri_for( page => 'reset' ) }">reset</a>
+                    <a href="${ \$request->uri_for({page => 'reset'}) }">reset</a>
                 </body>
             </html>
         }]
