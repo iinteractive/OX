@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Test::More;
 use Plack::Test;
+use Test::Fatal;
 
 {
     package RouteBuilder::REST;
@@ -67,8 +68,9 @@ use Plack::Test;
         my $self = shift;
         my ($action_spec) = @_;
         return if ref($action_spec);
+        return unless $action_spec =~ /^REST:(.*)$/;
         return {
-            action => $action_spec,
+            action => $1,
         }
     }
 }
@@ -95,7 +97,7 @@ use Plack::Test;
     );
 
     router ['RouteBuilder::REST'], as {
-        route '/' => 'root';
+        route '/' => 'REST:root';
     }, (root => 'root');
 }
 
@@ -114,5 +116,20 @@ test_psgi
             is($res->content, "root default: POST", "right content for POST");
         }
     };
+
+{
+    package Bar;
+    use OX;
+
+    ::like(
+        ::exception {
+            router ['RouteBuilder::REST'], as {
+                route '/' => sub { };
+            }
+        },
+        qr/^Unknown action spec /,
+        "default routes don't exist when routebuilders are specified"
+    );
+}
 
 done_testing;
