@@ -83,8 +83,7 @@ my %expected = (
     '/foo/foo'                    => '/foo/foo',
     '/foo/bar'                    => '/foo/bar',
     '/foo/specific'               => 'got a specific path under /foo',
-    # XXX: this seems odd, but i guess it's just Path::Router behavior
-    '/bar/thing'                  => 'got thing for bar',
+    '/bar/thing'                  => 'specific thing for bar',
     '/bar/other_thing'            => 'got other_thing for bar',
     '/baz'                        => 'index for baz',
     '/controller/foo'             => 'index for foo',
