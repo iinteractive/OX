@@ -52,12 +52,12 @@ sub parse_action_spec {
     my $class = shift;
     my ($action_spec) = @_;
 
-    return if ref($action_spec) || $action_spec !~ /^[^\.]+\.[^\.]+$/;
+    return if ref($action_spec);
+    return unless $action_spec =~ /^(\w+)\.(\w+)$/;
 
-    my ($controller, $action) = split /\./, $action_spec;
     return {
-        controller => $controller,
-        action     => $action,
+        controller => $1,
+        action     => $2,
     };
 }
 
