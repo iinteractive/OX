@@ -12,6 +12,8 @@ use Plack::Test;
     sub foo      { "/foo/foo" }
     sub bar      { "/foo/bar" }
     sub specific { "/foo/specific" }
+
+    sub get      { "GET on foo" }
 }
 
 {
@@ -22,6 +24,8 @@ use Plack::Test;
     sub thing          { "/bar/thing" }
     sub other_thing    { "/bar/other_thing" }
     sub specific_thing { "specific thing for bar" }
+
+    sub any            { "any method on bar" }
 }
 
 {
@@ -38,6 +42,15 @@ use Plack::Test;
         "got autoloaded method $meth for baz";
     }
     sub can { 1 }
+}
+
+{
+    package Specific::Action;
+    use Moose;
+
+    sub get  { "specific GET" }
+    sub post { "specific POST" }
+    sub any  { "specific any method" }
 }
 
 {
@@ -60,6 +73,11 @@ use Plack::Test;
         isa => 'Baz::Controller',
     );
 
+    has specific_action => (
+        is  => 'ro',
+        isa => 'Specific::Action',
+    );
+
     router as {
 
         route '/foo/:action'  => 'foo._';
@@ -76,6 +94,8 @@ use Plack::Test;
         route '/controller/:controller'         => '_.index';
         route '/controller/:controller/:action' => '_._';
 
+        route '/action/:action' => '_';
+        route '/action/specific' => 'specific_action';
     };
 }
 
@@ -95,17 +115,27 @@ my %expected = (
     '/controller/bar/other_thing' => '/bar/other_thing',
     '/controller/baz/a'           => 'got autoloaded method a for baz',
     '/controller/baz/foo'         => '/baz/foo',
+    '/action/foo'                 => 'GET on foo',
+    '/action/bar'                 => 'any method on bar',
+    '/action/specific'            => 'specific GET',
+    'POST:/action/specific'       => 'specific POST',
+    'PUT:/action/specific'        => 'specific any method',
 );
 
 test_psgi
     app    => Foo->new->to_app,
     client => sub {
         my $cb = shift;
-        for my $path (keys %expected) {
-            my $req = HTTP::Request->new(GET => "http://localhost$path");
+        for my $r (keys %expected) {
+            my $meth = 'GET';
+            my $path = $r;
+            if ($path =~ s/^(.*)://) {
+                $meth = $1;
+            }
+            my $req = HTTP::Request->new($meth => "http://localhost$path");
             my $res = $cb->($req);
-            is($res->content, $expected{$path},
-               "right content for $path");
+            is($res->content, $expected{$r},
+               "right content for $meth $path");
         }
     };
 

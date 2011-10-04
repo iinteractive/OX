@@ -60,6 +60,7 @@ sub router {
     elsif (ref($body) eq 'CODE') {
         if (!$meta->has_route_builders) {
             $meta->add_route_builder('OX::RouteBuilder::ControllerAction');
+            $meta->add_route_builder('OX::RouteBuilder::HTTPMethod');
             $meta->add_route_builder('OX::RouteBuilder::Code');
         }
 
