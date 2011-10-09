@@ -107,7 +107,8 @@ around build_app => sub {
         }
     }
 
-    $urlmap->map('/' => $app);
+    $urlmap->map('/' => $app)
+        unless $self->meta->has_mount_for('/');
 
     return $urlmap->to_app;
 };

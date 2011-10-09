@@ -125,6 +125,13 @@ sub add_mount {
     $self->_add_mount($opts);
 }
 
+sub has_mount_for {
+    my $self = shift;
+    my ($path) = @_;
+
+    return any { $_->{path} eq $path } $self->mounts;
+}
+
 sub add_middleware {
     my $self = shift;
     my $opts = @_ > 1 ? { @_ } : $_[0];
