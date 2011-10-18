@@ -30,8 +30,8 @@ around build_middleware => sub {
                          $self->meta->middleware;
 
     return [
-        @middleware,
         @{ $self->$orig(@_) },
+        @middleware,
     ];
 };
 
