@@ -51,12 +51,8 @@ sub BUILD {
                 my $s = shift;
 
                 my $app = $self->build_app($s);
-                my @middleware = (
-                    Plack::Middleware::HTTPExceptions->new(rethrow => 1),
-                    @{ $s->param('Middleware') },
-                );
 
-                for my $middleware (reverse @middleware) {
+                for my $middleware (reverse @{ $s->param('Middleware') }) {
                     match_on_type $middleware => (
                         'CodeRef' => sub {
                             $app = $middleware->($app);
@@ -80,7 +76,9 @@ sub BUILD {
     };
 }
 
-sub build_middleware { [] }
+sub build_middleware {
+    [ Plack::Middleware::HTTPExceptions->new(rethrow => 1) ]
+}
 sub middleware_dependencies { {} }
 
 sub build_app {
