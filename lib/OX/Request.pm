@@ -24,7 +24,10 @@ sub uri_for {
     my ($self, $route) = @_;
     my $uri_base = $self->script_name || '/';
     $uri_base .= '/' unless $uri_base =~ m+/$+;
-    return $uri_base . $self->_router->uri_for( %$route );
+    my $path_info = $self->_router->uri_for( %$route );
+    confess "No URI found for route"
+        unless defined($path_info);
+    return $uri_base . $path_info;
 }
 
 sub new_response {
