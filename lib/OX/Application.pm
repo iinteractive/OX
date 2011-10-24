@@ -24,16 +24,6 @@ has request_class => (
     default => 'OX::Request',
 );
 
-has _app => (
-    traits  => ['Code'],
-    isa     => 'CodeRef',
-    lazy    => 1,
-    default => sub { shift->resolve(service => 'App') },
-    handles => {
-        _call_app => 'execute',
-    },
-);
-
 sub BUILD {
     my $self = shift;
 
@@ -87,6 +77,14 @@ sub build_app {
 }
 sub app_dependencies {
     return { Middleware => 'Middleware' };
+}
+
+sub _call_app {
+    my $self = shift;
+    my ($env) = @_;
+
+    my $app = $self->resolve(service => 'App');
+    return $app->($env);
 }
 
 sub call {
