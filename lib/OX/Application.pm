@@ -5,11 +5,12 @@ use namespace::autoclean;
 use Bread::Board;
 use Moose::Util::TypeConstraints 'match_on_type';
 use Plack::Middleware::HTTPExceptions;
+use Plack::Util;
 use Try::Tiny;
 
 use OX::Types;
 
-extends 'Bread::Board::Container', 'Plack::Component';
+extends 'Bread::Board::Container';
 
 has name => (
     is      => 'rw',
@@ -59,7 +60,29 @@ sub BUILD {
                     );
                 }
 
-                return $app;
+                return sub {
+                    my $env = shift;
+
+                    my $res = $app->($env);
+
+                    Plack::Util::response_cb(
+                        $res,
+                        sub {
+                            return sub {
+                                my $content = shift;
+
+                                # flush all services that are request-scoped
+                                # after the response is returned
+                                $self->_flush_request_services
+                                    unless defined $content;
+
+                                return $content;
+                            };
+                        }
+                    );
+
+                    return $res;
+                };
             },
             dependencies => $self->app_dependencies,
         );
@@ -79,37 +102,17 @@ sub app_dependencies {
     return { Middleware => 'Middleware' };
 }
 
-sub _call_app {
+sub to_app {
     my $self = shift;
-    my ($env) = @_;
-
-    my $app = $self->resolve(service => 'App');
-    return $app->($env);
-}
-
-sub call {
-    my $self = shift;
-    my ($env) = @_;
-
-    my $res = $self->_call_app($env);
-
-    $self->response_cb(
-        $res,
-        sub {
-            return sub {
-                my $content = shift;
-
-                # flush all services that are request-scoped
-                # after the response is returned
-                $self->_flush_request_services
-                    unless defined $content;
-
-                return $content;
-            };
-        }
-    );
-
-    return $res;
+    # need to re-resolve for every request, to ensure that middleware
+    # dependencies are correct - otherwise, a middleware that depends on a
+    # service in an app will only resolve it once, at to_app time
+    # XXX can we avoid doing this for apps that don't have runtime middleware
+    # dependencies?
+    return sub {
+        my $env = shift;
+        return $self->resolve(service => 'App')->($env);
+    };
 }
 
 sub _flush_request_services {
