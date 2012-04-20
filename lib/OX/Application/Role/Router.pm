@@ -52,6 +52,8 @@ around build_middleware => sub {
             my $app = shift;
             return sub {
                 my $env = shift;
+                # not just using plack.router (set by Plack::App::Path::Router)
+                # because we want this to be accessible to user middleware
                 $env->{'ox.router'} = $router;
                 $app->($env);
             }
