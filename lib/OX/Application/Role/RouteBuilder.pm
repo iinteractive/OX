@@ -18,8 +18,11 @@ after configure_router => sub {
 
         my $builder = $self->parse_route($path, $route);
 
-        $router->add_compiled_route($_)
-            for $builder->compile_routes($self);
+        # XXX this shouldn't be depending on path::router's api
+        for my $route ($builder->compile_routes($self)) {
+            my $path = delete $route->{path};
+            $router->add_route($path => %$route);
+        }
     }
 };
 

@@ -6,10 +6,20 @@ use Test::Path::Router;
 use Plack::Test;
 
 use Path::Router;
+use Plack::App::Path::Router::PSGI;
 
 {
     package Foo;
     use OX;
+
+    sub app_from_router {
+        my $self = shift;
+        my ($router) = @_;
+
+        return Plack::App::Path::Router::PSGI->new(
+            router => $router,
+        )->to_app;
+    }
 
     my $router = Path::Router->new;
     $router->add_route('/' => (
@@ -63,7 +73,7 @@ use Path::Router;
 {
     package Baz::Router;
     use Moose;
-    extends 'OX::Router::Path::Router';
+    extends 'Path::Router';
 
     sub BUILD {
         my $self = shift;

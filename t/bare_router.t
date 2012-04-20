@@ -5,6 +5,8 @@ use Test::More;
 use Test::Path::Router;
 use Plack::Test;
 
+use Plack::App::Path::Router::PSGI;
+
 {
     package Foo;
     use Moose;
@@ -12,7 +14,14 @@ use Plack::Test;
     extends 'OX::Application';
     with 'OX::Application::Role::Router::Path::Router';
 
-    has '+router_class' => (default => 'Path::Router');
+    sub app_from_router {
+        my $self = shift;
+        my ($router) = @_;
+
+        return Plack::App::Path::Router::PSGI->new(
+            router => $router,
+        )->to_app;
+    }
 
     sub configure_router {
         my $self = shift;
