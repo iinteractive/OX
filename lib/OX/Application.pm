@@ -66,29 +66,7 @@ sub BUILD {
                     );
                 }
 
-                return sub {
-                    my $env = shift;
-
-                    my $res = $app->($env);
-
-                    Plack::Util::response_cb(
-                        $res,
-                        sub {
-                            return sub {
-                                my $content = shift;
-
-                                # flush all services that are request-scoped
-                                # after the response is returned
-                                $self->_flush_request_services
-                                    unless defined $content;
-
-                                return $content;
-                            };
-                        }
-                    );
-
-                    return $res;
-                };
+                $app;
             },
             dependencies => $self->app_dependencies,
         );
@@ -96,7 +74,38 @@ sub BUILD {
 }
 
 sub build_middleware {
-    [ Plack::Middleware::HTTPExceptions->new(rethrow => 1) ]
+    my $self = shift;
+
+    [
+        sub {
+            my ($app) = @_;
+
+            return sub {
+                my $env = shift;
+
+                my $res = $app->($env);
+
+                Plack::Util::response_cb(
+                    $res,
+                    sub {
+                        return sub {
+                            my $content = shift;
+
+                            # flush all services that are request-scoped
+                            # after the response is returned
+                            $self->_flush_request_services
+                                unless defined $content;
+
+                            return $content;
+                        };
+                    }
+                );
+
+                return $res;
+            };
+        },
+        Plack::Middleware::HTTPExceptions->new(rethrow => 1),
+    ]
 }
 sub middleware_dependencies { {} }
 
