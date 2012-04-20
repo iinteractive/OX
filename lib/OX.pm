@@ -2,9 +2,9 @@ package OX;
 use Moose::Exporter;
 # ABSTRACT: blah
 
-use Bread::Board::Declare ();
+use Bread::Board::Declare 0.11 ();
 use Carp 'confess';
-use Class::Load 'load_class';
+use Class::Load 0.10 'load_class';
 use namespace::autoclean ();
 use Scalar::Util 'blessed';
 

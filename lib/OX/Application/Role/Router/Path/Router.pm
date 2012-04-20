@@ -2,7 +2,7 @@ package OX::Application::Role::Router::Path::Router;
 use Moose::Role;
 use namespace::autoclean;
 
-use Plack::App::Path::Router::Custom;
+use Plack::App::Path::Router::Custom 0.05;
 
 with 'OX::Application::Role::Router';
 

@@ -1,5 +1,5 @@
 package OX::Application;
-use Moose;
+use Moose 2.0200;
 use namespace::autoclean;
 
 use Bread::Board;
