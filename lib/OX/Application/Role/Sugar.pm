@@ -113,4 +113,20 @@ around build_app => sub {
     return $urlmap->to_app;
 };
 
+around to_app => sub {
+    my $orig = shift;
+    my $self = shift;
+
+    return $self->$orig(@_)
+        unless $self->meta->has_middleware_dependencies;
+
+    # need to re-resolve for every request, to ensure that middleware
+    # dependencies are correct - otherwise, a middleware that depends on a
+    # service in an app will only resolve it once, at to_app time
+    return sub {
+        my ($env) = @_;
+        $self->$orig(@_)->($env);
+    };
+};
+
 1;

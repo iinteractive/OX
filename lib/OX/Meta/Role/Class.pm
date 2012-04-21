@@ -142,4 +142,10 @@ sub add_middleware {
     $self->_add_middleware($opts);
 }
 
+sub has_middleware_dependencies {
+    my $self = shift;
+
+    return any { %{ $_->{deps} } } $self->middleware;
+}
+
 1;

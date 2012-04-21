@@ -146,15 +146,7 @@ sub handle_response {
 
 sub to_app {
     my $self = shift;
-    # need to re-resolve for every request, to ensure that middleware
-    # dependencies are correct - otherwise, a middleware that depends on a
-    # service in an app will only resolve it once, at to_app time
-    # XXX can we avoid doing this for apps that don't have runtime middleware
-    # dependencies?
-    return sub {
-        my $env = shift;
-        return $self->resolve(service => 'App')->($env);
-    };
+    return $self->resolve(service => 'App');
 }
 
 sub _flush_request_services {
