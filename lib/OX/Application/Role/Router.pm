@@ -32,10 +32,7 @@ sub build_router {
     my ($s) = @_;
     my $router_class = $self->router_class;
     load_class($router_class);
-    return $router_class->new(
-        %{ $s->params },
-        request_class => $self->request_class,
-    );
+    return $router_class->new(%{ $s->params });
 }
 sub configure_router { }
 sub router_dependencies { {} }
