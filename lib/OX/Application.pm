@@ -49,7 +49,47 @@ sub BUILD {
 
                 my $app = $self->build_app($s);
 
-                for my $middleware (reverse @{ $s->param('Middleware') }) {
+                # these middleware always need to be outside of any user
+                # defined middleware, in order to maintain the guarantees that
+                # ox itself provides.
+                my @default_middleware = (
+                    sub {
+                        my ($app) = @_;
+
+                        return sub {
+                            my $env = shift;
+
+                            my $res = $app->($env);
+
+                            Plack::Util::response_cb(
+                                $res,
+                                sub {
+                                    return sub {
+                                        my $content = shift;
+
+                                        # flush all services that are
+                                        # request-scoped after the response is
+                                        # returned
+                                        $self->_flush_request_services
+                                            unless defined $content;
+
+                                        return $content;
+                                    };
+                                }
+                            );
+
+                            return $res;
+                        };
+                    },
+                    Plack::Middleware::HTTPExceptions->new(rethrow => 1),
+                );
+
+                my @middleware = reverse (
+                    @default_middleware,
+                    @{ $s->param('Middleware') },
+                );
+
+                for my $middleware (@middleware) {
                     match_on_type $middleware => (
                         'CodeRef' => sub {
                             $app = $middleware->($app);
@@ -73,40 +113,7 @@ sub BUILD {
     };
 }
 
-sub build_middleware {
-    my $self = shift;
-
-    [
-        sub {
-            my ($app) = @_;
-
-            return sub {
-                my $env = shift;
-
-                my $res = $app->($env);
-
-                Plack::Util::response_cb(
-                    $res,
-                    sub {
-                        return sub {
-                            my $content = shift;
-
-                            # flush all services that are request-scoped
-                            # after the response is returned
-                            $self->_flush_request_services
-                                unless defined $content;
-
-                            return $content;
-                        };
-                    }
-                );
-
-                return $res;
-            };
-        },
-        Plack::Middleware::HTTPExceptions->new(rethrow => 1),
-    ]
-}
+sub build_middleware { [] }
 sub middleware_dependencies { {} }
 
 sub build_app {
