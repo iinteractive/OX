@@ -10,7 +10,7 @@ use Scalar::Util 'blessed';
 
 my ($import, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
-    with_meta => [qw(router route mount wrap xo)],
+    with_meta => [qw(router route mount wrap)],
     as_is     => [qw(as)],
     install   => [qw(unimport)],
     class_metaroles => {
@@ -120,11 +120,6 @@ sub wrap {
         middleware => $middleware,
         deps       => \%deps,
     );
-}
-
-sub xo {
-    my ($meta) = @_;
-    $meta->new_object->to_app;
 }
 
 1;

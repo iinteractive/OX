@@ -12,4 +12,4 @@ router as {
     );
 };
 
-xo;
+__PACKAGE__->new->to_app;
