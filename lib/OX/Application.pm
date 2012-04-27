@@ -3,7 +3,6 @@ use Moose 2.0200;
 use namespace::autoclean;
 
 use Bread::Board;
-use Class::Load 'load_class';
 use Moose::Util::TypeConstraints 'match_on_type';
 use Plack::Middleware::HTTPExceptions;
 use Plack::Util;
@@ -20,19 +19,8 @@ has name => (
     default => sub { shift->meta->name },
 );
 
-has request_class => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => 'OX::Request',
-    handles => {
-        new_request => 'new',
-    },
-);
-
 sub BUILD {
     my $self = shift;
-
-    load_class($self->request_class);
 
     container $self => as {
         service Middleware => (
@@ -122,33 +110,6 @@ sub build_app {
 }
 sub app_dependencies {
     return { Middleware => 'Middleware' };
-}
-
-sub handle_response {
-    my $self = shift;
-    my ($res, $req) = @_;
-
-    my $psgi_res;
-    if (blessed $res && $res->can('finalize')) {
-        $psgi_res = $res->finalize;
-    }
-    elsif (!ref $res) {
-        $psgi_res = [ 200, [ 'Content-Type' => 'text/html' ], [ $res ] ];
-    }
-    else {
-        $psgi_res = $res;
-    }
-
-    Plack::Util::response_cb($psgi_res, sub {
-        my $res = shift;
-        return sub {
-            my $chunk = shift;
-            return unless defined $chunk;
-            return $req->encode($chunk);
-        };
-    });
-
-    return $psgi_res;
 }
 
 sub to_app {

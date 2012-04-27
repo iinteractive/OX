@@ -5,11 +5,13 @@ use namespace::autoclean;
 use Bread::Board;
 use Class::Load 'load_class';
 
-requires qw(router_class app_from_router request_class);
+requires qw(router_class app_from_router);
 
 sub BUILD { }
 before BUILD => sub {
     my $self = shift;
+
+    load_class($self->request_class);
 
     container $self => as {
         service Router => (
@@ -82,5 +84,35 @@ around app_dependencies => sub {
         Router => 'Router',
     };
 };
+
+sub request_class { 'OX::Request' }
+sub new_request { shift->request_class->new(@_) }
+
+sub handle_response {
+    my $self = shift;
+    my ($res, $req) = @_;
+
+    my $psgi_res;
+    if (blessed $res && $res->can('finalize')) {
+        $psgi_res = $res->finalize;
+    }
+    elsif (!ref $res) {
+        $psgi_res = [ 200, [ 'Content-Type' => 'text/html' ], [ $res ] ];
+    }
+    else {
+        $psgi_res = $res;
+    }
+
+    Plack::Util::response_cb($psgi_res, sub {
+        my $res = shift;
+        return sub {
+            my $chunk = shift;
+            return unless defined $chunk;
+            return $req->encode($chunk);
+        };
+    });
+
+    return $psgi_res;
+}
 
 1;
