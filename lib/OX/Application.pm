@@ -96,7 +96,10 @@ sub BUILD {
 
                 $app;
             },
-            dependencies => $self->app_dependencies,
+            dependencies => {
+                Middleware => 'Middleware',
+                %{ $self->app_dependencies },
+            }
         );
     };
 }
@@ -108,9 +111,7 @@ sub build_app {
     my $self = shift;
     confess(blessed($self) . " must implement the build_app method");
 }
-sub app_dependencies {
-    return { Middleware => 'Middleware' };
-}
+sub app_dependencies { {} }
 
 sub to_app {
     my $self = shift;
