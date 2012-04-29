@@ -37,10 +37,7 @@ sub BUILD {
 
                 my $app = $self->build_app($s);
 
-                # these middleware always need to be outside of any user
-                # defined middleware, in order to maintain the guarantees that
-                # ox itself provides.
-                my @default_middleware = (
+                my @middleware = (
                     sub {
                         my ($app) = @_;
 
@@ -69,14 +66,11 @@ sub BUILD {
                             return $res;
                         };
                     },
-                );
-
-                my @middleware = reverse (
-                    @default_middleware,
                     @{ $s->param('Middleware') },
+                    Plack::Middleware::HTTPExceptions->new(rethrow => 1),
                 );
 
-                for my $middleware (@middleware) {
+                for my $middleware (reverse @middleware) {
                     match_on_type $middleware => (
                         'CodeRef' => sub {
                             $app = $middleware->($app);
