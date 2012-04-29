@@ -6,12 +6,7 @@ use Plack::App::Path::Router::Custom 0.05;
 
 with 'OX::Application::Role::Router';
 
-sub router_class;
-has router_class => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => 'Path::Router',
-);
+sub router_class { 'Path::Router' }
 
 sub app_from_router {
     my $self = shift;
