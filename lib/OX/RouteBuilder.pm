@@ -4,13 +4,13 @@ use namespace::autoclean;
 
 requires 'compile_routes', 'parse_action_spec';
 
-has 'path' => (
+has path => (
     is       => 'ro',
     isa      => 'Str',
     required => 1,
 );
 
-has 'route_spec' => (
+has route_spec => (
     is       => 'ro',
     required => 1,
 );
