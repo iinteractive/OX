@@ -31,6 +31,9 @@ use Try::Tiny;
     );
 
     router as {
+        wrap 'Plack::Middleware::HTTPExceptions', (
+            rethrow => dep(value => 1),
+        );
         route '/:action' => 'controller._';
     };
 }

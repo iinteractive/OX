@@ -69,7 +69,6 @@ sub BUILD {
                             return $res;
                         };
                     },
-                    Plack::Middleware::HTTPExceptions->new(rethrow => 1),
                 );
 
                 my @middleware = reverse (
