@@ -86,7 +86,12 @@ around app_dependencies => sub {
 };
 
 sub request_class { 'OX::Request' }
-sub new_request { shift->request_class->new(@_) }
+sub new_request {
+    my $self = shift;
+    my ($env) = @_;
+
+    return $self->request_class->new(env => $env);
+}
 
 sub handle_response {
     my $self = shift;
