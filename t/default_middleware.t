@@ -17,7 +17,7 @@ use Test::Requires 'HTTP::Throwable::Factory';
         my $self = shift;
         my ($env) = @_;
 
-        my $req = OX::Request->new($env);
+        my $req = OX::Request->new_from_env($env);
         my $uri = $req->uri_for({name => 'root'});
         my $res = $self->app->($env);
         $res->[2][0] .= " " . $uri;
