@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use Bread::Board;
 use Moose::Util::TypeConstraints 'match_on_type';
-use Plack::Middleware::HTTPExceptions 0.9981;
+use Plack::Middleware::HTTPExceptions;
 use Plack::Util;
 use Try::Tiny;
 
