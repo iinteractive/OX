@@ -4,9 +4,7 @@ use namespace::autoclean;
 
 extends 'Web::Request';
 
-has '+encoding' => (
-    default => 'UTF-8',
-);
+sub default_encoding { 'UTF-8' }
 
 sub _router { (shift)->env->{'ox.router'} }
 
