@@ -52,7 +52,7 @@ use OX::Request;
         my $self = shift;
         my ($router) = @_;
         return sub {
-            my $req = OX::Request->new_from_env(shift);
+            my $req = OX::Request->new(shift);
             # peeking at the internals here just to ensure the proper thing
             # is being used
             [200, [], [$req->_router->model->val . ': ' . $req->path]];
