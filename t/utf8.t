@@ -42,6 +42,14 @@ use utf8;
 
         return "イノド料理を食い過ぎた。うめええ";
     }
+
+    sub binary {
+        my $self = shift;
+        my ($r) = @_;
+
+        $r->encoding(undef);
+        return "\x01\x02\x03\x04\xf3";
+    }
 }
 
 {
@@ -57,6 +65,7 @@ use utf8;
         route '/query'   => 'controller.query';
         route '/body'    => 'controller.body';
         route '/content' => 'controller.content';
+        route '/binary'  => 'controller.binary';
     };
 }
 
@@ -102,6 +111,13 @@ test_psgi
             my $expected = "イノド料理を食い過ぎた。うめええ";
             utf8::encode($expected);
             is($content, $expected, "got utf8 bytes");
+        }
+        {
+            my $req = HTTP::Request->new(GET => 'http://localhost/binary');
+            my $res = $cb->($req);
+            my $content = $res->content;
+            like($content, qr/^[\x00-\xff]*$/, "raw content is in bytes");
+            is($content, "\x01\x02\x03\x04\xf3", "got raw bytes");
         }
     };
 
