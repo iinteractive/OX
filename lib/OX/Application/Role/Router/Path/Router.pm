@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use Plack::App::Path::Router::Custom 0.05;
 
-with 'OX::Application::Role::Router';
+with 'OX::Application::Role::Router', 'OX::Application::Role::Request';
 
 sub router_class { 'Path::Router' }
 
