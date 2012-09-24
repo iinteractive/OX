@@ -97,27 +97,16 @@ sub handle_response {
     my $self = shift;
     my ($res, $req) = @_;
 
-    my $psgi_res;
-    if (blessed $res && $res->can('finalize')) {
-        $psgi_res = $res->finalize;
+    if (!ref($res)) {
+        $res = $req->new_response([
+            200, [ 'Content-Type' => 'text/html' ], [ $res ]
+        ]);
     }
-    elsif (!ref $res) {
-        $psgi_res = [ 200, [ 'Content-Type' => 'text/html' ], [ $res ] ];
-    }
-    else {
-        $psgi_res = $res;
+    elsif (!blessed($res) || !$res->can('finalize')) {
+        $res = $req->new_response($res);
     }
 
-    Plack::Util::response_cb($psgi_res, sub {
-        my $res = shift;
-        return sub {
-            my $chunk = shift;
-            return unless defined $chunk;
-            return $req->encode($chunk);
-        };
-    });
-
-    return $psgi_res;
+    return $res->finalize;
 }
 
 1;
