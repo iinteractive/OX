@@ -1,12 +1,23 @@
 package OX::Request;
 use Moose;
 use namespace::autoclean;
+# ABSTRACT: request object for OX
 
 extends 'Web::Request';
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=cut
 
 sub default_encoding { 'UTF-8' }
 
 sub _router { (shift)->env->{'ox.router'} }
+
+=method mapping
+
+=cut
 
 sub mapping {
     my $self = shift;
@@ -14,6 +25,10 @@ sub mapping {
     return unless $match;
     return %{ $match->mapping };
 }
+
+=method uri_for
+
+=cut
 
 sub uri_for {
     my ($self, $route) = @_;
@@ -26,5 +41,12 @@ sub uri_for {
 }
 
 __PACKAGE__->meta->make_immutable;
+
+=pod
+
+=for Pod::Coverage
+  default_encoding
+
+=cut
 
 1;

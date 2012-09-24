@@ -1,8 +1,15 @@
 package OX::RouteBuilder::Code;
 use Moose;
 use namespace::autoclean;
+# ABSTRACT: OX::RouteBuilder which routes to a coderef
 
 with 'OX::RouteBuilder';
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=cut
 
 sub compile_routes {
     my $self = shift;
@@ -26,5 +33,13 @@ sub parse_action_spec {
 }
 
 __PACKAGE__->meta->make_immutable;
+
+=pod
+
+=for Pod::Coverage
+  compile_routes
+  parse_action_spec
+
+=cut
 
 1;

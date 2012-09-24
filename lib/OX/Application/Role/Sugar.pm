@@ -129,4 +129,11 @@ around to_app => sub {
     };
 };
 
+=pod
+
+=for Pod::Coverage
+  BUILD
+
+=cut
+
 1;

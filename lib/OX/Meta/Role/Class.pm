@@ -148,4 +148,19 @@ sub has_middleware_dependencies {
     return any { %{ $_->{deps} } } $self->middleware;
 }
 
+=pod
+
+=for Pod::Coverage
+  add_middleware
+  add_mount
+  add_route
+  add_route_builder
+  has_middleware_dependencies
+  has_mount_for
+  has_route_for
+  route_builder_for
+  router_config
+
+=cut
+
 1;

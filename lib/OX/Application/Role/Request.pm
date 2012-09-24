@@ -1,8 +1,15 @@
 package OX::Application::Role::Request;
 use Moose::Role;
 use namespace::autoclean;
+# ABSTRACT: application role to allow the use of request and response objects
 
 use Class::Load 'load_class';
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=cut
 
 sub BUILD { }
 before BUILD => sub {
@@ -11,7 +18,15 @@ before BUILD => sub {
     load_class($self->request_class);
 };
 
+=method request_class
+
+=cut
+
 sub request_class { 'OX::Request' }
+
+=method new_request
+
+=cut
 
 sub new_request {
     my $self = shift;
@@ -19,6 +34,10 @@ sub new_request {
 
     return $self->request_class->new(env => $env);
 }
+
+=method handle_response
+
+=cut
 
 sub handle_response {
     my $self = shift;
@@ -35,5 +54,12 @@ sub handle_response {
 
     return $res->finalize;
 }
+
+=pod
+
+=for Pod::Coverage
+  BUILD
+
+=cut
 
 1;

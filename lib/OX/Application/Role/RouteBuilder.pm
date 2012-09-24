@@ -1,8 +1,15 @@
 package OX::Application::Role::RouteBuilder;
 use Moose::Role;
 use namespace::autoclean;
+# ABSTRACT: application role to configure a router based on a static description
 
 use Class::Load 'load_class';
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=cut
 
 after configure_router => sub {
     my $self = shift;
@@ -25,6 +32,10 @@ after configure_router => sub {
         }
     }
 };
+
+=method parse_route
+
+=cut
 
 sub parse_route {
     my $self = shift;

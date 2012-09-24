@@ -1,6 +1,7 @@
 package OX::Application;
 use Moose 2.0200;
 use namespace::autoclean;
+# ABSTRACT: base class for OX applications
 
 use Bread::Board;
 use Moose::Util::TypeConstraints 'match_on_type';
@@ -11,6 +12,12 @@ use Try::Tiny;
 use OX::Types;
 
 extends 'Bread::Board::Container';
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=cut
 
 has name => (
     is      => 'rw',
@@ -97,14 +104,36 @@ sub BUILD {
     };
 }
 
+=method build_middleware
+
+=cut
+
 sub build_middleware { [] }
+
+=method middleware_dependencies
+
+=cut
+
 sub middleware_dependencies { {} }
+
+=method build_app
+
+=cut
 
 sub build_app {
     my $self = shift;
     confess(blessed($self) . " must implement the build_app method");
 }
+
+=method app_dependencies
+
+=cut
+
 sub app_dependencies { {} }
+
+=method to_app
+
+=cut
 
 sub to_app {
     my $self = shift;
@@ -123,5 +152,12 @@ sub _flush_request_services {
 }
 
 __PACKAGE__->meta->make_immutable;
+
+=pod
+
+=for Pod::Coverage
+  BUILD
+
+=cut
 
 1;

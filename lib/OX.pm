@@ -1,12 +1,18 @@
 package OX;
 use Moose::Exporter;
-# ABSTRACT: blah
+# ABSTRACT: powerful and flexible PSGI web framework
 
 use Bread::Board::Declare 0.11 ();
 use Carp 'confess';
 use Class::Load 0.10 'load_class';
 use namespace::autoclean ();
 use Scalar::Util 'blessed';
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=cut
 
 my ($import, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
@@ -36,7 +42,15 @@ sub init_meta {
     $package->$init_meta(%options);
 }
 
+=func as
+
+=cut
+
 sub as (&) { $_[0] }
+
+=func router
+
+=cut
 
 sub router {
     my ($meta, @args) = @_;
@@ -71,6 +85,10 @@ sub router {
     }
 }
 
+=func route
+
+=cut
+
 sub route {
     my ($meta, $path, $action_spec, %params) = @_;
 
@@ -82,6 +100,10 @@ sub route {
         params     => \%params,
     );
 }
+
+=func mount
+
+=cut
 
 sub mount {
     my ($meta, $path, $mount, %params) = @_;
@@ -113,6 +135,10 @@ sub mount {
     }
 }
 
+=func wrap
+
+=cut
+
 sub wrap {
     my ($meta, $middleware, %deps) = @_;
 
@@ -121,5 +147,49 @@ sub wrap {
         deps       => \%deps,
     );
 }
+
+=head1 BUGS
+
+No known bugs.
+
+Please report any bugs through RT: email
+C<bug-ox at rt.cpan.org>, or browse to
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=OX>.
+
+=head1 SEE ALSO
+
+=head1 SUPPORT
+
+You can find this documentation for this module with the perldoc command.
+
+    perldoc OX
+
+You can also look for information at:
+
+=over 4
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/OX>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/OX>
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=OX>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/OX>
+
+=back
+
+=for Pod::Coverage
+  import
+  init_meta
+
+=cut
 
 1;
