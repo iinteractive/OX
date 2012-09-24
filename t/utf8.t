@@ -70,7 +70,7 @@ test_psgi
             );
             my $res = $cb->($req);
             my $content = $res->content;
-            ok(!utf8::is_utf8($content), "raw content is in bytes");
+            like($content, qr/^[\x00-\xff]*$/, "raw content is in bytes");
             my $expected = "déjà vu";
             utf8::encode($expected);
             is($content, $expected, "got utf8 bytes");
@@ -83,7 +83,7 @@ test_psgi
             );
             my $res = $cb->($req);
             my $content = $res->content;
-            ok(!utf8::is_utf8($content), "raw content is in bytes");
+            like($content, qr/^[\x00-\xff]*$/, "raw content is in bytes");
             my $expected = "déjà vu";
             utf8::encode($expected);
             is($content, $expected, "got utf8 bytes");
@@ -98,7 +98,7 @@ test_psgi
             );
             my $res = $cb->($req);
             my $content = $res->content;
-            ok(!utf8::is_utf8($content), "raw content is in bytes");
+            like($content, qr/^[\x00-\xff]*$/, "raw content is in bytes");
             my $expected = "イノド料理を食い過ぎた。うめええ";
             utf8::encode($expected);
             is($content, $expected, "got utf8 bytes");
