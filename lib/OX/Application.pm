@@ -15,7 +15,51 @@ extends 'Bread::Board::Container';
 
 =head1 SYNOPSIS
 
+  package MyApp;
+  use Moose;
+  extends 'OX::Application';
+
+  sub build_app {
+      return sub { [ 200, [], ["Hello world"] ] };
+  }
+
+  MyApp->new->to_app; # returns the PSGI coderef
+
 =head1 DESCRIPTION
+
+This class provides the base set of functionality for OX applications.
+OX::Application is a subclass of L<Bread::Board::Container>, so all
+L<Bread::Board> functionality is available through it.
+
+By default, the container holds two services:
+
+=over 4
+
+=item Middleware
+
+This service provides an arrayref of middleware to be applied, in order, to the
+app (the first middleware in the array will be the outermost middleware in the
+final built app). It is built via the C<build_middleware> and
+C<middleware_dependencies> methods, described below.
+
+Middleware can be specified as either a coderef (which is expected to accept an
+app coderef as an argument and return a new app coderef), the name of a
+subclass of L<Plack::Middleware>, or a L<Plack::Middleware> instance.
+
+=item App
+
+This service provides the actual L<PSGI> coderef for the application. It is
+built via the C<build_app> and C<app_dependencies> methods described below, and
+applies the middleware from the C<Middleware> service afterwards. It also
+applies L<Plack::Middleware::HTTPExceptions> as the innermost middleware, so
+your app can throw L<HTTP::Throwable> or L<HTTP::Exception> objects and have
+them work properly.
+
+=back
+
+You can add any other services or subcontainers you like, and can use them in
+the construction of your app by overriding C<build_middleware>,
+C<middleware_dependencies>, C<build_app>, and C<app_dependencies>.
 
 =cut
 
@@ -104,7 +148,12 @@ sub BUILD {
     };
 }
 
-=method build_middleware
+=method build_middleware($service)
+
+This method can be overridden in your app to provide an arrayref of middleware
+to be applied to the final application. It is passed the C<Middleware> service
+object, so that you can access the resolved dependencies you specify in
+C<middleware_dependencies>.
 
 =cut
 
@@ -112,11 +161,19 @@ sub build_middleware { [] }
 
 =method middleware_dependencies
 
+This method returns a hashref of dependencies, as described in L<Bread::Board>.
+The arrayref form of dependency specification is not currently supported. These
+dependencies can be accessed in the C<build_middleware> method.
+
 =cut
 
 sub middleware_dependencies { {} }
 
-=method build_app
+=method build_app($service)
+
+This method must be overridden by your app to return a L<PSGI> coderef. It is
+passed the C<App> service object, so that you can access the resolved
+dependencies you specify in C<app_dependencies>.
 
 =cut
 
@@ -127,11 +184,19 @@ sub build_app {
 
 =method app_dependencies
 
+This method returns a hashref of dependencies, as described in L<Bread::Board>.
+The arrayref form of dependency specification is not currently supported. These
+dependencies can be accessed in the C<build_app> method.
+
 =cut
 
 sub app_dependencies { {} }
 
 =method to_app
+
+This method returns the final L<PSGI> application, after all middleware have
+been applied. This method is just a shortcut for
+C<< $app->resolve(service => 'App') >>.
 
 =cut
 

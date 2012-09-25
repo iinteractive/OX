@@ -7,7 +7,25 @@ with 'OX::RouteBuilder';
 
 =head1 SYNOPSIS
 
+  package MyApp;
+  use OX;
+
+  has controller => (
+      is  => 'ro',
+      isa => 'MyApp::Controller',
+  );
+
+  router as {
+      route '/' => 'controller.index';
+  };
+
 =head1 DESCRIPTION
+
+This is an L<OX::RouteBuilder> which routes to action methods on a controller
+class. The C<action_spec> should be a string in the form
+C<"$controller.$action">, where C<$controller> is the name of a service which
+provides a controller instance, and C<$action> is the name of a method on that
+class.
 
 =cut
 

@@ -7,7 +7,44 @@ with 'OX::Application::Role::RouteBuilder';
 
 =head1 SYNOPSIS
 
+  package MyApp;
+  use Moose;
+  use Bread::Board;
+
+  extends 'OX::Application';
+  with 'OX::Application::Role::RouterConfig',
+       'OX::Application::Role::Router::Path::Router';
+
+  sub BUILD {
+      my $self = shift;
+
+      container $self => as {
+          service root => (
+              class => 'Foo::Root',
+          );
+
+          service 'RouterConfig' => (
+              block => sub {
+                  +{
+                      '/' => {
+                          controller => 'root',
+                          action     => 'index',
+                      },
+                      '/foo' => sub { 'FOO' },
+                  }
+              },
+          );
+      };
+  }
+
 =head1 DESCRIPTION
+
+This role overrides C<parse_route> in L<OX::Application::Role::RouteBuilder> to
+provide some nicer syntax. If a value in your router config contains the
+C<controller> and C<action> keys, it will extract those out and automatically
+construct an L<OX::RouteBuilder::ControllerAction> for you. If the value is a
+single coderef, it will automatically construct an L<OX::RouteBuilder::Code>
+for you.
 
 =cut
 

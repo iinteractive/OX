@@ -7,7 +7,16 @@ with 'OX::RouteBuilder';
 
 =head1 SYNOPSIS
 
+  package MyApp;
+  use OX;
+
+  router as {
+      route '/' => sub { "Hello world" };
+  };
+
 =head1 DESCRIPTION
+
+This is an L<OX::RouteBuilder> which allows routing directly to a coderef.
 
 =cut
 

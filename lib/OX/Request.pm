@@ -7,7 +7,15 @@ extends 'Web::Request';
 
 =head1 SYNOPSIS
 
+  use OX::Request;
+
+  my $req = OX::Request->new(env => $env);
+
 =head1 DESCRIPTION
+
+This class is a simple subclass of L<Web::Request> which adds a couple more
+features. It adds some methods to access various useful parts of the routing
+process, and it also sets the C<default_encoding> to C<UTF-8>.
 
 =cut
 
@@ -16,6 +24,9 @@ sub default_encoding { 'UTF-8' }
 sub _router { (shift)->env->{'ox.router'} }
 
 =method mapping
+
+This returns the C<mapping> of the current router match, if you are using
+L<Path::Router> as the router.
 
 =cut
 
@@ -26,7 +37,10 @@ sub mapping {
     return %{ $match->mapping };
 }
 
-=method uri_for
+=method uri_for($route)
+
+This calls C<uri_for> on the given route, and returns the absolute URI path
+that results (including prepending C<SCRIPT_NAME>).
 
 =cut
 
