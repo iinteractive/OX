@@ -1,6 +1,6 @@
 package OX;
 use Moose::Exporter;
-# ABSTRACT: powerful and flexible PSGI web framework
+# ABSTRACT: the hardest working two letters in Perl
 
 use Bread::Board::Declare 0.11 ();
 use Carp 'confess';
