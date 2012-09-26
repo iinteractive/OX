@@ -10,14 +10,12 @@ use Scalar::Util 'blessed';
 
 =head1 SYNOPSIS
 
+The following describes the outline of how a model-view-controller application
+might be configured as an OX application. For further examples and a more
+general introduction, see L<OX::Dox>.
+
   package MyApp;
   use OX;
-
-  has template_root => (
-      is     => 'ro',
-      isa    => 'Str',
-      value  => 'root',
-  );
 
   has model => (
       is        => 'ro',
@@ -25,7 +23,13 @@ use Scalar::Util 'blessed';
       lifecycle => 'Singleton',
   );
 
-  has tt => (
+  has template_root => (
+      is     => 'ro',
+      isa    => 'Str',
+      value  => 'root',
+  );
+
+  has view => (
       is           => 'ro',
       isa          => 'Template',
       dependencies => {
@@ -51,30 +55,34 @@ use Scalar::Util 'blessed';
 
 =head1 DESCRIPTION
 
-OX is a web framework based around L<PSGI> and L<Bread::Board>, and with easy
-access to routing via L<Path::Router>. It provides all of the application
-building blocks as services in a Bread::Board container, so that all of your
-application objects can easily refer to each other. Your application is turned
-into a simple PSGI coderef, which can be used directly by any PSGI-supporting
-web server.
+OX is a web application framework based on L<Bread::Board>, L<Path::Router>,
+and L<PSGI>. Bread::Board lets you build your application from a collection of
+normal L<Moose> objects, organized together in a "container", which allows
+components to easily interoperate without any additional configuration.
+Path::Router maps incoming request paths to method calls on the objects in the
+Bread::Board container. Finally, at compile time, the framework turns your
+entire application into a simple PSGI coderef, which can be used directly by
+any PSGI-supporting web server.
 
-The philosophy behind OX is that it shouldn't require any explicit plugin
-system or glue layer to build your application. An OX application is just a
-normal Bread::Board container, and the default router implementation routes
-incoming paths to method calls on normal Moose classes. All configuration can
-be done through applying roles to your application class (to affect application
-initialization) or providing your own request class (to provide more features
-at runtime).
+The philosophy behind OX is that the building blocks of your web application
+should just "click" together, without the overhead of an additional plugin
+system or "glue" layer. The combination of Bread::Board, Path::Router, and the
+Moose object system provides all that is needed for requests to be mapped to
+methods and for components to communicate with each other. For example, all
+configuration information can be provided via roles applied to the application
+class (affecting application initialization). Similarly, additional runtime
+features can be added by providing your own request (sub)class.
 
-Although you can build your application manually (see the L<OX::Application>
-docs for how to do that), OX comes with an easy to use sugar layer based on
-L<Bread::Board::Declare>. This allows you to write your application class in a
-way that is very similar to writing a normal Moose class, with full use of
-Moose features like attributes and roles. See L<Bread::Board::Declare> for an
-explanation of its syntax; all of it is valid in OX applications. In addition,
-applications defined with the OX sugar automatically get
-L<OX::Application::Role::Router::Path::Router> and
-L<OX::Application::Role::RouteBuilder> as well.
+Additionally, OX provides an easy-to-use "sugar" layer (based on
+L<Bread::Board::Declare>) that makes writing a web application as easy as
+writing any Moose class. The OX sugar layer supports the full complement of
+Moose features (attributes, roles, and more), as well as addiitonal sugar
+methods for mapping request routes to object methods. (See
+L<Bread::Board::Declare>, L<OX::Application::Role::Router::Path::Router>,
+L<OX::Application::Role::RouteBuilder>, and L<OX::Dox> for more detailed
+information.) You're also free to eschew the sugary syntax and build your
+application manually -- see L<OX::Application> for more information on going
+that route.
 
 =cut
 
