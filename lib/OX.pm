@@ -263,7 +263,7 @@ path namespace under the place they are mounted - they aren't just handlers for
 one specific path.
 
   mount '/other_app' => 'My::Other::App', (
-      template_root => 'template_root';
+      template_root => 'template_root',
   );
 
 If you specify a class name for the target, it will create an app by creating
