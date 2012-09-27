@@ -12,8 +12,7 @@ use Scalar::Util 'blessed';
 =head1 SYNOPSIS
 
 The following describes the outline of how a model-view-controller application
-might be configured as an OX application. For further examples and a more
-general introduction, see L<OX::Dox>.
+might be configured as an OX application.
 
   package MyApp;
   use OX;
@@ -79,11 +78,10 @@ L<Bread::Board::Declare>) that makes writing a web application as easy as
 writing any Moose class. The OX sugar layer supports the full complement of
 Moose features (attributes, roles, and more), as well as addiitonal sugar
 methods for mapping request routes to object methods. (See
-L<Bread::Board::Declare>, L<OX::Application::Role::Router::Path::Router>,
-L<OX::Application::Role::RouteBuilder>, and L<OX::Dox> for more detailed
-information.) You're also free to eschew the sugary syntax and build your
-application manually -- see L<OX::Application> for more information on going
-that route.
+L<Bread::Board::Declare>, L<OX::Application::Role::Router::Path::Router>, and
+L<OX::Application::Role::RouteBuilder> for more detailed information.) You're
+also free to eschew the sugary syntax and build your application manually --
+see L<OX::Application> for more information on going that route.
 
 =cut
 
