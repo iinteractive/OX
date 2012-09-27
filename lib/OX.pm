@@ -1,5 +1,6 @@
 package OX;
 use Moose::Exporter;
+use 5.010;
 # ABSTRACT: the hardest working two letters in Perl
 
 use Bread::Board::Declare 0.11 ();
