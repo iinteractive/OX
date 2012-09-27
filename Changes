@@ -1,6 +1,7 @@
 Revision history for OX
 
 {{$NEXT}}
+      - bump required perl version to 5.10, because it fails weirdly on 5.8
 
 0.01  2012-09-25
       - Initial release
