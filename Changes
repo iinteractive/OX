@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+
+0.03  2012-09-28
       - fix tests on windows (path issue)
       - fix Counter-Improved example not having uri_for available
         (yet_another_anonymo)
