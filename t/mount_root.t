@@ -4,6 +4,8 @@ use warnings;
 use Test::More;
 use Plack::Test;
 
+use Test::Requires 'MooseX::NonMoose';
+
 {
     package Custom::App;
     use Moose;

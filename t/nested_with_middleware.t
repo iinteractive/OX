@@ -60,7 +60,6 @@ use HTTP::Request;
 {
     package Baz::Middleware;
     use Moose;
-    use MooseX::NonMoose;
 
     extends 'Plack::Middleware';
 

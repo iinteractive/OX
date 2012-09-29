@@ -4,6 +4,8 @@ use warnings;
 use Test::More;
 use Plack::Test;
 
+use Test::Requires 'MooseX::NonMoose';
+
 {
     package Foo::Middleware;
     use Moose;

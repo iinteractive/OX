@@ -9,7 +9,6 @@ use Test::Requires 'HTTP::Throwable::Factory';
 {
     package Foo::Middleware;
     use Moose;
-    use MooseX::NonMoose;
 
     extends 'Plack::Middleware';
 
@@ -52,7 +51,6 @@ test_psgi
 {
     package Bar::Middleware;
     use Moose;
-    use MooseX::NonMoose;
 
     use HTTP::Throwable::Factory 'http_throw';
 

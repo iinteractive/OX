@@ -7,7 +7,6 @@ use Plack::Test;
 {
     package Bar::Middleware;
     use Moose;
-    use MooseX::NonMoose;
 
     extends 'Plack::Middleware';
 
