@@ -58,6 +58,20 @@ sub test_counter {
         qr/<h1>$count<\/h1>/,
         "got the right count"
     );
+
+    my @paths = (
+        '/inc',
+        '/dec',
+        '/reset',
+    );
+
+    for my $path (@paths) {
+        like(
+            $content,
+            qr{<a href="$path">},
+            "link to $path exists"
+        );
+    }
 }
 
 test_psgi

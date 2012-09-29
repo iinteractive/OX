@@ -54,7 +54,14 @@ sub configure_router {
         target   => sub {
             my $r = shift;
             my $out;
-            $view->process( 'index.tmpl', { count => $self->count }, \$out );
+            $view->process(
+                'index.tmpl',
+                {
+                    uri_for => sub { $r->uri_for(@_) },
+                    count   => $self->count
+                },
+                \$out
+            );
             $out;
         }
     );
@@ -65,7 +72,14 @@ sub configure_router {
             my $r = shift;
             $self->inc_counter;
             my $out;
-            $view->process( 'index.tmpl', { count => $self->count }, \$out );
+            $view->process(
+                'index.tmpl',
+                {
+                    uri_for => sub { $r->uri_for(@_) },
+                    count   => $self->count
+                },
+                \$out
+            );
             $out;
         }
     );
@@ -76,7 +90,14 @@ sub configure_router {
             my $r = shift;
             $self->dec_counter;
             my $out;
-            $view->process( 'index.tmpl', { count => $self->count }, \$out );
+            $view->process(
+                'index.tmpl',
+                {
+                    uri_for => sub { $r->uri_for(@_) },
+                    count   => $self->count
+                },
+                \$out
+            );
             $out;
         }
     );
@@ -87,7 +108,14 @@ sub configure_router {
             my $r = shift;
             $self->reset_counter;
             my $out;
-            $view->process( 'index.tmpl', { count => $self->count }, \$out );
+            $view->process(
+                'index.tmpl',
+                {
+                    uri_for => sub { $r->uri_for(@_) },
+                    count   => $self->count
+                },
+                \$out
+            );
             $out;
         }
     );
