@@ -3,7 +3,7 @@ use Moose;
 use namespace::autoclean;
 # ABSTRACT: request object for OX
 
-extends 'Web::Request';
+extends 'Web::Request' => { -version => 0.05 };
 
 =head1 SYNOPSIS
 
