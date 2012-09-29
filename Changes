@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+
+0.04  2012-09-29
       - support streaming responses
 
 0.03  2012-09-28
