@@ -7,6 +7,7 @@ use Test::More;
 use Test::Path::Router;
 use Plack::Test;
 use Test::Requires 'Template', 'MooseX::Types::Path::Class', 'Path::Class';
+use Path::Class;
 
 BEGIN {
     use_ok('OX::Application');
@@ -24,7 +25,8 @@ isa_ok($app, 'OX::Application');
 
 my $root = $app->resolve( service => 'app_root' );
 isa_ok($root, 'Path::Class::Dir');
-is($root, 't/apps/Counter-Improved', '... got the right root dir');
+is($root, file('t', 'apps', 'Counter-Improved')->stringify,
+   '... got the right root dir');
 
 my $router = $app->router;
 isa_ok($router, 'Path::Router');
