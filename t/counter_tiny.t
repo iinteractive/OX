@@ -8,6 +8,17 @@ use Test::Path::Router;
 use Plack::Test;
 use Plack::Util;
 
+sub test_counter {
+    my ($res, $count) = @_;
+
+    ok($res->is_success)
+        || diag($res->status_line . "\n" . $res->content);
+
+    my $content = $res->content;
+
+    is($content, $count, "got the right content");
+}
+
 test_psgi
       app    => Plack::Util::load_psgi('t/apps/Counter-Tiny/scripts/app.psgi'),
       client => sub {
@@ -15,37 +26,37 @@ test_psgi
           {
               my $req = HTTP::Request->new(GET => "http://localhost");
               my $res = $cb->($req);
-              is($res->content, '0', '... got the right content in index');
+              test_counter($res, 0);
           }
           {
               my $req = HTTP::Request->new(GET => "http://localhost/inc");
               my $res = $cb->($req);
-              is($res->content, '1', '... got the right content in /inc');
+              test_counter($res, 1);
           }
           {
               my $req = HTTP::Request->new(GET => "http://localhost/inc");
               my $res = $cb->($req);
-              is($res->content, '2', '... got the right content in /inc');
+              test_counter($res, 2);
           }
           {
               my $req = HTTP::Request->new(GET => "http://localhost/dec");
               my $res = $cb->($req);
-              is($res->content, '1', '... got the right content in /dec');
+              test_counter($res, 1);
           }
           {
               my $req = HTTP::Request->new(GET => "http://localhost/reset");
               my $res = $cb->($req);
-              is($res->content, '0', '... got the right content in /reset');
+              test_counter($res, 0);
           }
           {
               my $req = HTTP::Request->new(GET => "http://localhost");
               my $res = $cb->($req);
-              is($res->content, '0', '... got the right content in index');
+              test_counter($res, 0);
           }
           {
               my $req = HTTP::Request->new(GET => "http://localhost/set/23");
               my $res = $cb->($req);
-              is($res->content, '23', '... got the right content in set');
+              test_counter($res, 23);
           }
           {
               my $req = HTTP::Request->new(GET => "http://localhost/set/foo");
