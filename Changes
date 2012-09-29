@@ -1,6 +1,7 @@
 Revision history for OX
 
 {{$NEXT}}
+      - support streaming responses
 
 0.03  2012-09-28
       - fix tests on windows (path issue)
