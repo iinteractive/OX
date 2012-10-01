@@ -4,7 +4,8 @@ use warnings;
 use Test::More;
 use Plack::Test;
 
-use Test::Requires 'HTTP::Throwable::Factory';
+use Test::Requires { 'HTTP::Throwable' => 0.010 };
+use HTTP::Throwable::Factory;
 
 {
     package Foo::Middleware;
