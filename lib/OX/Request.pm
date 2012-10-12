@@ -20,6 +20,7 @@ process, and it also sets the C<default_encoding> to C<UTF-8>.
 =cut
 
 sub default_encoding { 'UTF-8' }
+sub response_class   { 'OX::Response' }
 
 sub _router { (shift)->env->{'ox.router'} }
 
@@ -60,6 +61,7 @@ __PACKAGE__->meta->make_immutable;
 
 =for Pod::Coverage
   default_encoding
+  response_class
 
 =cut
 
