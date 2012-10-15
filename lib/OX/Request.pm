@@ -35,7 +35,7 @@ sub mapping {
     my $self = shift;
     my $match = $self->env->{'plack.router.match'};
     return unless $match;
-    return %{ $match->mapping };
+    return $match->mapping;
 }
 
 =method uri_for($route)

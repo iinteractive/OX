@@ -45,8 +45,8 @@ sub compile_routes {
     my $target = sub {
         my ($req) = @_;
 
-        my %match = $req->mapping;
-        my $a = $match{action};
+        my $match = $req->mapping;
+        my $a = $match->{action};
 
         my $s = $app->fetch($a);
         return [
