@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+
+0.05  2012-10-15
       - OX::Request->mapping should return a hashref, not a hash (minor
         back-compat break)
 
