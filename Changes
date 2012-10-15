@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+      - OX::Request->mapping should return a hashref, not a hash (minor
+        back-compat break)
 
 0.04  2012-09-29
       - support streaming responses
