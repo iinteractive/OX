@@ -55,8 +55,8 @@ use Plack::App::Path::Router::PSGI;
                 number => 'Int',
             },
             target => sub {
-                my $env = shift;
-                my ($num) = @{ $env->{'plack.router.match.args'} };
+                my $req = shift;
+                my ($num) = @{ $req->env->{'plack.router.match.args'} };
                 return [200, [], ["got $num"]];
             }
         ));
@@ -79,7 +79,7 @@ use Plack::App::Path::Router::PSGI;
         my $self = shift;
 
         $self->add_route('/' => (
-            target => sub { shift->new_response(200, [], 'root') }
+            target => sub { shift->new_response([ 200, [], ['root'] ]) }
         ));
         $self->add_route('/:number' => (
             validations => {
@@ -102,8 +102,10 @@ use Plack::App::Path::Router::PSGI;
 }
 
 for my $class (qw(Foo Bar Baz)) {
-    my $app = Foo->new;
+    my $app = $class->new;
     my $router = $app->router;
+
+    isa_ok($app, $class);
 
     path_ok($router, $_, '... ' . $_ . ' is a valid path')
         for qw[
