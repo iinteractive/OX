@@ -55,8 +55,8 @@ use Plack::App::Path::Router::PSGI;
                 number => 'Int',
             },
             target => sub {
-                my $req = shift;
-                my ($num) = @{ $req->env->{'plack.router.match.args'} };
+                my $env = shift;
+                my ($num) = @{ $env->{'plack.router.match.args'} };
                 return [200, [], ["got $num"]];
             }
         ));
@@ -66,6 +66,15 @@ use Plack::App::Path::Router::PSGI;
 {
     package Bar;
     use OX;
+
+    sub app_from_router {
+        my $self = shift;
+        my ($router) = @_;
+
+        return Plack::App::Path::Router::PSGI->new(
+            router => $router,
+        )->to_app;
+    }
 
     router 'Bar::Router';
 }
