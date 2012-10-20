@@ -85,6 +85,14 @@ sub add_route {
     confess("A route already exists for $opts->{path}")
         if $self->has_route_for($opts->{path});
 
+    for my $mount ($self->mounts) {
+        (my $prefix = $mount->{path}) =~ s{/$}{};
+        if ($opts->{path} =~ m{^$prefix/}) {
+            warn "The application mounted at $mount->{path} will shadow the "
+               . "route declared at $opts->{path}";
+        }
+    }
+
     $self->_add_route($opts);
 }
 
@@ -120,6 +128,14 @@ sub add_mount {
         load_class($opts->{class});
         confess "Class $opts->{class} must implement a to_app method"
             unless $opts->{class}->can('to_app');
+    }
+
+    (my $prefix = $opts->{path}) =~ s{/$}{};
+    for my $route ($self->routes) {
+        if ($route->{path} =~ m{^$prefix/}) {
+            warn "The application mounted at $opts->{path} will shadow the "
+               . "route declared at $route->{path}";
+        }
     }
 
     $self->_add_mount($opts);
