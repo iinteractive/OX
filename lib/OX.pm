@@ -342,11 +342,16 @@ them into the constructor) and call C<wrap> on that instance, passing in the
 application coderef so far and using the result as the new application (this is
 the API provided by L<Plack::Middleware>).
 
-  wrap Plack::Middleware::StackTrace->new(force => 1);
+  my $pmst = Plack::Middleware::StackTrace->new(force => 1);
+  wrap $pmst;
 
 If you specify an object as the middleware, it will call C<wrap> on that
-object, passing in the application coderef so far and use the result as the new
-application.
+object, passing in the application coderef so far and use the result as the
+new application. Note that you must first instantiate an object and B<then>
+provide it to C<wrap> as an argument. Giving C<wrap> the constructor method
+call as an argument is parsed as an indirect method call (I<i.e.>, as calling
+the C<wrap> method on the provided class name), which will lead to cryptic
+error messages.
 
   wrap sub {
       my $app = shift;
