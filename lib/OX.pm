@@ -151,13 +151,15 @@ used in place of the previously mentioned list.
       foo => 'some_service',
   );
 
-  router My::Custom::Router->new(%router_args);
+  router(My::Custom::Router->new(%router_args));
 
 If you have declared a router manually elsewhere, you can pass in either the
 class name or the built router object to C<router> instead of a block. It will
 be used directly in that case. If you pass a class name, it can take an
 optional hash of dependencies, which will be resolved and passed into the
-class's constructor as arguments.
+class's constructor as arguments. Note that parentheses are required if the
+argument is a literal constructor call, to avoid it being parsed as an indirect
+method call.
 
 =cut
 
@@ -342,11 +344,12 @@ them into the constructor) and call C<wrap> on that instance, passing in the
 application coderef so far and using the result as the new application (this is
 the API provided by L<Plack::Middleware>).
 
-  wrap Plack::Middleware::StackTrace->new(force => 1);
+  wrap(Plack::Middleware::StackTrace->new(force => 1));
 
 If you specify an object as the middleware, it will call C<wrap> on that
 object, passing in the application coderef so far and use the result as the new
-application.
+application. Note that parentheses are required if the argument is a literal
+constructor call, to avoid it being parsed as an indirect method call.
 
   wrap sub {
       my $app = shift;
