@@ -64,7 +64,7 @@ use Plack::Test;
             return $s->param('param');
         },
         dependencies => {
-            param => dep(value => 'foo_param'),
+            param => literal('foo_param'),
         },
     );
 
@@ -76,7 +76,7 @@ use Plack::Test;
             return $s->param('param');
         },
         dependencies => {
-            param => dep(value => 'bar_param'),
+            param => literal('bar_param'),
         },
     );
 
@@ -90,7 +90,7 @@ use Plack::Test;
         route '/foo' => 'root.index';
 
         mount '/bar' => 'Bar' => (
-            middleware => dep(block => sub { ['Bar::Middleware'] }),
+            middleware => literal(['Bar::Middleware']),
         );
     };
 }

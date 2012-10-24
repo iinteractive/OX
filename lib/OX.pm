@@ -88,7 +88,7 @@ see L<OX::Application> for more information on going that route.
 my ($import, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
     with_meta => [qw(router route mount wrap)],
-    as_is     => [qw(as)],
+    as_is     => [qw(as literal)],
     install   => [qw(unimport)],
     class_metaroles => {
         class => ['OX::Meta::Role::Class'],
@@ -334,7 +334,7 @@ statement corresponds to the outermost middleware (just like
 L<Plack::Builder>).
 
   wrap 'Plack::Middleware::Static' => (
-      path => dep(value => sub { s{^/static/}{} }),
+      path => literal(sub { s{^/static/}{} }),
       root => 'static_root',
   );
 
@@ -372,6 +372,29 @@ sub wrap {
     $meta->add_middleware(
         middleware => $middleware,
         deps       => \%deps,
+    );
+}
+
+=func literal
+
+  wrap 'Plack::Middleware::Static', (
+      path => literal(qr{^/(images|js|css)/}),
+      root => 'static_root',
+  );
+
+The C<literal> keyword allows you to declare dependencies on literal values,
+rather than services. This is useful for situations where the constructor
+values aren't user-configurable, but are inherent to your app's structure, such
+as the C<path> option to L<Plack::Middleware::Static>, or the C<subrequest>
+option to L<Plack::Middleware::ErrorDocument>.
+
+=cut
+
+sub literal {
+    my ($value) = @_;
+    return Bread::Board::Literal->new(
+        name  => '__ANON__',
+        value => $value,
     );
 }
 
