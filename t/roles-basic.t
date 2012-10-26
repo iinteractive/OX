@@ -14,7 +14,8 @@ use HTTP::Request::Common;
         my $self = shift;
         my ($r, $content) = @_;
 
-        return "got $content from path " . $r->path;
+        return "got $content from path " . $r->path
+             . " (" . join(' ', sort keys %{ $r->mapping }) . ")";
     }
 }
 
@@ -103,13 +104,81 @@ test_psgi
         {
             my $res = $cb->(GET '/');
             ok($res->is_success);
-            is($res->content, "got main index from path /");
+            is($res->content, "got main index from path / (action controller)");
         }
 
         {
             my $res = $cb->(GET '/post/32');
             ok($res->is_success);
-            is($res->content, "got post 32 from path /post/32");
+            is($res->content, "got post 32 from path /post/32 (action controller id)");
+        }
+    };
+
+{
+    package MyApp2;
+    use OX;
+
+    has view => (
+        is  => 'ro',
+        isa => 'MyApp::View',
+    );
+
+    has root => (
+        is    => 'ro',
+        isa   => 'MyApp::Controller::Root',
+        infer => 1,
+    );
+
+    router as {
+        route '/post/:id' => 'root.index';
+    };
+
+    with 'MyApp::Role::Posts';
+}
+
+test_psgi
+    app    => MyApp2->new->to_app,
+    client => sub {
+        my $cb = shift;
+
+        {
+            my $res = $cb->(GET '/post/32');
+            ok($res->is_success);
+            is($res->content, "got main index from path /post/32 (action controller id)");
+        }
+    };
+
+{
+    package MyApp3;
+    use OX;
+
+    has view => (
+        is  => 'ro',
+        isa => 'MyApp::View',
+    );
+
+    has root => (
+        is    => 'ro',
+        isa   => 'MyApp::Controller::Root',
+        infer => 1,
+    );
+
+    router as {
+        route '/post/:number' => 'root.index';
+    };
+
+    with 'MyApp::Role::Posts';
+}
+
+test_psgi
+    app    => MyApp3->new->to_app,
+    client => sub {
+        my $cb = shift;
+
+        {
+            my $res = $cb->(GET '/post/32');
+            ok($res->is_success);
+            is($res->content, "got main index from path /post/32 (action controller number)");
         }
     };
 

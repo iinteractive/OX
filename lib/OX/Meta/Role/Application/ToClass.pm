@@ -25,7 +25,7 @@ sub _apply_routes {
     my ($role, $class) = @_;
 
     for my $route ($role->routes) {
-        $class->add_route($route)
+        $class->_add_route($route)
             unless $class->has_route_for($route->{path});
     }
 }
