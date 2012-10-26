@@ -6,6 +6,10 @@ with 'OX::Meta::Role::HasRouteBuilders',
      'OX::Meta::Role::HasRoutes',
      'OX::Meta::Role::HasMiddleware';
 
+sub composition_class_roles {
+    return 'OX::Meta::Role::Composite';
+}
+
 no Moose::Role;
 
 1;
