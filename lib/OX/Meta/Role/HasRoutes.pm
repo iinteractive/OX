@@ -48,7 +48,14 @@ sub has_route_for {
     my $self = shift;
     my ($path) = @_;
 
-    return any { $_->{path} eq $path } $self->routes;
+    return any { $self->canonicalize_path($_->{path}) eq $self->canonicalize_path($path) } $self->routes;
+}
+
+sub canonicalize_path {
+    my $self = shift;
+    my ($path) = @_;
+
+    return join '/', map { /^\??:/ ? ':' : $_ } split '/', $path, -1;
 }
 
 sub add_mount {

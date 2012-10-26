@@ -13,12 +13,19 @@ with 'OX::Meta::Role::HasRouteBuilders',
 sub router_config {
     my $self = shift;
 
-    return {
-        map { %{ $_->_local_router_config } }
-            grep { $_ && does_role($_, 'OX::Meta::Role::Class') }
-                 map { find_meta($_) }
-                     reverse $self->linearized_isa
+    my $config = {
+        map {
+            my $config = $_;
+            map { $self->canonicalize_path($_) => [ $_, $config->{$_} ] }
+                keys %$config
+        }
+        map { $_->_local_router_config }
+        grep { $_ && does_role($_, 'OX::Meta::Role::Class') }
+        map { find_meta($_) }
+        reverse $self->linearized_isa
     };
+
+    return { map { @$_ } values %$config };
 }
 
 sub _local_router_config {

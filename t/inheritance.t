@@ -8,6 +8,11 @@ use Plack::Test;
     package Foo::Controller;
     use Moose;
     sub foo { "foo" }
+    sub with_args {
+        my $self = shift;
+        my ($r, $thing) = @_;
+        return "$thing: " . join(' ', sort keys %{ $r->mapping });
+    }
 }
 
 {
@@ -21,6 +26,7 @@ use Plack::Test;
 
     router as {
         route '/foo' => 'foo.foo';
+        route '/with_args/:thing' => 'foo.with_args';
     };
 }
 
@@ -66,6 +72,11 @@ test_psgi
             my $res = $cb->($req);
             is($res->content, "foo", "got the right content");
         }
+        {
+            my $req = HTTP::Request->new(GET => 'http://localhost/with_args/8');
+            my $res = $cb->($req);
+            is($res->content, "8: action controller thing", "got the right content");
+        }
     };
 
 {
@@ -87,6 +98,7 @@ test_psgi
 
     router as {
         route '/baz' => 'baz.baz';
+        route '/with_args/:other' => 'foo.with_args';
     };
 }
 
@@ -108,6 +120,11 @@ test_psgi
             my $req = HTTP::Request->new(GET => 'http://localhost/baz');
             my $res = $cb->($req);
             is($res->content, "baz", "got the right content");
+        }
+        {
+            my $req = HTTP::Request->new(GET => 'http://localhost/with_args/7');
+            my $res = $cb->($req);
+            is($res->content, "7: action controller other", "got the right content");
         }
     };
 
