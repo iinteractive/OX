@@ -22,8 +22,9 @@ my ($import) = Moose::Exporter->build_import_methods(
     as_is     => [\&OX::as, \&OX::literal],
     install   => [qw(unimport init_meta)],
     role_metaroles => {
-        role                 => ['OX::Meta::Role::Role'],
-        application_to_class => ['OX::Meta::Role::Application::ToClass'],
+        role                    => ['OX::Meta::Role::Role'],
+        application_to_class    => ['OX::Meta::Role::Application::ToClass'],
+        application_to_instance => ['OX::Meta::Role::Application::ToInstance'],
     },
 );
 

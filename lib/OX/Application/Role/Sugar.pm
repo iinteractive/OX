@@ -5,6 +5,11 @@ use namespace::autoclean;
 use Bread::Board;
 use Plack::App::URLMap;
 
+has _manual_router_config => (
+    is  => 'rw',
+    isa => 'HashRef',
+);
+
 sub BUILD { }
 after BUILD => sub {
     my $self = shift;
@@ -12,6 +17,15 @@ after BUILD => sub {
     my $manual_router_config = $self->has_service('RouterConfig')
         ? $self->resolve(service => 'RouterConfig')
         : {};
+    $self->_manual_router_config($manual_router_config);
+
+    $self->regenerate_router_config;
+};
+
+sub regenerate_router_config {
+    my $self = shift;
+
+    my $manual_router_config = $self->_manual_router_config;
     my $sugar_router_config = $self->meta->router_config;
 
     container $self => as {
@@ -20,7 +34,7 @@ after BUILD => sub {
             %$sugar_router_config,
         };
     };
-};
+}
 
 around build_middleware => sub {
     my $orig = shift;
