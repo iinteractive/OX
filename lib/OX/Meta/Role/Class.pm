@@ -5,6 +5,7 @@ use namespace::autoclean;
 use Moose::Util 'does_role', 'find_meta';
 
 use OX::RouteBuilder;
+use OX::Util;
 
 with 'OX::Meta::Role::HasRouteBuilders',
      'OX::Meta::Role::HasRoutes',
@@ -16,7 +17,7 @@ sub router_config {
     my $config = {
         map {
             my $config = $_;
-            map { $self->canonicalize_path($_) => [ $_, $config->{$_} ] }
+            map { OX::Util::canonicalize_path($_) => [ $_, $config->{$_} ] }
                 keys %$config
         }
         map { $_->_local_router_config }
@@ -31,7 +32,7 @@ sub router_config {
 sub _local_router_config {
     my $self = shift;
 
-    return { map { $_->{path} => $_ } $self->routes };
+    return { map { $_->path => $_->router_config } $self->routes };
 }
 
 =pod

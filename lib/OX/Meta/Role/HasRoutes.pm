@@ -5,9 +5,12 @@ use namespace::autoclean;
 use Class::Load 'load_class';
 use List::MoreUtils 'any';
 
+use OX::Meta::Route;
+use OX::Util;
+
 has routes => (
     traits  => ['Array'],
-    isa     => 'ArrayRef[HashRef]',
+    isa     => 'ArrayRef[OX::Meta::Route]',
     default => sub { [] },
     handles => {
         routes     => 'elements',
@@ -28,34 +31,33 @@ has mounts => (
 
 sub add_route {
     my $self = shift;
-    my $opts = @_ > 1 ? { @_ } : $_[0];
 
-    confess("A route already exists for $opts->{path}")
-        if $self->has_route_for($opts->{path});
+    my $route = OX::Meta::Route->new(@_)
+        unless @_ == 1 && blessed($_[0]);
+
+    my $path = $route->path;
+
+    confess("A route already exists for $path")
+        if $self->has_route_for($path);
 
     for my $mount ($self->mounts) {
         (my $prefix = $mount->{path}) =~ s{/$}{};
-        if ($opts->{path} =~ m{^$prefix/}) {
+        if ($path =~ m{^$prefix/}) {
             warn "The application mounted at $mount->{path} will shadow the "
-               . "route declared at $opts->{path}";
+               . "route declared at $path";
         }
     }
 
-    $self->_add_route($opts);
+    $self->_add_route($route);
 }
 
 sub has_route_for {
     my $self = shift;
     my ($path) = @_;
 
-    return any { $self->canonicalize_path($_->{path}) eq $self->canonicalize_path($path) } $self->routes;
-}
+    my $canonical = OX::Util::canonicalize_path($path);
 
-sub canonicalize_path {
-    my $self = shift;
-    my ($path) = @_;
-
-    return join '/', map { /^\??:/ ? ':' : $_ } split '/', $path, -1;
+    return any { $_->canonical_path eq $canonical } $self->routes;
 }
 
 sub add_mount {
@@ -70,9 +72,10 @@ sub add_mount {
 
     (my $prefix = $opts->{path}) =~ s{/$}{};
     for my $route ($self->routes) {
-        if ($route->{path} =~ m{^$prefix/}) {
+        my $path = $route->path;
+        if ($path =~ m{^$prefix/}) {
             warn "The application mounted at $opts->{path} will shadow the "
-               . "route declared at $route->{path}";
+               . "route declared at $path";
         }
     }
 
