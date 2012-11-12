@@ -5,12 +5,13 @@ use namespace::autoclean;
 use Class::Load 'load_class';
 use List::MoreUtils 'any';
 
+use OX::Meta::Conflict;
 use OX::Meta::Route;
 use OX::Util;
 
 has routes => (
     traits  => ['Array'],
-    isa     => 'ArrayRef[OX::Meta::Route]',
+    isa     => 'ArrayRef[OX::Meta::Route|OX::Meta::Conflict]',
     default => sub { [] },
     handles => {
         routes     => 'elements',

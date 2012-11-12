@@ -153,10 +153,11 @@ sub route {
 
     my ($class, $route_spec) = $meta->route_builder_for($action_spec);
     $meta->add_route(
-        path       => $path,
-        class      => $class,
-        route_spec => $route_spec,
-        params     => \%params,
+        path                => $path,
+        class               => $class,
+        route_spec          => $route_spec,
+        params              => \%params,
+        definition_location => $meta->name,
     );
 }
 

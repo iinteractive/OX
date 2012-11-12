@@ -9,6 +9,12 @@ has path => (
     required => 1,
 );
 
+has definition_location => (
+    is      => 'ro',
+    isa     => 'Str',
+    default => '(unknown)',
+);
+
 sub canonical_path {
     my $self = shift;
 

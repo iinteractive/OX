@@ -29,14 +29,25 @@ around apply_params => sub {
 sub _merge_routes {
     my $self = shift;
 
-    # XXX conflict detection
+    my %routes;
     for my $role (@{ $self->get_roles }) {
-        if (does_role($role, 'OX::Meta::Role::Role')) {
-            for my $route ($role->routes) {
-                $self->_add_route($route)
-                    unless $self->has_route_for($route->{path});
+        next unless does_role($role, 'OX::Meta::Role::Role');
+        for my $route ($role->routes) {
+            my $canonical = $route->canonical_path;
+            if (exists $routes{$canonical}) {
+                $routes{$canonical} = OX::Meta::Conflict->new(
+                    path      => $canonical,
+                    conflicts => [$routes{$canonical}, $route],
+                );
+            }
+            else {
+                $routes{$canonical} = $route;
             }
         }
+    }
+
+    for my $route (values %routes) {
+        $self->_add_route($route);
     }
 }
 

@@ -15,8 +15,14 @@ sub _apply_routes {
     }
 
     for my $route ($role->routes) {
-        $class->_add_route($route)
-            unless $class->has_route_for($route->{path});
+        if (!$class->has_route_for($route->path)) {
+            if ($route->isa('OX::Meta::Conflict')) {
+                confess($route->message);
+            }
+            else {
+                $class->_add_route($route);
+            }
+        }
     }
 }
 
