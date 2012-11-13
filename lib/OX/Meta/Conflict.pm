@@ -28,4 +28,10 @@ sub type { 'conflict' }
 
 __PACKAGE__->meta->make_immutable;
 
+=for Pod::Coverage
+  message
+  type
+
+=cut
+
 1;

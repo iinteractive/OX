@@ -39,6 +39,7 @@ sub all_middleware {
 =for Pod::Coverage
   add_middleware
   has_middleware_dependencies
+  all_middleware
 
 =cut
 

@@ -8,4 +8,9 @@ sub canonicalize_path {
     return join '/', map { /^\??:/ ? ':' : $_ } split '/', $path, -1;
 }
 
+=for Pod::Coverage
+  canonicalize_path
+
+=cut
+
 1;

@@ -145,6 +145,7 @@ around to_app => sub {
 
 =for Pod::Coverage
   BUILD
+  regenerate_router_config
 
 =cut
 

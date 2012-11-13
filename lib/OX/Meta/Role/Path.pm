@@ -24,4 +24,9 @@ sub canonical_path {
     return OX::Util::canonicalize_path($self->path);
 }
 
+=for Pod::Coverage
+  canonical_path
+
+=cut
+
 1;

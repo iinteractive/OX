@@ -8,4 +8,9 @@ sub type { 'mount' }
 
 __PACKAGE__->meta->make_immutable;
 
+=for Pod::Coverage
+  type
+
+=cut
+
 1;

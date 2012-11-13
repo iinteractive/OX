@@ -36,4 +36,10 @@ sub type { 'route' }
 
 __PACKAGE__->meta->make_immutable;
 
+=for Pod::Coverage
+  router_config
+  type
+
+=cut
+
 1;

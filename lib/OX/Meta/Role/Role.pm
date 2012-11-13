@@ -10,4 +10,9 @@ sub composition_class_roles {
     return 'OX::Meta::Role::Composite';
 }
 
+=for Pod::Coverage
+  composition_class_roles
+
+=cut
+
 1;

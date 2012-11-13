@@ -47,6 +47,7 @@ sub all_middleware {
 
 =for Pod::Coverage
   router_config
+  all_middleware
 
 =cut
 
