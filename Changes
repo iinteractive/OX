@@ -1,6 +1,9 @@
 Revision history for OX
 
 {{$NEXT}}
+      - implement roles. using OX::Role will now let you declare partial
+        routers in your roles which will be merged into the main router when
+        you apply them to an OX class.
 
 0.05  2012-10-15
       - OX::Request->mapping should return a hashref, not a hash (minor
