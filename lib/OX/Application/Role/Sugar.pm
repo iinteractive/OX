@@ -41,7 +41,7 @@ around build_middleware => sub {
     my $self = shift;
 
     my @middleware = map { $self->_resolve_middleware($_) }
-                         $self->meta->middleware;
+                         $self->meta->all_middleware;
 
     return [
         @{ $self->$orig(@_) },

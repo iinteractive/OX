@@ -35,6 +35,14 @@ sub _local_router_config {
     return { map { $_->path => $_->router_config } $self->routes };
 }
 
+sub all_middleware {
+    my $self = shift;
+    return map { $_->middleware }
+           grep { $_ && does_role($_, 'OX::Meta::Role::Class') }
+           map { find_meta($_) }
+           $self->linearized_isa;
+}
+
 =pod
 
 =for Pod::Coverage

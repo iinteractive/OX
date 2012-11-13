@@ -31,6 +31,11 @@ sub has_middleware_dependencies {
     return any { %{ $_->{deps} } } $self->middleware;
 }
 
+sub all_middleware {
+    my $self = shift;
+    return $self->middleware;
+}
+
 =for Pod::Coverage
   add_middleware
   has_middleware_dependencies
