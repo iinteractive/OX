@@ -6,19 +6,26 @@ use Plack::Test;
 
 use HTTP::Request::Common;
 
+sub filter (&) {
+    my $code = shift;
+    return sub {
+        my $app = shift;
+        return sub {
+            my $env = shift;
+            my $res = $app->($env);
+            $res->[2][0] = $code->($res->[2][0]);
+            return $res;
+        };
+    };
+}
+
 {
     package MyApp;
     use OX;
 
     router as {
-        wrap sub {
-            my $app = shift;
-            return sub {
-                my $res = $app->($_[0]);
-                $res->[2][0] .= " wrapped";
-                return $res;
-            };
-        };
+        wrap ::filter { "$_[0] MyApp(1)" };
+        wrap ::filter { "$_[0] MyApp(2)" };
 
         route '/'    => sub { "base" };
         route '/foo' => sub { "base foo" };
@@ -32,14 +39,8 @@ use HTTP::Request::Common;
     extends 'MyApp';
 
     router as {
-        wrap sub {
-            my $app = shift;
-            return sub {
-                my $res = $app->($_[0]);
-                $res->[2][0] = uc($res->[2][0]);
-                return $res;
-            };
-        };
+        wrap ::filter { "$_[0] MyApp2(1)" };
+        wrap ::filter { "$_[0] MyApp2(2)" };
 
         route '/'    => sub { "subclass" };
         route '/bar' => sub { "subclass bar" };
@@ -51,22 +52,23 @@ test_psgi
     client => sub {
         my $cb = shift;
 
+        my $middleware_id = 'MyApp(2) MyApp(1) MyApp2(2) MyApp2(1)';
         {
             my $res = $cb->(GET '/');
             ok($res->is_success);
-            is($res->content, 'SUBCLASS WRAPPED');
+            is($res->content, "subclass $middleware_id");
         }
 
         {
             my $res = $cb->(GET '/foo');
             ok($res->is_success);
-            is($res->content, 'BASE FOO WRAPPED');
+            is($res->content, "base foo $middleware_id");
         }
 
         {
             my $res = $cb->(GET '/bar');
             ok($res->is_success);
-            is($res->content, 'SUBCLASS BAR WRAPPED');
+            is($res->content, "subclass bar $middleware_id");
         }
     };
 
@@ -77,22 +79,8 @@ test_psgi
     extends 'MyApp2';
 
     router as {
-        wrap sub {
-            my $app = shift;
-            return sub {
-                my $res = $app->($_[0]);
-                $res->[2][0] = "outerA-" . $res->[2][0];
-                return $res;
-            };
-        };
-        wrap sub {
-            my $app = shift;
-            return sub {
-                my $res = $app->($_[0]);
-                $res->[2][0] =~ s/A/?/g;
-                return $res;
-            };
-        };
+        wrap ::filter { "$_[0] MyApp3(1)" };
+        wrap ::filter { "$_[0] MyApp3(2)" };
 
         route '/'    => sub { "subsubclass" };
         route '/baz' => sub { "subsubclass baz" };
@@ -104,28 +92,29 @@ test_psgi
     client => sub {
         my $cb = shift;
 
+        my $middleware_id = 'MyApp(2) MyApp(1) MyApp2(2) MyApp2(1) MyApp3(2) MyApp3(1)';
         {
             my $res = $cb->(GET '/');
             ok($res->is_success);
-            is($res->content, 'outerA-SUBSUBCL?SS WR?PPED');
+            is($res->content, "subsubclass $middleware_id");
         }
 
         {
             my $res = $cb->(GET '/foo');
             ok($res->is_success);
-            is($res->content, 'outerA-B?SE FOO WR?PPED');
+            is($res->content, "base foo $middleware_id");
         }
 
         {
             my $res = $cb->(GET '/bar');
             ok($res->is_success);
-            is($res->content, 'outerA-SUBCL?SS B?R WR?PPED');
+            is($res->content, "subclass bar $middleware_id");
         }
 
         {
             my $res = $cb->(GET '/baz');
             ok($res->is_success);
-            is($res->content, 'outerA-SUBSUBCL?SS B?Z WR?PPED');
+            is($res->content, "subsubclass baz $middleware_id");
         }
     };
 
