@@ -58,6 +58,9 @@ declared in another role, this generates an unresolvable conflict - you'll need
 to fix this in the roles themselves.
 
 Note that middleware applied via a role will still wrap the entire application.
+Also, since the router keyword doesn't happen at compile time, you should most
+likely put the C<with> statement for your application roles after the C<router>
+block.
 
 =cut
 
