@@ -4,6 +4,9 @@ Revision history for OX
       - implement roles. using OX::Role will now let you declare partial
         routers in your roles which will be merged into the main router when
         you apply them to an OX class.
+      - also clean up some bugs in router inheritance
+      - add 'literal' keyword, for declaring dependencies on literal values
+      - add warning for declaring routes which will be shadowed by mounts
 
 0.05  2012-10-15
       - OX::Request->mapping should return a hashref, not a hash (minor
