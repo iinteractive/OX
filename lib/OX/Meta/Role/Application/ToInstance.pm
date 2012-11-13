@@ -17,6 +17,11 @@ sub _apply_routes {
             unless $class->has_route_for($route->{path});
     }
 
+    for my $mount ($role->mounts) {
+        $class->_add_mount($mount)
+            unless $class->has_mount_for($mount->{path});
+    }
+
     $obj->regenerate_router_config;
 }
 

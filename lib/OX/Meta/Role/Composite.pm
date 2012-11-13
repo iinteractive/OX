@@ -30,6 +30,7 @@ sub _merge_routes {
     my $self = shift;
 
     my %routes;
+    my %mounts;
     for my $role (@{ $self->get_roles }) {
         next unless does_role($role, 'OX::Meta::Role::Role');
         for my $route ($role->routes) {
@@ -44,10 +45,18 @@ sub _merge_routes {
                 $routes{$canonical} = $route;
             }
         }
+        # XXX conflict detection
+        for my $mount ($role->mounts) {
+            $mounts{$mount->{path}} = $mount;
+        }
     }
 
     for my $route (values %routes) {
         $self->_add_route($route);
+    }
+
+    for my $mount (values %mounts) {
+        $self->_add_mount($mount);
     }
 }
 

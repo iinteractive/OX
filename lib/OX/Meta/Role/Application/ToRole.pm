@@ -17,6 +17,11 @@ sub _apply_routes {
         $role2->_add_route($route)
             unless $role2->has_route_for($route->{path});
     }
+
+    for my $mount ($role1->mounts) {
+        $role2->_add_mount($mount)
+            unless $role2->has_mount_for($mount->{path});
+    }
 }
 
 no Moose::Role;

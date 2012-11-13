@@ -20,6 +20,7 @@ use HTTP::Request::Common;
     use OX::Role;
 
     router as {
+        mount '/mount' => sub { [ 200, [], ["mounted app: $_[0]->{PATH_INFO}"] ] };
         route '/foo' => 'root.baz';
         route '/bar' => 'root.baz';
         route '/baz' => 'root.baz';
@@ -73,6 +74,11 @@ use HTTP::Request::Common;
                 ok(!$res->is_success);
                 is($res->code, 404);
             }
+            {
+                my $res = $cb->(GET '/mount');
+                ok(!$res->is_success);
+                is($res->code, 404);
+            }
         };
 
     Moose::Util::apply_all_roles($app, 'MyApp::Role');
@@ -95,6 +101,11 @@ use HTTP::Request::Common;
                 my $res = $cb->(GET '/baz');
                 ok($res->is_success);
                 is($res->content, 'baz');
+            }
+            {
+                my $res = $cb->(GET '/mount/foo');
+                ok($res->is_success);
+                is($res->content, 'mounted app: /foo');
             }
         };
 }

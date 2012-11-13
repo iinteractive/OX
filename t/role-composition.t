@@ -72,6 +72,15 @@ use HTTP::Request::Common;
 }
 
 {
+    package MyOtherApp;
+    use OX;
+
+    router as {
+        route '/' => sub { "other app" };
+    };
+}
+
+{
     package MyApp::Role::Root;
     use OX::Role;
 
@@ -83,6 +92,7 @@ use HTTP::Request::Common;
 
     router as {
         route '/' => 'root.index';
+        mount '/otherapp' => 'MyOtherApp';
     };
 }
 
@@ -112,6 +122,11 @@ test_psgi
             my $res = $cb->(GET '/login');
             ok($res->is_success);
             is($res->content, "login from /login");
+        }
+        {
+            my $res = $cb->(GET '/otherapp');
+            ok($res->is_success);
+            is($res->content, "other app");
         }
     };
 

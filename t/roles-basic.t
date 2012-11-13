@@ -71,6 +71,7 @@ use HTTP::Request::Common;
 
     router as {
         route '/post/:id' => 'posts.show';
+        mount '/auth'     => sub { [ 200, [], ["auth: $_[0]->{PATH_INFO}"] ] };
     };
 }
 
@@ -111,6 +112,12 @@ test_psgi
             my $res = $cb->(GET '/post/32');
             ok($res->is_success);
             is($res->content, "got post 32 from path /post/32 (action controller id)");
+        }
+
+        {
+            my $res = $cb->(GET '/auth/login');
+            ok($res->is_success);
+            is($res->content, "auth: /login");
         }
     };
 
