@@ -300,9 +300,14 @@ PSGI response arrayref.
 sub mount {
     my ($meta, $path, $mount, %params) = @_;
 
+    my %default = (
+        path                => $path,
+        definition_location => $meta->name,
+    );
+
     if (!ref($mount)) {
         $meta->add_mount(
-            path         => $path,
+            %default,
             class        => $mount,
             dependencies => \%params,
         );
@@ -312,14 +317,14 @@ sub mount {
             unless $mount->can('to_app');
 
         $meta->add_mount(
-            path => $path,
-            app  => $mount->to_app,
+            %default,
+            app => $mount->to_app,
         );
     }
     elsif (ref($mount) eq 'CODE') {
         $meta->add_mount(
-            path => $path,
-            app  => $mount,
+            %default,
+            app => $mount,
         )
     }
     else {

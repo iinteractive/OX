@@ -27,7 +27,12 @@ sub _apply_routes {
 
     for my $mount ($role->mounts) {
         if (!$class->has_mount_for($mount->path)) {
-            $class->_add_mount($mount);
+            if ($mount->isa('OX::Meta::Conflict')) {
+                confess($mount->message);
+            }
+            else {
+                $class->_add_mount($mount);
+            }
         }
     }
 }

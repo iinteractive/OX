@@ -45,9 +45,17 @@ sub _merge_routes {
                 $routes{$canonical} = $route;
             }
         }
-        # XXX conflict detection
         for my $mount ($role->mounts) {
-            $mounts{$mount->path} = $mount;
+            my $path = $mount->path;
+            if (exists $mounts{$path}) {
+                $mounts{$path} = OX::Meta::Conflict->new(
+                    path      => $path,
+                    conflicts => [$mounts{$path}, $mount],
+                );
+            }
+            else {
+                $mounts{$path} = $mount;
+            }
         }
     }
 

@@ -3,6 +3,8 @@ use Moose::Role;
 
 use OX::Util;
 
+requires 'type';
+
 has path => (
     is       => 'ro',
     isa      => 'Str',

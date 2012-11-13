@@ -17,12 +17,13 @@ sub message {
     my $self = shift;
 
     my @descs = map {
-        lc((split('::', blessed($_)))[-1]) . " " . $_->path
-      . " (" . $_->definition_location . ")"
+        $_->type . " " . $_->path . " (" . $_->definition_location . ")"
     } $self->conflicts;
 
     return "Conflicting paths found: " . join(', ', @descs);
 }
+
+sub type { 'conflict' }
 
 __PACKAGE__->meta->make_immutable;
 no Moose;

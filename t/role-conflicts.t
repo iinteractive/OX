@@ -133,4 +133,67 @@ test_psgi
         }
     };
 
+{
+    package MyApp::Mounts::Role1;
+    use OX::Role;
+
+    router as {
+        mount '/foo' => sub { [ 200, [], ["foo"] ] };
+        mount '/bar' => sub { [ 200, [], ["bar"] ] };
+    };
+}
+
+{
+    package MyApp::Mounts::Role2;
+    use OX::Role;
+
+    router as {
+        mount '/foo' => sub { [ 200, [], ["FOO"] ] };
+        mount '/baz' => sub { [ 200, [], ["BAZ"] ] };
+    };
+}
+
+{
+    package MyApp::Mounts::Conflict;
+    use OX;
+
+    ::like(
+        ::exception { with 'MyApp::Mounts::Role1', 'MyApp::Mounts::Role2' },
+        qr{conflict.*/foo}i,
+    );
+}
+
+{
+    package MyApp::Mounts::NoConflict;
+    use OX;
+
+    router as {
+        mount '/foo' => sub { [ 200, [], ["resolved"] ] };
+    };
+
+    with 'MyApp::Mounts::Role1', 'MyApp::Mounts::Role2';
+}
+
+test_psgi
+    app    => MyApp::Mounts::NoConflict->new->to_app,
+    client => sub {
+        my $cb = shift;
+
+        {
+            my $res = $cb->(GET '/foo');
+            ok($res->is_success);
+            is($res->content, 'resolved');
+        }
+        {
+            my $res = $cb->(GET '/bar');
+            ok($res->is_success);
+            is($res->content, 'bar');
+        }
+        {
+            my $res = $cb->(GET '/baz');
+            ok($res->is_success);
+            is($res->content, 'BAZ');
+        }
+    };
+
 done_testing;

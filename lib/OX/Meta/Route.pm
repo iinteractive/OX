@@ -31,6 +31,8 @@ sub router_config {
     };
 }
 
+sub type { 'route' }
+
 __PACKAGE__->meta->make_immutable;
 no Moose;
 
