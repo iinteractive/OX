@@ -19,7 +19,7 @@ sub _apply_routes {
 
     for my $mount ($role->mounts) {
         $class->_add_mount($mount)
-            unless $class->has_mount_for($mount->{path});
+            unless $class->has_mount_for($mount->path);
     }
 
     $obj->regenerate_router_config;

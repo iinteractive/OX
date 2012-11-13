@@ -47,7 +47,7 @@ sub _merge_routes {
         }
         # XXX conflict detection
         for my $mount ($role->mounts) {
-            $mounts{$mount->{path}} = $mount;
+            $mounts{$mount->path} = $mount;
         }
     }
 

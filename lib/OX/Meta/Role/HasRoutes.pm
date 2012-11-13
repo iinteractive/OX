@@ -6,6 +6,8 @@ use Class::Load 'load_class';
 use List::MoreUtils 'any';
 
 use OX::Meta::Conflict;
+use OX::Meta::Mount::App;
+use OX::Meta::Mount::Class;
 use OX::Meta::Route;
 use OX::Util;
 
@@ -21,7 +23,7 @@ has routes => (
 
 has mounts => (
     traits  => ['Array'],
-    isa     => 'ArrayRef[HashRef]',
+    isa     => 'ArrayRef[OX::Meta::Mount|OX::Meta::Conflict]',
     default => sub { [] },
     handles => {
         mounts     => 'elements',
@@ -42,9 +44,10 @@ sub add_route {
         if $self->has_route_for($path);
 
     for my $mount ($self->mounts) {
-        (my $prefix = $mount->{path}) =~ s{/$}{};
+        my $mount_path = $mount->path;
+        (my $prefix = $mount_path) =~ s{/$}{};
         if ($path =~ m{^$prefix/}) {
-            warn "The application mounted at $mount->{path} will shadow the "
+            warn "The application mounted at $mount_path will shadow the "
                . "route declared at $path";
         }
     }
@@ -65,29 +68,36 @@ sub add_mount {
     my $self = shift;
     my $opts = @_ > 1 ? { @_ } : $_[0];
 
+    my $mount;
     if (exists $opts->{class}) {
         load_class($opts->{class});
         confess "Class $opts->{class} must implement a to_app method"
             unless $opts->{class}->can('to_app');
+        $mount = OX::Meta::Mount::Class->new($opts);
+    }
+    else {
+        $mount = OX::Meta::Mount::App->new($opts);
     }
 
-    (my $prefix = $opts->{path}) =~ s{/$}{};
+    my $path = $mount->path;
+
+    (my $prefix = $path) =~ s{/$}{};
     for my $route ($self->routes) {
-        my $path = $route->path;
-        if ($path =~ m{^$prefix/}) {
-            warn "The application mounted at $opts->{path} will shadow the "
-               . "route declared at $path";
+        my $route_path = $route->path;
+        if ($route_path =~ m{^$prefix/}) {
+            warn "The application mounted at $path will shadow the "
+               . "route declared at $route_path";
         }
     }
 
-    $self->_add_mount($opts);
+    $self->_add_mount($mount);
 }
 
 sub has_mount_for {
     my $self = shift;
     my ($path) = @_;
 
-    return any { $_->{path} eq $path } $self->mounts;
+    return any { $_->path eq $path } $self->mounts;
 }
 
 no Moose::Role;

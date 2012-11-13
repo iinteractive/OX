@@ -20,7 +20,7 @@ sub _apply_routes {
 
     for my $mount ($role1->mounts) {
         $role2->_add_mount($mount)
-            unless $role2->has_mount_for($mount->{path});
+            unless $role2->has_mount_for($mount->path);
     }
 }
 

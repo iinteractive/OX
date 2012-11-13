@@ -100,24 +100,22 @@ around build_app => sub {
     my $urlmap = Plack::App::URLMap->new;
 
     for my $mount ($self->meta->mounts) {
-        if (exists $mount->{app}) {
-            $urlmap->map($mount->{path} => $mount->{app});
+        if ($mount->isa('OX::Meta::Mount::App')) {
+            $urlmap->map($mount->path => $mount->app);
         }
-        elsif (exists $mount->{class}) {
-            my $class = $mount->{class};
-            my %deps = %{ $mount->{dependencies} };
-
+        elsif ($mount->isa('OX::Meta::Mount::Class')) {
             my $service = Bread::Board::ConstructorInjection->new(
                 name         => '__ANON__',
-                class        => $mount->{class},
-                dependencies => $mount->{dependencies},
+                class        => $mount->class,
+                dependencies => $mount->dependencies,
                 parent       => $self,
             );
             my $app = $service->get;
-            $urlmap->map($mount->{path} => $app->to_app);
+            $urlmap->map($mount->path => $app->to_app);
         }
         else {
-            die "Unknown mount spec for path $mount->{path}";
+            die "Unknown mount type for path " . $mount->path . ": "
+              . blessed($mount);
         }
     }
 
