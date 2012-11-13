@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+
+0.06  2012-11-13
       - implement roles. using OX::Role will now let you declare partial
         routers in your roles which will be merged into the main router when
         you apply them to an OX class.
