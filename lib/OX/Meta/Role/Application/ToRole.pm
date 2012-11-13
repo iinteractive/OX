@@ -22,6 +22,10 @@ sub _apply_routes {
         $role2->_add_mount($mount)
             unless $role2->has_mount_for($mount->path);
     }
+
+    for my $conflict ($role1->mixed_conflicts) {
+        $role2->_add_mixed_conflict($conflict);
+    }
 }
 
 no Moose::Role;

@@ -59,9 +59,32 @@ sub _merge_routes {
         }
     }
 
-    for my $route (values %routes) {
+    my %mixed;
+    ROUTE: for my $route (values %routes) {
+        for my $mount_path (keys %mounts) {
+            my $mount = $mounts{$mount_path};
+            (my $prefix = $mount_path) =~ s{/$}{};
+            if ($route->path =~ m{^$mount_path\b}) {
+                my @routes = $route->isa('OX::Meta::Conflict')
+                    ? $route->conflicts
+                    : $route;
+                my @mounts = $mount->isa('OX::Meta::Conflict')
+                    ? $mount->conflicts
+                    : $mount;
+                my $conflict = OX::Meta::Conflict->new(
+                    path      => $route->canonical_path,
+                    conflicts => [@routes, @mounts],
+                );
+                $self->_add_mixed_conflict($conflict);
+                $mixed{$mount_path} = 1;
+                next ROUTE;
+            }
+        }
+
         $self->_add_route($route);
     }
+
+    delete $mounts{$_} for keys %mixed;
 
     for my $mount (values %mounts) {
         $self->_add_mount($mount);

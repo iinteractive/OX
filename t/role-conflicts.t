@@ -196,4 +196,134 @@ test_psgi
         }
     };
 
+{
+    package MyApp::Mixed::Role1;
+    use OX::Role;
+
+    router as {
+        mount '/foo' => sub { [ 200, [], ["foo"] ] };
+        mount '/bar' => sub { [ 200, [], ["bar"] ] };
+    };
+}
+
+{
+    package MyApp::Mixed::Role2;
+    use OX::Role;
+
+    router as {
+        route '/foo' => sub { "FOO" };
+        route '/baz' => sub { "BAZ" };
+    };
+}
+
+{
+    package MyApp::Mixed::Conflict;
+    use OX;
+
+    ::like(
+        ::exception { with 'MyApp::Mixed::Role1', 'MyApp::Mixed::Role2' },
+        qr{conflict.*/foo}i,
+    );
+}
+
+{
+    package MyApp::Mixed::NoResolution;
+    use OX;
+
+    router as {
+        mount '/foo' => sub { [ 200, [], ["resolved"] ] };
+    };
+
+    ::like(
+        ::exception { with 'MyApp::Mixed::Role1', 'MyApp::Mixed::Role2' },
+        qr{conflict.*/foo}i,
+    );
+}
+
+{
+    package MyApp::Mixed::NoResolution2;
+    use OX;
+
+    router as {
+        route '/foo' => sub { "resolved" };
+    };
+
+    ::like(
+        ::exception { with 'MyApp::Mixed::Role1', 'MyApp::Mixed::Role2' },
+        qr{conflict.*/foo}i,
+    );
+}
+
+{
+    package MyApp::Mixed2::Role1;
+    use OX::Role;
+
+    router as {
+        mount '/foo' => sub { [ 200, [], ["foo"] ] };
+        mount '/bar' => sub { [ 200, [], ["bar"] ] };
+    };
+}
+
+{
+    package MyApp::Mixed2::Role2;
+    use OX::Role;
+
+    router as {
+        route '/foo/thing' => sub { "FOO" };
+        route '/baz'       => sub { "BAZ" };
+    };
+}
+
+{
+    package MyApp::Mixed2::Conflict;
+    use OX;
+
+    ::like(
+        ::exception { with 'MyApp::Mixed2::Role1', 'MyApp::Mixed2::Role2' },
+        qr{conflict.*(?:/foo/thing.*/foo|/foo.*/foo/thing)}i,
+    );
+}
+
+{
+    package MyApp::Mixed2::NoResolution;
+    use OX;
+
+    router as {
+        mount '/foo' => sub { [ 200, [], ["resolved"] ] };
+    };
+
+    ::like(
+        ::exception { with 'MyApp::Mixed2::Role1', 'MyApp::Mixed2::Role2' },
+        qr{conflict.*(?:/foo/thing.*/foo|/foo.*/foo/thing)}i,
+    );
+}
+
+{
+    package MyApp::Mixed2::NoResolution2;
+    use OX;
+
+    router as {
+        route '/foo' => sub { "resolved" };
+    };
+
+    ::like(
+        ::exception { with 'MyApp::Mixed2::Role1', 'MyApp::Mixed2::Role2' },
+        qr{conflict.*(?:/foo/thing.*/foo|/foo.*/foo/thing)}i,
+    );
+}
+
+{
+    package MyApp::Mixed2::NoResolution3;
+    use OX;
+
+    router as {
+        route '/foo/thing' => sub { "resolved" };
+    };
+
+    ::like(
+        ::exception { with 'MyApp::Mixed2::Role1', 'MyApp::Mixed2::Role2' },
+        qr{conflict.*(?:/foo/thing.*/foo|/foo.*/foo/thing)}i,
+    );
+}
+
 done_testing;

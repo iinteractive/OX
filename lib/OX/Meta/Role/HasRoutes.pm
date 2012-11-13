@@ -32,6 +32,16 @@ has mounts => (
     },
 );
 
+has mixed_conflicts => (
+    traits  => ['Array'],
+    isa     => 'ArrayRef[OX::Meta::Conflict]',
+    default => sub { [] },
+    handles => {
+        mixed_conflicts     => 'elements',
+        _add_mixed_conflict => 'push',
+    },
+);
+
 sub add_route {
     my $self = shift;
 

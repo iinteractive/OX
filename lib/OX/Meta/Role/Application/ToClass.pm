@@ -14,6 +14,10 @@ sub _apply_routes {
         confess("OX::Roles can only be applied to OX classes");
     }
 
+    for my $conflict ($role->mixed_conflicts) {
+        confess($conflict->message);
+    }
+
     for my $route ($role->routes) {
         if (!$class->has_route_for($route->path)) {
             if ($route->isa('OX::Meta::Conflict')) {
