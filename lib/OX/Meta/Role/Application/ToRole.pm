@@ -27,6 +27,8 @@ sub _apply_routes {
     for my $conflict ($role1->mixed_conflicts) {
         $role2->_add_mixed_conflict($conflict);
     }
+
+    $role2->_add_middleware($role1->middleware);
 }
 
 1;
