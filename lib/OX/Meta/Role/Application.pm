@@ -11,6 +11,4 @@ after apply => sub {
     $self->_apply_routes($role, $class);
 };
 
-no Moose::Role;
-
 1;

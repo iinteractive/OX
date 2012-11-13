@@ -110,8 +110,6 @@ sub has_mount_for {
     return any { $_->path eq $path } $self->mounts;
 }
 
-no Moose::Role;
-
 =for Pod::Coverage
   add_route
   has_route_for

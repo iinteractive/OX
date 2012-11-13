@@ -1,5 +1,6 @@
 package OX::Response;
 use Moose;
+use namespace::autoclean;
 # ABSTRACT: response object for OX
 
 extends 'Web::Response';
@@ -20,6 +21,5 @@ in later.
 =cut
 
 __PACKAGE__->meta->make_immutable;
-no Moose;
 
 1;

@@ -1,5 +1,6 @@
 package OX::Meta::Route;
 use Moose;
+use namespace::autoclean;
 
 with 'OX::Meta::Role::Path';
 
@@ -34,6 +35,5 @@ sub router_config {
 sub type { 'route' }
 
 __PACKAGE__->meta->make_immutable;
-no Moose;
 
 1;

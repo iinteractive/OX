@@ -1,5 +1,6 @@
 package OX::Meta::Conflict;
 use Moose;
+use namespace::autoclean;
 
 with 'OX::Meta::Role::Path';
 
@@ -26,6 +27,5 @@ sub message {
 sub type { 'conflict' }
 
 __PACKAGE__->meta->make_immutable;
-no Moose;
 
 1;

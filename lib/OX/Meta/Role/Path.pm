@@ -1,5 +1,6 @@
 package OX::Meta::Role::Path;
 use Moose::Role;
+use namespace::autoclean;
 
 use OX::Util;
 
@@ -22,7 +23,5 @@ sub canonical_path {
 
     return OX::Util::canonicalize_path($self->path);
 }
-
-no Moose::Role;
 
 1;

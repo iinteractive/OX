@@ -1,5 +1,6 @@
 package OX::Meta::Role::Application::ToRole;
 use Moose::Role;
+use namespace::autoclean;
 
 use Moose::Util 'does_role';
 
@@ -27,7 +28,5 @@ sub _apply_routes {
         $role2->_add_mixed_conflict($conflict);
     }
 }
-
-no Moose::Role;
 
 1;

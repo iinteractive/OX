@@ -44,8 +44,6 @@ sub route_builder_for {
     }
 }
 
-no Moose::Role;
-
 =for Pod::Coverage
   add_route_builder
   route_builder_for

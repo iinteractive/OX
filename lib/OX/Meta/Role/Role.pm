@@ -10,6 +10,4 @@ sub composition_class_roles {
     return 'OX::Meta::Role::Composite';
 }
 
-no Moose::Role;
-
 1;

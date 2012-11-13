@@ -25,6 +25,4 @@ sub _apply_routes {
     $obj->regenerate_router_config;
 }
 
-no Moose::Role;
-
 1;

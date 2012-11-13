@@ -31,8 +31,6 @@ sub has_middleware_dependencies {
     return any { %{ $_->{deps} } } $self->middleware;
 }
 
-no Moose::Role;
-
 =for Pod::Coverage
   add_middleware
   has_middleware_dependencies

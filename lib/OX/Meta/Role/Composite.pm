@@ -91,6 +91,4 @@ sub _merge_routes {
     }
 }
 
-no Moose::Role;
-
 1;

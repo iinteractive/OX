@@ -1,5 +1,6 @@
 package OX::Meta::Mount::App;
 use Moose;
+use namespace::autoclean;
 
 extends 'OX::Meta::Mount';
 
@@ -10,6 +11,5 @@ has app => (
 );
 
 __PACKAGE__->meta->make_immutable;
-no Moose;
 
 1;

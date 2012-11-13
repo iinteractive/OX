@@ -41,6 +41,4 @@ sub _apply_routes {
     }
 }
 
-no Moose::Role;
-
 1;
