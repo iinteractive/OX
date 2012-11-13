@@ -14,7 +14,7 @@ sub _apply_routes {
 
     for my $route ($role->routes) {
         $class->_add_route($route)
-            unless $class->has_route_for($route->{path});
+            unless $class->has_route_for($route->path);
     }
 
     for my $mount ($role->mounts) {
