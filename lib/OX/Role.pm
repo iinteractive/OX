@@ -12,7 +12,52 @@ use OX ();
 
 =head1 SYNOPSIS
 
+  package MyApp::Role::Auth;
+  use OX::Role;
+
+  has auth => (
+      is  => 'ro',
+      isa => 'MyApp::Auth',
+  );
+
+  router as {
+      route '/auth/login'  => 'auth.login';
+      route '/auth/logout' => 'auth.logout';
+  };
+
+  package MyApp;
+  use OX;
+
+  with 'MyApp::Role::Auth';
+
+  has root => (
+      is  => 'ro',
+      isa => 'MyApp::Controller::Root',
+  );
+
+  router as {
+      route '/' => 'root.index';
+  };
+
 =head1 DESCRIPTION
+
+This module allows you to define roles to be applied to your L<OX>
+applications. OX roles can define any part of the application that an OX class
+can, except for declaring a pre-built router or router class. When you consume
+the role, all of the services, routes, mounts, and middleware will be composed
+into the application class.
+
+During composition, conflicts between mounts and routes will be checked for,
+similar to how roles normally detect conflicts between methods and attributes.
+If two mounts are declared with the same path, a conflict will be generated,
+and if two routes are declared with the same path (disregarding the names of
+variable path components), a conflict will also be generated. The consuming
+class can resolve these types of conflicts by declaring its own mount or route,
+respectively. If a route is declared which would be shadowed by a mount
+declared in another role, this generates an unresolvable conflict - you'll need
+to fix this in the roles themselves.
+
+Note that middleware applied via a role will still wrap the entire application.
 
 =cut
 
