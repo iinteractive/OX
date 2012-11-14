@@ -87,7 +87,7 @@ see L<OX::Application> for more information on going that route.
 
 my ($import, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
-    with_meta => [qw(router route mount wrap)],
+    with_meta => [qw(router route mount wrap wrap_if)],
     as_is     => [qw(as literal)],
     install   => [qw(unimport)],
     class_metaroles => {
@@ -376,6 +376,16 @@ sub wrap {
     my ($meta, $middleware, %deps) = @_;
 
     $meta->add_middleware(
+        middleware => $middleware,
+        deps       => \%deps,
+    );
+}
+
+sub wrap_if {
+    my ($meta, $condition, $middleware, %deps) = @_;
+
+    $meta->add_middleware(
+        condition  => $condition,
         middleware => $middleware,
         deps       => \%deps,
     );

@@ -5,6 +5,8 @@ use namespace::autoclean;
 use Bread::Board;
 use Plack::App::URLMap;
 
+use OX::Util;
+
 has _manual_router_config => (
     is  => 'rw',
     isa => 'HashRef',
@@ -87,7 +89,22 @@ sub _resolve_middleware {
         );
     }
 
-    return $mw_service->get;
+    my $resolved_mw = $mw_service->get;
+
+    if (my $condition = $mw_spec->{condition}) {
+        require Plack::Middleware::Conditional;
+        my $builder = $resolved_mw;
+        $resolved_mw = sub {
+            Plack::Middleware::Conditional->new(
+                condition => $condition,
+                builder   => sub {
+                    OX::Util::apply_middleware($_[0], $builder)
+                },
+            )->wrap($_[0]);
+        };
+    }
+
+    return $resolved_mw;
 }
 
 around build_app => sub {

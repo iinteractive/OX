@@ -4,12 +4,11 @@ use namespace::autoclean;
 # ABSTRACT: base class for OX applications
 
 use Bread::Board;
-use Moose::Util::TypeConstraints 'match_on_type';
 use Plack::Middleware::HTTPExceptions;
 use Plack::Util;
 use Try::Tiny;
 
-use OX::Types;
+use OX::Util;
 
 extends 'Bread::Board::Container';
 
@@ -122,20 +121,7 @@ sub BUILD {
                 );
 
                 for my $middleware (reverse @middleware) {
-                    match_on_type $middleware => (
-                        'CodeRef' => sub {
-                            $app = $middleware->($app);
-                        },
-                        'OX::Types::MiddlewareClass' => sub {
-                            $app = $middleware->wrap($app);
-                        },
-                        'Plack::Middleware' => sub {
-                            $app = $middleware->wrap($app);
-                        },
-                        sub {
-                            warn "not applying middleware $middleware!";
-                        },
-                    );
+                    $app = OX::Util::apply_middleware($app, $middleware);
                 }
 
                 $app;
