@@ -381,6 +381,21 @@ sub wrap {
     );
 }
 
+=func wrap_if
+
+C<wrap_if> works identically to C<wrap>, except that it requires an additional
+initial coderef parameter for the condition under which this middleware should
+be applied. This condition will be run on every request, and will receive the
+C<$env> hashref as a parameter, so the condition can depend on variables in the
+environment. For instance:
+
+  wrap_if sub { $_[0]->{REMOTE_ADDR} eq '127.0.0.1' },
+      'Plack::Middleware::StackTrace' => (
+          force => literal(1),
+      );
+
+=cut
+
 sub wrap_if {
     my ($meta, $condition, $middleware, %deps) = @_;
 
