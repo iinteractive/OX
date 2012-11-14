@@ -34,6 +34,7 @@ sub apply_middleware {
 
 =for Pod::Coverage
   canonicalize_path
+  apply_middleware
 
 =cut
 
