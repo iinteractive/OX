@@ -42,70 +42,13 @@ around build_middleware => sub {
     my $orig = shift;
     my $self = shift;
 
-    my @middleware = map { $self->_resolve_middleware($_) }
-                         $self->meta->all_middleware;
+    my @middleware = map { $_->resolve($self) } $self->meta->all_middleware;
 
     return [
         @{ $self->$orig(@_) },
         @middleware,
     ];
 };
-
-sub _resolve_middleware {
-    my $self = shift;
-    my ($mw_spec) = @_;
-
-    my ($mw, $deps) = ($mw_spec->{middleware}, $mw_spec->{deps});
-
-    my %common = (
-        name   => '__ANON__',
-        parent => $self,
-    );
-    my $mw_service;
-    if (!ref($mw)) {
-        $mw_service = Bread::Board::ConstructorInjection->new(
-            %common,
-            class        => $mw,
-            dependencies => $deps,
-        );
-    }
-    elsif (blessed($mw)) {
-        $mw_service = Bread::Board::Literal->new(
-            %common,
-            value => $mw,
-        );
-    }
-    else {
-        $mw_service = Bread::Board::BlockInjection->new(
-            %common,
-            block        => sub {
-                my $s = shift;
-                return sub {
-                    my $app = shift;
-                    return $mw->($app, $s);
-                };
-            },
-            dependencies => $deps,
-        );
-    }
-
-    my $resolved_mw = $mw_service->get;
-
-    if (my $condition = $mw_spec->{condition}) {
-        require Plack::Middleware::Conditional;
-        my $builder = $resolved_mw;
-        $resolved_mw = sub {
-            Plack::Middleware::Conditional->new(
-                condition => $condition,
-                builder   => sub {
-                    OX::Util::apply_middleware($_[0], $builder)
-                },
-            )->wrap($_[0]);
-        };
-    }
-
-    return $resolved_mw;
-}
 
 around build_app => sub {
     my $orig = shift;

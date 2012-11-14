@@ -376,8 +376,8 @@ sub wrap {
     my ($meta, $middleware, %deps) = @_;
 
     $meta->add_middleware(
-        middleware => $middleware,
-        deps       => \%deps,
+        middleware   => $middleware,
+        dependencies => \%deps,
     );
 }
 
@@ -400,9 +400,9 @@ sub wrap_if {
     my ($meta, $condition, $middleware, %deps) = @_;
 
     $meta->add_middleware(
-        condition  => $condition,
-        middleware => $middleware,
-        deps       => \%deps,
+        condition    => $condition,
+        middleware   => $middleware,
+        dependencies => \%deps,
     );
 }
 
