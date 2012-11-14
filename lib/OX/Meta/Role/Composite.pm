@@ -57,7 +57,6 @@ sub _merge_routes {
                 $mounts{$path} = $mount;
             }
         }
-        $self->_add_middleware($role->middleware);
     }
 
     my %mixed;

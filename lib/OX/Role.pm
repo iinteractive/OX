@@ -43,9 +43,9 @@ use OX ();
 
 This module allows you to define roles to be applied to your L<OX>
 applications. OX roles can define any part of the application that an OX class
-can, except for declaring a pre-built router or router class. When you consume
-the role, all of the services, routes, mounts, and middleware will be composed
-into the application class.
+can, except for middleware and declaring a pre-built router or router class.
+When you consume the role, all of the services, routes, and mounts will be
+composed into the application class.
 
 During composition, conflicts between mounts and routes will be checked for,
 similar to how roles normally detect conflicts between methods and attributes.
@@ -57,16 +57,15 @@ respectively. If a route is declared which would be shadowed by a mount
 declared in another role, this generates an unresolvable conflict - you'll need
 to fix this in the roles themselves.
 
-Note that middleware applied via a role will still wrap the entire application.
-Also, since the router keyword doesn't happen at compile time, you should most
-likely put the C<with> statement for your application roles after the C<router>
-block.
+Note that since the router keyword doesn't happen at compile time, you should
+most likely put the C<with> statement for your application roles after the
+C<router> block.
 
 =cut
 
 my ($import) = Moose::Exporter->build_import_methods(
     also      => ['Moose::Role', 'Bread::Board::Declare'],
-    with_meta => [qw(router route mount wrap)],
+    with_meta => [qw(router route mount)],
     as_is     => [\&OX::as, \&OX::literal],
     install   => [qw(unimport init_meta)],
     role_metaroles => {
@@ -275,55 +274,6 @@ sub mount {
     else {
         confess "Unknown mount $mount";
     }
-}
-
-=func wrap
-
-The C<wrap> keyword declares a middleware to apply to the application. The
-C<wrap> statements will be applied in order such that the first C<wrap>
-statement corresponds to the outermost middleware (just like
-L<Plack::Builder>).
-
-  wrap 'Plack::Middleware::Static' => (
-      path => literal(sub { s{^/static/}{} }),
-      root => 'static_root',
-  );
-
-If you specify a class name as the middleware to apply, it will create an
-instance of the class (resolving the parameters as dependencies and passing
-them into the constructor) and call C<wrap> on that instance, passing in the
-application coderef so far and using the result as the new application (this is
-the API provided by L<Plack::Middleware>).
-
-  wrap(Plack::Middleware::StackTrace->new(force => 1));
-
-If you specify an object as the middleware, it will call C<wrap> on that
-object, passing in the application coderef so far and use the result as the new
-application. Note that parentheses are required if the argument is a literal
-constructor call, to avoid it being parsed as an indirect method call.
-
-  wrap sub {
-      my $app = shift;
-      return sub {
-          my $env = shift;
-          return [302, [Location => '/'], []]
-              if $env->{PATH_INFO} eq '/';
-          return $app->($env);
-      };
-  };
-
-If you specify a coderef as the middleware, it will call that coderef, passing
-in the application coderef so far, and use the result as the new application.
-
-=cut
-
-sub wrap {
-    my ($meta, $middleware, %deps) = @_;
-
-    $meta->add_middleware(
-        middleware => $middleware,
-        deps       => \%deps,
-    );
 }
 
 =func literal

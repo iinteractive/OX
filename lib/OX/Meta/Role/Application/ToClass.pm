@@ -39,8 +39,6 @@ sub _apply_routes {
             }
         }
     }
-
-    $class->_add_middleware($role->middleware);
 }
 
 1;

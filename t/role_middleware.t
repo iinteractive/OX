@@ -6,6 +6,8 @@ use Plack::Test;
 
 use HTTP::Request::Common;
 
+BEGIN { plan skip_all => "i can't decide if this is a good idea or not" }
+
 sub filter (&) {
     my $code = shift;
     return sub {
