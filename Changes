@@ -1,6 +1,11 @@
 Revision history for OX
 
 {{$NEXT}}
+      - actually, disable middleware in roles for now, because it's not clear
+        that it actually makes sense
+      - add 'wrap_if' keyword for Plack::Middleware::Conditional support
+        (relates to wrap in the same way that enable_if relates to enable in
+        Plack::Builder)
 
 0.06  2012-11-13
       - implement roles. using OX::Role will now let you declare partial
