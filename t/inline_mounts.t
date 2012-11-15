@@ -551,4 +551,171 @@ test_psgi
         }
     };
 
+{
+    package MyApp7::Super;
+    use OX;
+
+    has root => (
+        is    => 'ro',
+        isa   => 'MyApp::Controller::Root',
+        infer => 1,
+    );
+
+    has view => (
+        is  => 'ro',
+        isa => 'MyApp::View',
+    );
+
+    router as {
+        route '/'    => 'root.index';
+        route '/baz' => 'root.baz';
+        route '/:_'  => 'root.fallback';
+    };
+}
+
+{
+    package MyApp7;
+    use OX;
+
+    extends 'MyApp7::Super';
+
+    has foo => (
+        is    => 'ro',
+        isa   => 'MyApp::Controller::Foo',
+        infer => 1,
+    );
+
+    router as {
+        mount '/foo' => router as {
+            route '/'    => 'foo.index';
+            route '/bar' => 'foo.bar';
+            route '/:_'  => 'root.fallback';
+        };
+    }
+}
+
+test_psgi
+    app    => MyApp7->new->to_app,
+    client => sub {
+        my $cb = shift;
+
+        {
+            my $res = $cb->(GET '/');
+            ok($res->is_success);
+            is($res->content, "rendered root index");
+        }
+        {
+            my $res = $cb->(GET '/baz');
+            ok($res->is_success);
+            is($res->content, "rendered root baz");
+        }
+        {
+            my $res = $cb->(GET '/quux');
+            ok($res->is_success);
+            is($res->content, "rendered fallback for /quux");
+        }
+        {
+            my $res = $cb->(GET '/foo');
+            ok($res->is_success);
+            is($res->content, "rendered foo index");
+        }
+        {
+            my $res = $cb->(GET '/foo/bar');
+            ok($res->is_success);
+            is($res->content, "rendered foo bar");
+        }
+        {
+            my $res = $cb->(GET '/foo/quux');
+            ok($res->is_success);
+            is($res->content, "rendered fallback for /quux");
+        }
+    };
+
+{
+    package MyApp8::Super;
+    use OX;
+
+    has root => (
+        is    => 'ro',
+        isa   => 'MyApp::Controller::Root',
+        infer => 1,
+    );
+
+    has view => (
+        is  => 'ro',
+        isa => 'MyApp::View',
+    );
+
+    router as {
+        route '/'    => 'root.index';
+        route '/baz' => 'root.baz';
+        route '/:_'  => 'root.fallback';
+    };
+}
+
+{
+    package MyApp8::Role;
+    use OX::Role;
+
+    has foo => (
+        is    => 'ro',
+        isa   => 'MyApp::Controller::Foo',
+        infer => 1,
+    );
+
+    router as {
+        mount '/foo' => router as {
+            route '/'    => 'foo.index';
+            route '/bar' => 'foo.bar';
+            route '/:_'  => 'root.fallback';
+        };
+    }
+}
+
+{
+    package MyApp8;
+    use OX;
+
+    extends 'MyApp8::Super';
+    with 'MyApp8::Role';
+}
+
+test_psgi
+    app    => MyApp8->new->to_app,
+    client => sub {
+        my $cb = shift;
+
+        {
+            my $res = $cb->(GET '/');
+            ok($res->is_success);
+            is($res->content, "rendered root index");
+        }
+        {
+            my $res = $cb->(GET '/baz');
+            ok($res->is_success);
+            is($res->content, "rendered root baz");
+        }
+        {
+            my $res = $cb->(GET '/quux');
+            ok($res->is_success);
+            is($res->content, "rendered fallback for /quux");
+        }
+        {
+            my $res = $cb->(GET '/foo');
+            ok($res->is_success);
+            is($res->content, "rendered foo index");
+        }
+        {
+            my $res = $cb->(GET '/foo/bar');
+            ok($res->is_success);
+            is($res->content, "rendered foo bar");
+        }
+        {
+            local $TODO = "nested routers can currently only access services in the role they are defined in";
+            my $res = $cb->(GET '/foo/quux');
+            ok($res->is_success);
+            is($res->content, "rendered fallback for /quux");
+        }
+    };
+
 done_testing;
