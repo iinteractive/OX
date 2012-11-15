@@ -5,6 +5,7 @@ use 5.010;
 
 use Bread::Board::Declare 0.11 ();
 use Carp 'confess';
+use Moose::Util 'find_meta';
 use namespace::autoclean ();
 use Scalar::Util 'blessed';
 
@@ -118,9 +119,14 @@ used in place of the previously mentioned list.
 =cut
 
 sub router {
-    my ($meta, @args) = @_;
+    my ($top_meta, @args) = @_;
+
+    my $meta = $OX::CURRENT_CLASS
+        ? _new_router_meta($OX::CURRENT_CLASS)
+        : $top_meta;
+
     confess "Only one top level router is allowed"
-        if $meta->has_route_builders;
+        if !$OX::CURRENT_CLASS && $meta->has_route_builders;
 
     if (ref($args[0]) eq 'ARRAY') {
         $meta->add_route_builder($_) for @{ $args[0] };
@@ -130,9 +136,16 @@ sub router {
 
     if (ref($body) eq 'CODE') {
         if (!$meta->has_route_builders) {
-            $meta->add_route_builder('OX::RouteBuilder::ControllerAction');
-            $meta->add_route_builder('OX::RouteBuilder::HTTPMethod');
-            $meta->add_route_builder('OX::RouteBuilder::Code');
+            if ($OX::CURRENT_CLASS) {
+                for my $route_builder ($OX::CURRENT_CLASS->route_builders) {
+                    $meta->add_route_builder($route_builder);
+                }
+            }
+            else {
+                $meta->add_route_builder('OX::RouteBuilder::ControllerAction');
+                $meta->add_route_builder('OX::RouteBuilder::HTTPMethod');
+                $meta->add_route_builder('OX::RouteBuilder::Code');
+            }
         }
 
         local $OX::CURRENT_CLASS = $meta;
@@ -141,6 +154,29 @@ sub router {
     else {
         confess "Roles only support the block form of 'router', not $body";
     }
+
+    if (defined wantarray) {
+        return $meta->new_object->to_app;
+    }
+}
+
+my $default_class_meta;
+
+sub _new_router_meta {
+    my ($meta) = @_;
+
+    if (!$meta->isa('Moose::Meta::Role')) {
+        return OX::_new_router_meta($meta);
+    }
+
+    $default_class_meta ||= do {
+        OX->import({ into => "OX::Role::__DEFAULT_META__" });
+        find_meta('OX::Role::__DEFAULT_META__');
+    };
+
+    return find_meta($default_class_meta)->name->create_anon_class(
+        superclasses => [$default_class_meta->superclasses],
+    );
 }
 
 =func route $path, $action_spec, %params

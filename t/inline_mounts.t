@@ -401,4 +401,77 @@ test_psgi
         }
     };
 
+{
+    package MyApp5::Role;
+    use OX::Role;
+
+    router as {
+        mount '/foo' => router as {
+            route '/' => sub { "foo root" };
+            mount '/bar' => router as {
+                route '/'    => sub { "foo bar" };
+                route '/baz' => sub { "foo bar baz" };
+            };
+        };
+        mount '/bar' => router as {
+            route '/'    => sub { "BAR ROOT" };
+            route '/baz' => sub { "BAR BAZ" };
+        };
+    }
+}
+
+{
+    package MyApp5;
+    use OX;
+
+    with 'MyApp5::Role';
+}
+
+test_psgi
+    app    => MyApp5->new->to_app,
+    client => sub {
+        my $cb = shift;
+
+        {
+            my $res = $cb->(GET '/');
+            ok(!$res->is_success);
+            is($res->code, 404);
+        }
+        {
+            my $res = $cb->(GET '/foo');
+            ok($res->is_success);
+            is($res->content, "foo root");
+        }
+        {
+            my $res = $cb->(GET '/foo/bar');
+            ok($res->is_success);
+            is($res->content, "foo bar");
+        }
+        {
+            my $res = $cb->(GET '/foo/baz');
+            ok(!$res->is_success);
+            is($res->code, 404);
+        }
+        {
+            my $res = $cb->(GET '/foo/bar/baz');
+            ok($res->is_success);
+            is($res->content, "foo bar baz");
+        }
+        {
+            my $res = $cb->(GET '/bar');
+            ok($res->is_success);
+            is($res->content, "BAR ROOT");
+        }
+        {
+            my $res = $cb->(GET '/bar/baz');
+            ok($res->is_success);
+            is($res->content, "BAR BAZ");
+        }
+        {
+            my $res = $cb->(GET '/baz');
+            ok(!$res->is_success);
+            is($res->code, 404);
+        }
+    };
+
 done_testing;
