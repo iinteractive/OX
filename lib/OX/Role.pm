@@ -195,18 +195,7 @@ argument here as well.
 
 =cut
 
-sub route {
-    my ($meta, $path, $action_spec, %params) = @_;
-
-    my ($class, $route_spec) = $meta->route_builder_for($action_spec);
-    $meta->add_route(
-        path                => $path,
-        class               => $class,
-        route_spec          => $route_spec,
-        params              => \%params,
-        definition_location => $meta->name,
-    );
-}
+sub route { goto \&OX::route }
 
 =func mount
 
@@ -241,40 +230,7 @@ PSGI response arrayref.
 
 =cut
 
-sub mount {
-    my ($meta, $path, $mount, %params) = @_;
-
-    my %default = (
-        path                => $path,
-        definition_location => $meta->name,
-    );
-
-    if (!ref($mount)) {
-        $meta->add_mount(
-            %default,
-            class        => $mount,
-            dependencies => \%params,
-        );
-    }
-    elsif (blessed($mount)) {
-        confess "Class " . blessed($mount) . " must implement a to_app method"
-            unless $mount->can('to_app');
-
-        $meta->add_mount(
-            %default,
-            app => $mount->to_app,
-        );
-    }
-    elsif (ref($mount) eq 'CODE') {
-        $meta->add_mount(
-            %default,
-            app => $mount,
-        )
-    }
-    else {
-        confess "Unknown mount $mount";
-    }
-}
+sub mount { goto \&OX::mount }
 
 =func literal
 
