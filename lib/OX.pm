@@ -298,38 +298,35 @@ PSGI response arrayref.
 =cut
 
 sub mount {
-    my ($meta, $path, $mount, %params) = @_;
+    my ($meta, $path, $mount, %deps) = @_;
 
     my %default = (
         path                => $path,
         definition_location => $meta->name,
     );
 
+    my %extra;
     if (!ref($mount)) {
-        $meta->add_mount(
-            %default,
+        %extra = (
             class        => $mount,
-            dependencies => \%params,
+            dependencies => \%deps,
         );
     }
     elsif (blessed($mount)) {
-        confess "Class " . blessed($mount) . " must implement a to_app method"
-            unless $mount->can('to_app');
-
-        $meta->add_mount(
-            %default,
+        %extra = (
             app => $mount->to_app,
         );
     }
     elsif (ref($mount) eq 'CODE') {
-        $meta->add_mount(
-            %default,
+        %extra = (
             app => $mount,
         )
     }
     else {
         confess "Unknown mount $mount";
     }
+
+    $meta->add_mount(%default, %extra);
 }
 
 =func wrap
