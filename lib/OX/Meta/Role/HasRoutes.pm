@@ -16,8 +16,9 @@ has routes => (
     isa     => 'ArrayRef[OX::Meta::Route|OX::Meta::Conflict]',
     default => sub { [] },
     handles => {
-        routes     => 'elements',
-        _add_route => 'push',
+        routes        => 'elements',
+        _add_route    => 'push',
+        _clear_routes => 'clear',
     },
 );
 
@@ -26,9 +27,10 @@ has mounts => (
     isa     => 'ArrayRef[OX::Meta::Mount|OX::Meta::Conflict]',
     default => sub { [] },
     handles => {
-        mounts     => 'elements',
-        has_mounts => 'count',
-        _add_mount => 'push',
+        mounts        => 'elements',
+        has_mounts    => 'count',
+        _add_mount    => 'push',
+        _clear_mounts => 'clear',
     },
 );
 
@@ -37,8 +39,9 @@ has mixed_conflicts => (
     isa     => 'ArrayRef[OX::Meta::Conflict]',
     default => sub { [] },
     handles => {
-        mixed_conflicts     => 'elements',
-        _add_mixed_conflict => 'push',
+        mixed_conflicts        => 'elements',
+        _add_mixed_conflict    => 'push',
+        _clear_mixed_conflicts => 'clear',
     },
 );
 

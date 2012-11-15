@@ -11,8 +11,9 @@ has middleware => (
     isa     => 'ArrayRef[OX::Meta::Middleware]',
     default => sub { [] },
     handles => {
-        middleware      => 'elements',
-        _add_middleware => 'push',
+        middleware        => 'elements',
+        _add_middleware   => 'push',
+        _clear_middleware => 'clear',
     },
 );
 

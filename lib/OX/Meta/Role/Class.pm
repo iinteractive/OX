@@ -43,6 +43,15 @@ sub all_middleware {
            $self->linearized_isa;
 }
 
+sub clear_app_state {
+    my $self = shift;
+    $self->_clear_routes;
+    $self->_clear_mounts;
+    $self->_clear_mixed_conflicts;
+    $self->_clear_middleware;
+    $self->_clear_route_builders;
+}
+
 =pod
 
 =for Pod::Coverage

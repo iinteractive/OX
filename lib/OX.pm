@@ -222,12 +222,7 @@ sub _new_router_meta {
     my ($meta) = @_;
 
     return find_meta($meta)->name->create_anon_class(
-        superclasses    => [$meta->name],
-        routes          => [],
-        mounts          => [],
-        mixed_conflicts => [],
-        middleware      => [],
-        route_builders  => [],
+        superclasses => [$meta->name],
     );
 }
 

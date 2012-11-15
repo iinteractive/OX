@@ -11,9 +11,10 @@ has route_builders => (
     isa     => 'ArrayRef[Str]',
     default => sub { [] },
     handles => {
-        route_builders     => 'elements',
-        has_route_builders => 'count',
-        _add_route_builder => 'push',
+        route_builders        => 'elements',
+        has_route_builders    => 'count',
+        _add_route_builder    => 'push',
+        _clear_route_builders => 'clear',
     },
 );
 

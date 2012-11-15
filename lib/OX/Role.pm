@@ -174,9 +174,12 @@ sub _new_router_meta {
         find_meta('OX::Role::__DEFAULT_META__');
     };
 
-    return find_meta($default_class_meta)->name->create_anon_class(
+    my $new = find_meta($default_class_meta)->name->create_anon_class(
         superclasses => [$default_class_meta->superclasses],
+        roles        => [$meta->name],
     );
+    $new->clear_app_state;
+    return $new;
 }
 
 =func route $path, $action_spec, %params
