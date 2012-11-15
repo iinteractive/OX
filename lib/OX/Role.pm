@@ -65,8 +65,8 @@ C<router> block.
 
 my ($import) = Moose::Exporter->build_import_methods(
     also      => ['Moose::Role', 'Bread::Board::Declare'],
-    with_meta => [qw(router route mount)],
-    as_is     => [\&OX::as, \&OX::literal],
+    with_meta => [qw(router)],
+    as_is     => [\&OX::route, \&OX::mount, \&OX::as, \&OX::literal],
     install   => [qw(unimport init_meta)],
     role_metaroles => {
         role                    => ['OX::Meta::Role::Role'],
@@ -133,6 +133,7 @@ sub router {
             $meta->add_route_builder('OX::RouteBuilder::Code');
         }
 
+        local $OX::CURRENT_CLASS = $meta;
         $body->();
     }
     else {
@@ -195,8 +196,6 @@ argument here as well.
 
 =cut
 
-sub route { goto \&OX::route }
-
 =func mount
 
 The C<mount> keyword declares an entirely separate application to be mounted
@@ -229,8 +228,6 @@ a plain L<PSGI> application, which receives an env hashref and returns a full
 PSGI response arrayref.
 
 =cut
-
-sub mount { goto \&OX::mount }
 
 =func literal
 

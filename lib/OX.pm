@@ -87,8 +87,8 @@ see L<OX::Application> for more information on going that route.
 
 my ($import, undef, $init_meta) = Moose::Exporter->build_import_methods(
     also      => ['Moose', 'Bread::Board::Declare'],
-    with_meta => [qw(router route mount wrap wrap_if)],
-    as_is     => [qw(as literal)],
+    with_meta => [qw(router)],
+    as_is     => [qw(route mount wrap wrap_if as literal)],
     install   => [qw(unimport)],
     class_metaroles => {
         class => ['OX::Meta::Role::Class'],
@@ -163,6 +163,8 @@ method call.
 
 =cut
 
+our $CURRENT_CLASS;
+
 sub router {
     my ($meta, @args) = @_;
     confess "Only one top level router is allowed"
@@ -189,6 +191,7 @@ sub router {
             $meta->add_route_builder('OX::RouteBuilder::Code');
         }
 
+        local $CURRENT_CLASS = $meta;
         $body->();
     }
     else {
@@ -252,15 +255,18 @@ argument here as well.
 =cut
 
 sub route {
-    my ($meta, $path, $action_spec, %params) = @_;
+    my ($path, $action_spec, %params) = @_;
 
-    my ($class, $route_spec) = $meta->route_builder_for($action_spec);
-    $meta->add_route(
+    confess "route called outside of a router block"
+        unless $CURRENT_CLASS;
+
+    my ($class, $route_spec) = $CURRENT_CLASS->route_builder_for($action_spec);
+    $CURRENT_CLASS->add_route(
         path                => $path,
         class               => $class,
         route_spec          => $route_spec,
         params              => \%params,
-        definition_location => $meta->name,
+        definition_location => $CURRENT_CLASS->name,
     );
 }
 
@@ -298,11 +304,14 @@ PSGI response arrayref.
 =cut
 
 sub mount {
-    my ($meta, $path, $mount, %deps) = @_;
+    my ($path, $mount, %deps) = @_;
+
+    confess "mount called outside of a router block"
+        unless $CURRENT_CLASS;
 
     my %default = (
         path                => $path,
-        definition_location => $meta->name,
+        definition_location => $CURRENT_CLASS->name,
     );
 
     my %extra;
@@ -326,7 +335,7 @@ sub mount {
         confess "Unknown mount $mount";
     }
 
-    $meta->add_mount(%default, %extra);
+    $CURRENT_CLASS->add_mount(%default, %extra);
 }
 
 =func wrap
@@ -370,9 +379,12 @@ in the application coderef so far, and use the result as the new application.
 =cut
 
 sub wrap {
-    my ($meta, $middleware, %deps) = @_;
+    my ($middleware, %deps) = @_;
 
-    $meta->add_middleware(
+    confess "wrap called outside of a router block"
+        unless $CURRENT_CLASS;
+
+    $CURRENT_CLASS->add_middleware(
         middleware   => $middleware,
         dependencies => \%deps,
     );
@@ -394,9 +406,12 @@ environment. For instance:
 =cut
 
 sub wrap_if {
-    my ($meta, $condition, $middleware, %deps) = @_;
+    my ($condition, $middleware, %deps) = @_;
 
-    $meta->add_middleware(
+    confess "wrap_if called outside of a router block"
+        unless $CURRENT_CLASS;
+
+    $CURRENT_CLASS->add_middleware(
         condition    => $condition,
         middleware   => $middleware,
         dependencies => \%deps,
