@@ -11,5 +11,3 @@ router as {
         num => { isa => 'Int' },
     );
 };
-
-__PACKAGE__->new->to_app;
