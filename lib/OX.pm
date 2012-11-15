@@ -6,6 +6,7 @@ use 5.010;
 use Bread::Board::Declare 0.11 ();
 use Carp 'confess';
 use Class::Load 0.10 'load_class';
+use Moose::Util 'find_meta';
 use namespace::autoclean ();
 use Scalar::Util 'blessed';
 
@@ -166,9 +167,14 @@ method call.
 our $CURRENT_CLASS;
 
 sub router {
-    my ($meta, @args) = @_;
+    my ($top_meta, @args) = @_;
+
+    my $meta = $CURRENT_CLASS
+        ? _new_router_meta($CURRENT_CLASS)
+        : $top_meta;
+
     confess "Only one top level router is allowed"
-        if $meta->has_route_builders;
+        if !$CURRENT_CLASS && $meta->has_route_builders;
 
     if (ref($args[0]) eq 'ARRAY') {
         $meta->add_route_builder($_) for @{ $args[0] };
@@ -197,6 +203,23 @@ sub router {
     else {
         confess "Unknown argument to 'router': $body";
     }
+
+    if (defined wantarray) {
+        return $meta->new_object->to_app;
+    }
+}
+
+sub _new_router_meta {
+    my ($meta) = @_;
+
+    return find_meta($meta)->create_anon_class(
+        superclasses    => [$meta->name],
+        routes          => [],
+        mounts          => [],
+        mixed_conflicts => [],
+        middleware      => [],
+        route_builders  => [$meta->route_builders],
+    );
 }
 
 =func route $path, $action_spec, %params
