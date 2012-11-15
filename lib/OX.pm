@@ -102,7 +102,9 @@ my ($import, undef, $init_meta) = Moose::Exporter->build_import_methods(
 );
 
 sub import {
-    namespace::autoclean->import(-cleanee => scalar(caller));
+    my ($package, $args) = @_;
+    my $into = $args && $args->{into} ? $args->{into} : caller;
+    namespace::autoclean->import(-cleanee => $into);
     goto $import;
 }
 
