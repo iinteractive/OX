@@ -192,9 +192,16 @@ sub router {
     }
     elsif (ref($body) eq 'CODE') {
         if (!$meta->has_route_builders) {
-            $meta->add_route_builder('OX::RouteBuilder::ControllerAction');
-            $meta->add_route_builder('OX::RouteBuilder::HTTPMethod');
-            $meta->add_route_builder('OX::RouteBuilder::Code');
+            if ($CURRENT_CLASS) {
+                for my $route_builder ($CURRENT_CLASS->route_builders) {
+                    $meta->add_route_builder($route_builder);
+                }
+            }
+            else {
+                $meta->add_route_builder('OX::RouteBuilder::ControllerAction');
+                $meta->add_route_builder('OX::RouteBuilder::HTTPMethod');
+                $meta->add_route_builder('OX::RouteBuilder::Code');
+            }
         }
 
         local $CURRENT_CLASS = $meta;
@@ -218,7 +225,7 @@ sub _new_router_meta {
         mounts          => [],
         mixed_conflicts => [],
         middleware      => [],
-        route_builders  => [$meta->route_builders],
+        route_builders  => [],
     );
 }
 
