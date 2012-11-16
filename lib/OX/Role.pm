@@ -116,6 +116,26 @@ able to specify routes in other ways, you can specify a list of
 L<OX::RouteBuilder> classes as the first argument to C<router>, which will be
 used in place of the previously mentioned list.
 
+  router as {
+      route '/' => 'root.index';
+      mount '/admin' => router as {
+          wrap "MyApp::Middleware::Auth";
+          route '/' => 'admin.index';
+      };
+  };
+
+In addition, router blocks handle nesting properly. If you declare a new router
+block inside of the main router block, it will allow you to define an entirely
+separate application which you can mount wherever you want (see C<mount>
+below). Nested routers will have full access to the services defined in the
+role. This can be used, for instance, to apply certain middleware to only
+parts of the application, or just to organize the application better.
+
+Note that while they are being defined inline, these are still just normal
+mounts. This means that examining the C<path> in the request object will only
+give the path relative to the nested router (the remainder will be in
+C<script_name>).
+
 =cut
 
 sub router {

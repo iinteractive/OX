@@ -164,6 +164,36 @@ class's constructor as arguments. Note that parentheses are required if the
 argument is a literal constructor call, to avoid it being parsed as an indirect
 method call.
 
+  # myapp.psgi
+  use OX;
+  router as {
+      route '/' => sub { "Hello world" };
+  };
+
+This function (if called in non-void context) also returns the fully-built PSGI
+app coderef. This means that you can define an OX class in a C<.psgi> file with
+the router block as the last statement in the file, and have it be valid.
+
+  router as {
+      route '/' => 'root.index';
+      mount '/admin' => router as {
+          wrap "MyApp::Middleware::Auth";
+          route '/' => 'admin.index';
+      };
+  };
+
+In addition, router blocks handle nesting properly. If you declare a new router
+block inside of the main router block, it will allow you to define an entirely
+separate application which you can mount wherever you want (see C<mount>
+below). Nested routers will have full access to the services defined in the
+main app. This can be used, for instance, to apply certain middleware to only
+parts of the application, or just to organize the application better.
+
+Note that while they are being defined inline, these are still just normal
+mounts. This means that examining the C<path> in the request object will only
+give the path relative to the nested router (the remainder will be in
+C<script_name>).
+
 =cut
 
 our $CURRENT_CLASS;
