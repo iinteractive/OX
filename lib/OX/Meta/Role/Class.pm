@@ -57,6 +57,7 @@ sub clear_app_state {
 =for Pod::Coverage
   router_config
   all_middleware
+  clear_app_state
 
 =cut
 

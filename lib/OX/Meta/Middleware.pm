@@ -78,4 +78,9 @@ sub resolve {
 
 __PACKAGE__->meta->make_immutable;
 
+=for Pod::Coverage
+  resolve
+
+=cut
+
 1;
