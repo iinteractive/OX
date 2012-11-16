@@ -83,6 +83,7 @@ sub parse_action_spec {
     return {
         controller => $1,
         action     => $2,
+        name       => $action_spec,
     };
 }
 

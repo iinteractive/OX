@@ -90,6 +90,7 @@ sub parse_action_spec {
 
     return {
         action => $1,
+        name   => $action_spec,
     };
 }
 

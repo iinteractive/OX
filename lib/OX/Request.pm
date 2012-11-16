@@ -47,11 +47,19 @@ that results (including prepending C<SCRIPT_NAME>).
 
 sub uri_for {
     my ($self, $route) = @_;
+
     my $uri_base = $self->script_name || '/';
     $uri_base .= '/' unless $uri_base =~ m+/$+;
+
+    if (!ref($route)) {
+        $route = { name => $route };
+    }
+
     my $path_info = $self->_router->uri_for( %$route );
+
     confess "No URI found for route"
         unless defined($path_info);
+
     return $uri_base . $path_info;
 }
 
