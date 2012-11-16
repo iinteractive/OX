@@ -1,5 +1,6 @@
 package OX::Meta::Middleware;
 use Moose;
+use namespace::autoclean;
 
 has middleware => (
     is       => 'ro',
@@ -76,6 +77,5 @@ sub resolve {
 }
 
 __PACKAGE__->meta->make_immutable;
-no Moose;
 
 1;
