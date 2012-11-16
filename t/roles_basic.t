@@ -105,13 +105,13 @@ test_psgi
         {
             my $res = $cb->(GET '/');
             ok($res->is_success);
-            is($res->content, "got main index from path / (action controller)");
+            is($res->content, "got main index from path / (action controller name)");
         }
 
         {
             my $res = $cb->(GET '/post/32');
             ok($res->is_success);
-            is($res->content, "got post 32 from path /post/32 (action controller id)");
+            is($res->content, "got post 32 from path /post/32 (action controller id name)");
         }
 
         {
@@ -151,7 +151,7 @@ test_psgi
         {
             my $res = $cb->(GET '/post/32');
             ok($res->is_success);
-            is($res->content, "got main index from path /post/32 (action controller id)");
+            is($res->content, "got main index from path /post/32 (action controller id name)");
         }
     };
 
@@ -185,7 +185,7 @@ test_psgi
         {
             my $res = $cb->(GET '/post/32');
             ok($res->is_success);
-            is($res->content, "got main index from path /post/32 (action controller number)");
+            is($res->content, "got main index from path /post/32 (action controller name number)");
         }
     };
 

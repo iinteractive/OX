@@ -35,11 +35,11 @@ for qw[
 ];
 
 routes_ok($router, {
-    ''       => { controller => 'root', action => 'index' },
-    'inc'    => { controller => 'root', action => 'inc'   },
-    'dec'    => { controller => 'root', action => 'dec'   },
-    'reset'  => { controller => 'root', action => 'reset' },
-    'set/10' => { controller => 'root', action => 'set',  number => 10 },
+    ''       => { controller => 'root', action => 'index', name => 'root.index' },
+    'inc'    => { controller => 'root', action => 'inc',   name => 'root.inc'   },
+    'dec'    => { controller => 'root', action => 'dec',   name => 'root.dec'   },
+    'reset'  => { controller => 'root', action => 'reset', name => 'root.reset' },
+    'set/10' => { controller => 'root', action => 'set',   name => 'root.set',   number => 10 },
 },
 "... our routes are valid");
 

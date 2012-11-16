@@ -75,7 +75,7 @@ test_psgi
         {
             my $req = HTTP::Request->new(GET => 'http://localhost/with_args/8');
             my $res = $cb->($req);
-            is($res->content, "8: action controller thing", "got the right content");
+            is($res->content, "8: action controller name thing", "got the right content");
         }
     };
 
@@ -124,7 +124,7 @@ test_psgi
         {
             my $req = HTTP::Request->new(GET => 'http://localhost/with_args/7');
             my $res = $cb->($req);
-            is($res->content, "7: action controller other", "got the right content");
+            is($res->content, "7: action controller name other", "got the right content");
         }
     };
 
