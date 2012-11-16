@@ -27,6 +27,9 @@ C<"$controller.$action">, where C<$controller> is the name of a service which
 provides a controller instance, and C<$action> is the name of a method on that
 class.
 
+C<controller> and C<action> will also be automatically added as defaults for
+the route, as well as C<name> (which will be set to C<"$controller.$action">.
+
 =cut
 
 sub compile_routes {

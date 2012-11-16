@@ -40,8 +40,10 @@ sub mapping {
 
 =method uri_for($route)
 
-This calls C<uri_for> on the given route, and returns the absolute URI path
-that results (including prepending C<SCRIPT_NAME>).
+This calls C<uri_for> on the given route hashref, and returns the absolute URI
+path that results (including prepending C<SCRIPT_NAME>). If a string is passed
+rather than a hashref, this is treated as equivalent to
+C<< { name => $route } >>.
 
 =cut
 

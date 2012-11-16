@@ -30,6 +30,9 @@ corresponds to the lowercased version of the HTTP method used in the request
 to looking for a method named C<any>. If that isn't found either, an error will
 be raised.
 
+C<action> will automatically be added to the route as a default, as well as
+C<name> (which will be set to the same thing as C<action>).
+
 =cut
 
 sub compile_routes {
