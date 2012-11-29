@@ -46,7 +46,6 @@ h2 {
 }
 
 .feed {
-  float: right;
   color: #ffff00;
   padding-right: 1em;
   vertical-align: middle;
@@ -74,6 +73,7 @@ dt {
   background: #779977;
   border: 1px solid #557755;
   color: #ffffff;
+  text-align: right;
 }
 
 .pod h1, .pod h2 {
@@ -104,10 +104,6 @@ a:not(.article) {
 
 .pod ul li {
   margin: .25em 0;
-}
-
-.pod ul li p {
-  display: inline;
 }
 
 .calendar {
@@ -233,7 +229,7 @@ pre {
   padding-bottom: 1em;
   background-color: #222222;
   color: #dddddd;
-  font-family: monospace;
+  font-family: "Consolas","Bitstream Vera Sans Mono","Courier New",Courier,monospace !important;
   width: 100%;
 }
 
@@ -241,10 +237,14 @@ pre {
   line-height: 120%;
   background-color: #222222;
   color: #dddddd;
-  font-family: monospace;
   white-space: pre;
   border-collapse: collapse;
   width: 100%;
+}
+
+pre, code, .code-listing {
+  font-family: "Consolas","Bitstream Vera Sans Mono","Courier New",Courier,monospace;
+  font-size: 1em;
 }
 
 .code-listing td {
