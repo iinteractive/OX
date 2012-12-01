@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+Introduction to OX
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>Introduction to OX</h1>
+<div class='subtitle'>OX - 2012-12-01</div>
+
+<div class='pod'><h2 id="Overview">Overview</h2>
+
+<p><a href="https://metacpan.org/module/OX">OX</a> is a new web framework, designed to allow easily gluing together existing components (or writing new, highly decoupled components) for your application, without requiring additional plugin systems, glue layers, or global state. It is available on <a href="https://metacpan.org/module/OX">CPAN</a>, and on <a href="http://github.com/iinteractive/OX">GitHub</a>. You can install it via <code>cpanm OX</code>. If you have any questions or suggestions, we hang out on the <code>#ox</code> channel on irc.perl.org, so feel free to drop by!</p>
+
+<p>OX is based on three main components:</p>
+
+<h3 id="Plack">Plack</h3>
+
+<p><a href="https://metacpan.org/module/Plack">Plack</a> is an implementation of the <a href="https://metacpan.org/module/PSGI">PSGI</a> protocol. By implementing PSGI, OX can run on any server platform that PSGI supports (which is most of them). Plack also provides extra functionality such as middleware, which OX exposes to application authors (as will be described in future articles).</p>
+
+<h3 id="Bread::Board">Bread::Board</h3>
+
+<p><a href="https://metacpan.org/module/Bread::Board">Bread::Board</a> is a dependency injection framework, used to structure your application initialization. It allows your application objects to access each other without the need for globals or repetitive argument passing. With Bread::Board, you can write your application classes however makes sense to you, and then tie them all together.</p>
+
+<h3 id="Path::Router">Path::Router</h3>
+
+<p><a href="https://metacpan.org/module/Path::Router">Path::Router</a> provides simple, reversible routing for URL paths. In addition to basic path matching, it supports variable path components (with optional validation), the ability to look up paths based on the descriptions they were defined with, and useful debugging and testing tools. It&#39;s used to determine your application&#39;s URL structure.</p>
+
+<h2 id="Hello-World">Hello World</h2>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">use </span>OX;<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/'</span> =&gt; <span class="synStatement">sub </span>{ <span class="synConstant">&quot;Hello world!&quot;</span> };<br />};</code><br />&nbsp;</td></table>
+
+<p>This defines a simple &quot;Hello world&quot; application. This snippet is a valid <code>.psgi</code> file (the format used by <a href="https://metacpan.org/module/Plack">Plack</a>), since the <code>router</code> keyword returns a PSGI application coderef if necessary.</p>
+
+
+
+If you download this example <a href="hello.psgi">here</a>, you can run it with
+<tt>plackup hello.psgi</tt>, and view the results in your browser.
+
+<p>The router block is the most important part of an OX application. It defines the entire URL structure in one place, making tracing the code that is run for a given request as easy as possible to find. Simple routes can define the code to be run directly, but for anything non-trivial, you&#39;ll want to organize the code into models, controllers, etc., as shown in this next example.</p>
+
+<h2 id="Another-example">Another example</h2>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;<br />29:&nbsp;<br />30:&nbsp;<br />31:&nbsp;<br />32:&nbsp;<br />33:&nbsp;<br />34:&nbsp;<br />35:&nbsp;<br />36:&nbsp;<br />37:&nbsp;<br />38:&nbsp;<br />39:&nbsp;<br />40:&nbsp;<br />41:&nbsp;<br />42:&nbsp;<br />43:&nbsp;<br />44:&nbsp;<br />45:&nbsp;<br />46:&nbsp;<br />47:&nbsp;<br />48:&nbsp;<br />49:&nbsp;<br />50:&nbsp;<br />51:&nbsp;<br />52:&nbsp;<br />53:&nbsp;<br />54:&nbsp;<br />55:&nbsp;<br />56:&nbsp;<br />57:&nbsp;<br />58:&nbsp;<br />59:&nbsp;<br />60:&nbsp;<br />61:&nbsp;<br />62:&nbsp;<br />63:&nbsp;<br />64:&nbsp;<br />65:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> Counter::Model</span>;<br /><span class="synStatement">use </span>Moose;<br /><br />has <span class="synConstant">counter</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">traits</span>  =&gt; [<span class="synConstant">'Counter'</span>],<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>      =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>     =&gt; <span class="synConstant">'Int'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">default</span> =&gt; <span class="synConstant">0</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">handles</span> =&gt; {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">inc</span>   =&gt; <span class="synConstant">'inc'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dec</span>   =&gt; <span class="synConstant">'dec'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">reset</span> =&gt; <span class="synConstant">'reset'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;},<br />);<br /><br /><span class="synStatement">package</span><span class="synType"> Counter::Controller</span>;<br /><span class="synStatement">use </span>Moose;<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>       =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>      =&gt; <span class="synConstant">'Counter::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">required</span> =&gt; <span class="synConstant">1</span>,<br />);<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">index </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$self</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$self-&gt;model-&gt;counter</span>;<br />}<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">inc </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$self</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$self-&gt;model-&gt;inc</span>;<br />}<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">dec </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$self</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$self-&gt;model-&gt;dec</span>;<br />}<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">reset </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$self</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$self-&gt;model-&gt;reset</span>;<br />}<br /><br /><span class="synStatement">package</span><span class="synType"> Counter</span>;<br /><span class="synStatement">use </span>OX;<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>        =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>       =&gt; <span class="synConstant">'Counter::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">lifecycle</span> =&gt; <span class="synConstant">'Singleton'</span>,<br />);<br /><br />has <span class="synConstant">controller</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Counter::Controller'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">infer</span> =&gt; <span class="synConstant">1</span>,<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/'</span>      =&gt; <span class="synConstant">'controller.index'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/inc'</span>   =&gt; <span class="synConstant">'controller.inc'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/dec'</span>   =&gt; <span class="synConstant">'controller.dec'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/reset'</span> =&gt; <span class="synConstant">'controller.reset'</span>;<br />};</code><br />&nbsp;</td></table>
+
+<p>This is a slightly more involved example. Here, paths are routed to methods on controller objects, and OX automatically figures out (via Bread::Board) how to create all of the objects necessary to make the request work.</p>
+
+
+
+This example can be downloaded <a href="counter.psgi">here</a>, and run via
+<tt>plackup counter.psgi</tt>. Access the <tt>/inc</tt>, <tt>/dec</tt>, and
+<tt>/reset</tt> paths to manipulate the counter.
+
+<p>One interesting thing to note is how the controller and model are both just normal Moose classes - there is nothing special about them at all. Your application can be structured in any way that you want, and OX will do the work of introspecting and tying together all of the pieces. We will explain how exactly this works over the coming weeks.</p>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/615c9501f43cca57a2467232c5257544?r=g&s=80&d=retro />
+This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous">Previous</li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
