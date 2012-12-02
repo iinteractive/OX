@@ -1,5 +1,91 @@
 <?xml version="1.0" encoding="us-ascii"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent</id><link href="http://ox.iinteractive.com/adventatom.xml" rel="self"/><updated>2012-12-01T03:02:53-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>Introduction to OX</title><link href="http://ox.iinteractive.com/advent2012-12-01.html"/><id>http://ox.iinteractive.com/advent2012-12-01.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Overview&#34;&gt;Overview&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-02T01:09:38-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>Route Builders and Actions</title><link href="http://ox.iinteractive.com/advent/2012-12-02.html"/><id>http://ox.iinteractive.com/advent/2012-12-02.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;The-route-keyword&#34;&gt;The &lt;code&gt;route&lt;/code&gt; keyword&lt;/h2&gt;
+
+&lt;p&gt;The &lt;code&gt;route&lt;/code&gt; keyword maps a &lt;i&gt;path&lt;/i&gt; to an &lt;i&gt;action spec&lt;/i&gt;. A path is a pattern that resembles a URI path, which OX attempts to match against the incoming request URI. An action spec can take many forms, but it essentially describes what code will run when the corresponding path is matched. The path syntax and features will be described tomorrow, but today&#38;#39;s article is about how the action spec is interpreted.&lt;/p&gt;
+
+&lt;h2 id=&#34;Route-builders&#34;&gt;Route builders&lt;/h2&gt;
+
+&lt;p&gt;Route builders are the part of OX which takes an action spec and determines which code to run when its associated path is matched. For instance, in this router:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;router as {&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/&#39;&lt;/span&gt;          =&#38;gt; &lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{ &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;Hello world!&#38;quot;&lt;/span&gt; };&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/posts/:id&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;posts.view&#39;&lt;/span&gt;;&lt;br /&gt;};&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;&lt;code&gt;/&lt;/code&gt; uses a route builder which just calls the given coderef directly, while &lt;code&gt;/posts/24&lt;/code&gt; uses a route builder which generates a coderef to call the &lt;code&gt;view&lt;/code&gt; method on the &lt;code&gt;posts&lt;/code&gt; controller.&lt;/p&gt;
+
+&lt;p&gt;There are three default route builders for OX applications:&lt;/p&gt;
+
+&lt;ul&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://metacpan.org/module/OX::RouteBuilder::Code&#34;&gt;OX::RouteBuilder::Code&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{ &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;Hello world!&#38;quot;&lt;/span&gt; };&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;This route builder will be used whenever the action spec is a coderef. It is the most basic route builder - it just allows you to specify a coderef to call when the route is chosen.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://metacpan.org/module/OX::RouteBuilder::ControllerAction&#34;&gt;OX::RouteBuilder::ControllerAction&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;root.index&#39;&lt;/span&gt;;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;The ControllerAction route builder will be used if the action spec consists of two words (&lt;code&gt;\w+&lt;/code&gt;) separated by a period. Those two words will be used to look up a controller to use and a method to call on that controller. The controller is looked up by name among the attributes on the OX application (really services, but we will discuss that when we explain Bread::Board).&lt;/p&gt;
+
+&lt;p&gt;The code which is run for the above example is roughly equivalent to:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$controller&lt;/span&gt; = &lt;span class=&#34;synIdentifier&#34;&gt;$self-&#38;gt;root&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$controller-&#38;gt;index&lt;/span&gt;(&lt;span class=&#34;synIdentifier&#34;&gt;@_&lt;/span&gt;);&lt;br /&gt;}&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://metacpan.org/module/OX::RouteBuilder::HTTPMethod&#34;&gt;OX::RouteBuilder::HTTPMethod&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;root&#39;&lt;/span&gt;;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;The HTTPMethod route builder will be used if the action spec consists of a single word (&lt;code&gt;\w+&lt;/code&gt;). This word will be used to look up a controller as in the ControllerAction route builder, but the method to call will be the lowercase version of the HTTP method used (&lt;code&gt;get&lt;/code&gt;, &lt;code&gt;post&lt;/code&gt;, etc). If no appropriate method is found in the class, it will attempt to call the method named &lt;code&gt;any&lt;/code&gt; instead. If that is also not found, the request will return a 405 error.&lt;/p&gt;
+
+&lt;p&gt;The code which is run for the above example is roughly equivalent to:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;br /&gt;8:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; (&lt;span class=&#34;synIdentifier&#34;&gt;$r&lt;/span&gt;) = &lt;span class=&#34;synIdentifier&#34;&gt;@_&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$controller&lt;/span&gt; = &lt;span class=&#34;synIdentifier&#34;&gt;$self-&#38;gt;root&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$method&lt;/span&gt; = &lt;span class=&#34;synStatement&#34;&gt;lc&lt;/span&gt;(&lt;span class=&#34;synIdentifier&#34;&gt;$r-&#38;gt;method&lt;/span&gt;);&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$method&lt;/span&gt; = &lt;span class=&#34;synConstant&#34;&gt;&#39;any&#39;&lt;/span&gt;             &lt;span class=&#34;synStatement&#34;&gt;if&lt;/span&gt; !&lt;span class=&#34;synIdentifier&#34;&gt;$controller-&#38;gt;can&lt;/span&gt;(&lt;span class=&#34;synIdentifier&#34;&gt;$method&lt;/span&gt;);&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;return&lt;/span&gt; [&lt;span class=&#34;synConstant&#34;&gt;405&lt;/span&gt;, [], [&lt;span class=&#34;synConstant&#34;&gt;&#38;quot;error&#38;quot;&lt;/span&gt;]] &lt;span class=&#34;synStatement&#34;&gt;if&lt;/span&gt; !&lt;span class=&#34;synIdentifier&#34;&gt;$controller-&#38;gt;can&lt;/span&gt;(&lt;span class=&#34;synIdentifier&#34;&gt;$method&lt;/span&gt;);&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$controller-&#38;gt;$method&lt;/span&gt;(&lt;span class=&#34;synIdentifier&#34;&gt;@_&lt;/span&gt;);&lt;br /&gt;}&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can also define your own route builders, but doing so will be covered in another article.&lt;/p&gt;
+
+&lt;h2 id=&#34;Actions&#34;&gt;Actions&lt;/h2&gt;
+
+&lt;p&gt;Once OX determines which code to run to fulfill the request, it will call that code. The code that is called will receive an &lt;a href=&#34;https://metacpan.org/module/OX::Request&#34;&gt;OX::Request&lt;/a&gt; object as its first argument (other than the invocant, if called as a method), which can be used to access all of the request information. The action code should return the response to use, which can be any of:&lt;/p&gt;
+
+&lt;ul&gt;
+
+&lt;li&gt;&lt;p&gt;Any valid &lt;a href=&#34;https://metacpan.org/module/PSGI&#34;&gt;PSGI&lt;/a&gt; response&lt;/p&gt;
+
+&lt;p&gt;This will be used as-is.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A string&lt;/p&gt;
+
+&lt;p&gt;This will result in a response with a 200 response code and &lt;code&gt;Content-Type&lt;/code&gt; set to &lt;code&gt;text/html&lt;/code&gt;.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;An &lt;a href=&#34;https://metacpan.org/module/OX::Response&#34;&gt;OX::Response&lt;/a&gt; object&lt;/p&gt;
+
+&lt;p&gt;This will use the result of calling the &lt;code&gt;finalize&lt;/code&gt; method. This will typically be generated by calling &lt;code&gt;new_response&lt;/code&gt; on the request object that you receive.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;All requests will be decoded and all responses will be encoded as UTF-8 automatically, so your application can deal entirely with Unicode strings. This behavior can be changed if necessary, but we will discuss that in a future post.&lt;/p&gt;
+
+&lt;/div&gt;</summary><updated>2012-12-02T00:00:00-06:00</updated><author><name>Jesse Luehrs</name></author></entry><entry><title>Introduction to OX</title><link href="http://ox.iinteractive.com/advent/2012-12-01.html"/><id>http://ox.iinteractive.com/advent/2012-12-01.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Overview&#34;&gt;Overview&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://metacpan.org/module/OX&#34;&gt;OX&lt;/a&gt; is a new web framework, designed to allow easily gluing together existing components (or writing new, highly decoupled components) for your application, without requiring additional plugin systems, glue layers, or global state. It is available on &lt;a href=&#34;https://metacpan.org/module/OX&#34;&gt;CPAN&lt;/a&gt;, and on &lt;a href=&#34;http://github.com/iinteractive/OX&#34;&gt;GitHub&lt;/a&gt;. You can install it via &lt;code&gt;cpanm OX&lt;/code&gt;. If you have any questions or suggestions, we hang out on the &lt;code&gt;#ox&lt;/code&gt; channel on irc.perl.org, so feel free to drop by!&lt;/p&gt;
 
