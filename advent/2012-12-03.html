@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+Routes and Path::Router
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>Routes and Path::Router</h1>
+<div class='subtitle'>OX - 2012-12-03</div>
+
+<div class='pod'><h2 id="Routing">Routing</h2>
+
+<p>Routing is the step that takes an HTTP request and decides what code should actually be run. Although any part of the request can be used here, in practice routing happens by only looking at the path (and maybe the HTTP method).</p>
+
+<p><a href="https://metacpan.org/module/Path::Router">Path::Router</a> is a module which can take an incoming path and return which of a set of route definitions it matched. OX uses this as the basis for its routing. Path::Router handles solely the path aspect of routing - routing based on other things (such as HTTP methods) must be handled via route builders.</p>
+
+<h3 id="Basic-routes">Basic routes</h3>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/'</span>           =&gt; <span class="synConstant">'root.index'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/archive'</span>    =&gt; <span class="synConstant">'posts.archive'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/auth/login'</span> =&gt; <span class="synConstant">'auth.login'</span>;<br />};</code><br />&nbsp;</td></table>
+
+<p>The simplest pattern for matching paths consists of just a literal string, to be matched against the incoming path. This only looks at the path itself (to be specific, the <a href="https://metacpan.org/module/PSGI">PSGI</a> <code>PATH_INFO</code> variable), so any query parameters are ignored. If the path in the incoming request is equal to any of the paths defined in the router, that path is chosen, and its associated code is run to create the response. If no path matches, a 404 response is returned.</p>
+
+<h3 id="Route-variables">Route variables</h3>
+
+<p>Some routes need to contain variable components. These can be specified by a leading colon:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/:id'</span> =&gt; <span class="synStatement">sub </span>{ <span class="synStatement">my</span> (<span class="synIdentifier">$r</span>, <span class="synIdentifier">$id</span>) = <span class="synIdentifier">@_</span>; <span class="synStatement">return</span> <span class="synIdentifier">$id</span> };<br />};</code><br />&nbsp;</td></table>
+
+<p>In this case, this route doesn&#39;t match just the path <code>/view/:id</code>, but any path that starts with <code>/view/</code> and contains exactly one additional path component: <code>/view/24</code>, <code>/view/c9625979-976a-4cf1-b557-7cf5bd591d0d</code>, etc. When the code for the route is called, the variable path components will be passed as additional arguments, in order, after the request object.</p>
+
+<p>Variable routes do make routing more complicated, however, since paths can now potentially match multiple different routes. If a path is given which does match multiple routes, the route with the fewest variable path components is chosen. For instance, given this router:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/view/:id'</span>     =&gt; <span class="synConstant">'posts.view_specific_post'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/view/default'</span> =&gt; <span class="synConstant">'posts.view_default_post'</span>;<br />};</code><br />&nbsp;</td></table>
+
+<p>a request for <code>/view/default</code> will match the <code>view_default_post</code> route. If there are multiple routes with the fewest variable path components, an error will be thrown (so don&#39;t do that).</p>
+
+<h4 id="Optional-routes">Optional routes</h4>
+
+<p>Sometimes the path component isn&#39;t actually necessary at all. In this case, you can prefix the path variable with a question mark to indicate that including it is not actually necessary (path components must otherwise be non-empty strings). For instance:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/view/?:id'</span> =&gt; <span class="synConstant">'posts.view_specific_post'</span>;<br />};</code><br />&nbsp;</td></table>
+
+<p>In this case, <code>/view</code> is also a valid path, and the argument passed to the route&#39;s code will be <code>undef</code>.</p>
+
+<h4 id="Validations">Validations</h4>
+
+<p>Sometimes you want a bit more control than just &quot;does the path component exist?&quot;. In this case, you can specify constraints to validate the path variables. For instance:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/view/:id'</span> =&gt; <span class="synConstant">'posts.view_by_id'</span>, (<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">id</span> =&gt; { <span class="synConstant">isa</span> =&gt; <span class="synConstant">'Int'</span> },<br />&nbsp;&nbsp;&nbsp;&nbsp;);<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/view/:search'</span> =&gt; <span class="synConstant">'posts.search'</span>, (<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">id</span> =&gt; { <span class="synConstant">isa</span> =&gt; <span class="synConstant">qr/^</span><span class="synSpecial">\w</span><span class="synConstant">/</span> },<br />&nbsp;&nbsp;&nbsp;&nbsp;);<br />};</code><br />&nbsp;</td></table>
+
+<p>This will route <code>/view/123</code> to <code>view_by_id</code>, and <code>/view/foobar</code> to <code>search</code>. Validations must be specified by a hash following the action spec, where the keys are names of variable path components and the values are hashrefs with an <code>isa</code> entry. Each validation can be either a Moose type constraint (a type name or a type constraint object) or a regular expression.</p>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/615c9501f43cca57a2467232c5257544?r=g&s=80&d=retro />
+This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="Route Builders and Actions" href="2012-12-02.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
