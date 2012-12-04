@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+
+0.09  2012-12-03
       - fix handling of multiple routes with equivalent paths (but different
         validations)
 
