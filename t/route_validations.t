@@ -22,6 +22,12 @@ use HTTP::Request::Common;
         my ($r, $y, $m, $d) = @_;
         return "blog post on $y-$m-$d";
     }
+
+    sub blog_by_search {
+        my $self = shift;
+        my ($r, $search) = @_;
+        return "search for $search";
+    }
 }
 
 {
@@ -37,6 +43,9 @@ use HTTP::Request::Common;
         route '/blog' => 'root.blog';
         route '/blog/:id' => 'root.blog_by_id', (
             id => { isa => 'Int' },
+        );
+        route '/blog/:search' => 'root.blog_by_search', (
+            search => { isa => qr/^\D+$/ },
         );
         route '/blog/:year/:month/:day' => 'root.blog_by_date', (
             year  => { isa => 'Int' },
@@ -67,6 +76,11 @@ test_psgi
         }
         {
             my $res = $cb->(GET '/blog/foo');
+            ok($res->is_success) || diag($res->content);
+            is($res->content, 'search for foo');
+        }
+        {
+            my $res = $cb->(GET '/blog/foo123');
             is($res->code, 404);
         }
         {
