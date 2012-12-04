@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+Bread::Board
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>Bread::Board</h1>
+<div class='subtitle'>OX - 2012-12-04</div>
+
+<div class='pod'><h2 id="Dependency-Injection">Dependency Injection</h2>
+
+<p>One thing that you may have noticed in the article about actions is that actions only receive the request object. There is no global application context, or stash, or anything like that, like you may be used to in other frameworks. This is by design - global state in general is bad for maintainability.</p>
+
+<p>This does present a problem, however - how do you access things like your model objects, if action methods aren&#39;t passed anything which can access them? The answer is pretty straightforward: if your controller is going to use a model object, that object should be an attribute. This limits the scope of your helper objects to only the places you expect them to actually be used (which helps in debugging, and reliability in general), without making them any more difficult to access.</p>
+
+<p>The mechanism which powers this is called <i>dependency injection</i>. Dependency injection is a pattern in which you specify the relationships between your objects (which objects are necessary for each objects&#39; construction), and a framework determines how to create the objects on demand such that all of the dependencies are met. The framework that OX uses is called <a href="https://metacpan.org/module/Bread::Board">Bread::Board</a>, via the <a href="https://metacpan.org/module/Bread::Board::Declare">Bread::Board::Declare</a> sugar layer.</p>
+
+<h2 id="Defining-services">Defining services</h2>
+
+<p>Describing your application is done by creating <i>services</i> for each type of object your application will need. In OX (because OX uses Bread::Board::Declare), this is as simple as creating attributes on your application class, just like you would in any other project. The difference is that in the attribute definition, you must define how the value for that attribute should be created, and which other attributes the creation process needs. Here is an example of an OX class with a few attribute defintions:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />has <span class="synConstant">dsn</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'dbi:mysql:myapp'</span>,<br />);<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'dsn'</span>],<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">block</span>        =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$s</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> MyApp::Model-&gt;<span class="synStatement">connect</span>(<span class="synIdentifier">$s-&gt;param</span>(<span class="synConstant">'dsn'</span>));<br />&nbsp;&nbsp;&nbsp;&nbsp;},<br />);<br /><br />has <span class="synConstant">controller</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Controller'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'model'</span>],<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synComment"># ...</span><br />};</code><br />&nbsp;</td></table>
+
+<p>This is very similar to the way you would write the class normally, except that you use the <code>value</code> or <code>block</code> options instead of <code>default</code> or <code>builder</code>, and if your attribute holds an object with a constructor that takes key/value pairs (like Moose objects do by default), you don&#39;t have to specify anything at all (Bread::Board will figure out how to create the object on its own).</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>has <span class="synConstant">dsn</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'dbi:mysql:myapp'</span>,<br />);</code><br />&nbsp;</td></table>
+
+<p>If the attribute specifies <code>value</code>, then requesting the service will return that given value directly. Here, requesting the <code>dsn</code> service will return the string <code>&quot;dbi:mysql:myapp&quot;</code> unless another value has been provided for this attribute, such as from a constructor parameter.</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'dsn'</span>],<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">block</span>        =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$s</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> MyApp::Model-&gt;<span class="synStatement">connect</span>(<span class="synIdentifier">$s-&gt;param</span>(<span class="synConstant">'dsn'</span>));<br />&nbsp;&nbsp;&nbsp;&nbsp;},<br />);</code><br />&nbsp;</td></table>
+
+<p>If you specify <code>block</code>, Bread::Board will first initialize all of the dependencies. Then, it will call the subroutine provided in <code>block</code>. That subroutine receives one argument, an object which contains the value of each dependency. The dependency values can be accessed via the <code>param</code> method on that object. Here, requesting the <code>model</code> service will first get the value from the <code>dsn</code> service, and then call the given sub. Calling <code>$s-&gt;param(&#39;dsn&#39;)</code> inside that sub will return the value for the <code>dsn</code> service.</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>has <span class="synConstant">controller</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Controller'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'model'</span>],<br />);</code><br />&nbsp;</td></table>
+
+<p>If you specify neither of those, but the type constraint corresponds to a class, Bread::Board will get the value associated with each dependency listed and pass them as parameters to the constructor. For instance, here the value for the service will be created by calling <code>MyApp::Controller-&gt;new(model =&gt; $model)</code> (where <code>$model</code> is the value retrieved from the <code>model</code> service).</p>
+
+<h2 id="Dependencies">Dependencies</h2>
+
+<p><i>Dependencies</i> are how services know which other services are required in order to generate their value. The simplest way to specify dependencies is with an arrayref of service names (as above). If you need to use a different name for a service, however, you&#39;ll need to specify the dependencies via a hashref:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>has <span class="synConstant">view</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'Template'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">INCLUDE_PATH</span> =&gt; <span class="synConstant">'template_root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;},<br />);</code><br />&nbsp;</td></table>
+
+<p>This will create a <a href="https://metacpan.org/module/Template">Template</a> object by calling <code>Template-&gt;new(INCLUDE_PATH =&gt; $template_root)</code>, where <code>$template_root</code> is created from the <code>template_root</code> service.</p>
+
+<p>Sometimes you don&#39;t necessarily want to create trivial services for constant values. If you want to create a service with an inline, hardcoded value for one of its constructor parameters, you can use the <code>literal</code> helper keyword:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>has <span class="synConstant">view</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'Template'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">INCLUDE_PATH</span> =&gt; <span class="synConstant">'template_root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">TAG_STYLE</span>    =&gt; literal(<span class="synConstant">'php'</span>),<br />&nbsp;&nbsp;&nbsp;&nbsp;},<br />);</code><br />&nbsp;</td></table>
+
+<p>This will do the same thing as above, except that it will call <code>Template-&gt;new(INCLUDE_PATH =&gt; $template_root, TAG_STYLE =&gt; &#39;php&#39;)</code>.</p>
+
+<h2 id="Resolving-services">Resolving services</h2>
+
+<p>Requesting the value from a service is called <i>resolving</i> the service. Recall from the article on route builders that there are many ways to specify which code executes when a route matches. For instance, you can specify an action like <code>&quot;profile.edit&quot;</code>. To dispatch this action, OX first resolves the <code>profile</code> service, which by convention we also call the <code>profile</code> <i>controller</i> since it is a kind of dispatch target. OX then calls the <code>edit</code> method (called the <code>edit</code> <i>action</i>) on the <code>profile</code> controller. Thanks to Bread::Board, your <code>profile</code> controller will be fully initialized with all of its specified dependencies, so that OX can satisfy the user&#39;s web request.</p>
+
+<p>If you want to get the values out of your application class separately, you can just call the accessor for the attribute. If the attribute doesn&#39;t have a value stored in it, this will create a new instance of the value held by the service and return it (otherwise, it will work like a normal attribute). Other ways to interact with services will be described in a future article.</p>
+
+<h2 id="Further-reading">Further reading</h2>
+
+<p>This article has been just a very high level overview of how to create OX applications that use additional classes. We will be going deeper into detail about how to use Bread::Board features more effectively with OX in future articles, but if you&#39;re interested in learning more about it, the documentation for <a href="https://metacpan.org/module/Bread::Board">Bread::Board</a> (especially the <a href="https://metacpan.org/module/Bread::Board::Manual">Bread::Board::Manual</a>) and <a href="https://metacpan.org/module/Bread::Board::Declare">Bread::Board::Declare</a> are useful resources, as is <a href="http://youtu.be/DhhaOQWoOpw">this talk</a> from YAPC::NA 2012.</p>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/615c9501f43cca57a2467232c5257544?r=g&s=80&d=retro />
+This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="Routes and Path::Router" href="2012-12-03.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
