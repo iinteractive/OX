@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+      - fix handling of multiple routes with equivalent paths (but different
+        validations)
 
 0.08  2012-11-16
       - allow declaring nested routers as mounts
