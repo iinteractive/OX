@@ -53,9 +53,6 @@ sub add_route {
 
     my $path = $route->path;
 
-    confess("A route already exists for $path")
-        if $self->has_route_for($path);
-
     for my $mount ($self->mounts) {
         my $mount_path = $mount->path;
         (my $prefix = $mount_path) =~ s{/$}{};
