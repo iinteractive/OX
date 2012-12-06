@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+Mounts
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>Mounts</h1>
+<div class='subtitle'>OX - 2012-12-06</div>
+
+<div class='pod'><h2 id="The-mount-keyword">The <code>mount</code> keyword</h2>
+
+<p>The <code>mount</code> keyword allows you to include other <a href="https://metacpan.org/module/PSGI">PSGI</a> applications inside your application, under a given request path. For instance, if you have static files that need to be served, you can create a <a href="https://metacpan.org/module/Plack::App::File">Plack::App::File</a> instance and mount it under <code>/static</code>, so that any request for a path underneath <code>/static</code> will be delegated to the Plack::App::File app.</p>
+
+<p>You can specify an app in one of four ways:</p>
+
+<ul>
+
+<li><p>A PSGI coderef</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>mount <span class="synConstant">'/static'</span> =&gt; Plack::App::File-&gt;new(<span class="synConstant">root</span> =&gt; <span class="synConstant">&quot;static&quot;</span>)-&gt;to_app;</code><br />&nbsp;</td></table>
+
+<p>In this case, the coderef is delegated to directly.</p>
+
+</li>
+<li><p>An object</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>mount <span class="synConstant">'/static'</span> =&gt; Plack::App::File-&gt;new(<span class="synConstant">root</span> =&gt; <span class="synConstant">&quot;static&quot;</span>);</code><br />&nbsp;</td></table>
+
+<p>The object will have <code>to_app</code> called on it, and the result of that will be used for the mount.</p>
+
+</li>
+<li><p>The name of a class</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>mount <span class="synConstant">'/static'</span> =&gt; <span class="synConstant">&quot;Plack::App::File&quot;</span>, (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">root</span>     =&gt; <span class="synConstant">'static_root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">encoding</span> =&gt; literal(<span class="synConstant">'latin1'</span>),<br />);</code><br />&nbsp;</td></table>
+
+<p>This will first instantiate a new instance of the class, and then use that instance as described in the previous bullet point. The instance will be instantiated via Bread::Board, so it can depend on services that your application has declared. The dependencies should be listed as a hash after the name of the class.</p>
+
+</li>
+<li><p>Another router</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>mount <span class="synConstant">'/auth'</span> =&gt; router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/login'</span> =&gt; <span class="synConstant">'auth.login'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synComment"># ...</span><br />};</code><br />&nbsp;</td></table>
+
+<p>This will allow you to create separate sections of your application under certain request paths. These will be able to define all of their own middleware, routes, and mounts, but will share the attributes defined in the main app. In this example, a request for <code>/auth/login</code> will be handled by the <code>auth.login</code> action.</p>
+
+</li>
+</ul>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/615c9501f43cca57a2467232c5257544?r=g&s=80&d=retro />
+This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="Middleware" href="2012-12-05.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+

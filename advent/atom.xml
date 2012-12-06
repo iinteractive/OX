@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="us-ascii"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-05T02:07:14-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>Middleware</title><link href="http://ox.iinteractive.com/advent/2012-12-05.html"/><id>http://ox.iinteractive.com/advent/2012-12-05.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Plack-Middleware&#34;&gt;Plack Middleware&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-06T00:25:59-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>Mounts</title><link href="http://ox.iinteractive.com/advent/2012-12-06.html"/><id>http://ox.iinteractive.com/advent/2012-12-06.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;The-mount-keyword&#34;&gt;The &lt;code&gt;mount&lt;/code&gt; keyword&lt;/h2&gt;
+
+&lt;p&gt;The &lt;code&gt;mount&lt;/code&gt; keyword allows you to include other &lt;a href=&#34;https://metacpan.org/module/PSGI&#34;&gt;PSGI&lt;/a&gt; applications inside your application, under a given request path. For instance, if you have static files that need to be served, you can create a &lt;a href=&#34;https://metacpan.org/module/Plack::App::File&#34;&gt;Plack::App::File&lt;/a&gt; instance and mount it under &lt;code&gt;/static&lt;/code&gt;, so that any request for a path underneath &lt;code&gt;/static&lt;/code&gt; will be delegated to the Plack::App::File app.&lt;/p&gt;
+
+&lt;p&gt;You can specify an app in one of four ways:&lt;/p&gt;
+
+&lt;ul&gt;
+
+&lt;li&gt;&lt;p&gt;A PSGI coderef&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;mount &lt;span class=&#34;synConstant&#34;&gt;&#39;/static&#39;&lt;/span&gt; =&#38;gt; Plack::App::File-&#38;gt;new(&lt;span class=&#34;synConstant&#34;&gt;root&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;static&#38;quot;&lt;/span&gt;)-&#38;gt;to_app;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;In this case, the coderef is delegated to directly.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;An object&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;mount &lt;span class=&#34;synConstant&#34;&gt;&#39;/static&#39;&lt;/span&gt; =&#38;gt; Plack::App::File-&#38;gt;new(&lt;span class=&#34;synConstant&#34;&gt;root&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;static&#38;quot;&lt;/span&gt;);&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;The object will have &lt;code&gt;to_app&lt;/code&gt; called on it, and the result of that will be used for the mount.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The name of a class&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;mount &lt;span class=&#34;synConstant&#34;&gt;&#39;/static&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;Plack::App::File&#38;quot;&lt;/span&gt;, (&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synConstant&#34;&gt;root&lt;/span&gt;     =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;static_root&#39;&lt;/span&gt;,&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synConstant&#34;&gt;encoding&lt;/span&gt; =&#38;gt; literal(&lt;span class=&#34;synConstant&#34;&gt;&#39;latin1&#39;&lt;/span&gt;),&lt;br /&gt;);&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;This will first instantiate a new instance of the class, and then use that instance as described in the previous bullet point. The instance will be instantiated via Bread::Board, so it can depend on services that your application has declared. The dependencies should be listed as a hash after the name of the class.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Another router&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;mount &lt;span class=&#34;synConstant&#34;&gt;&#39;/auth&#39;&lt;/span&gt; =&#38;gt; router as {&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/login&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;auth.login&#39;&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synComment&#34;&gt;# ...&lt;/span&gt;&lt;br /&gt;};&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;This will allow you to create separate sections of your application under certain request paths. These will be able to define all of their own middleware, routes, and mounts, but will share the attributes defined in the main app. In this example, a request for &lt;code&gt;/auth/login&lt;/code&gt; will be handled by the &lt;code&gt;auth.login&lt;/code&gt; action.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;/div&gt;</summary><updated>2012-12-06T00:00:00-06:00</updated><author><name>Jesse Luehrs</name></author></entry><entry><title>Middleware</title><link href="http://ox.iinteractive.com/advent/2012-12-05.html"/><id>http://ox.iinteractive.com/advent/2012-12-05.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Plack-Middleware&#34;&gt;Plack Middleware&lt;/h2&gt;
 
 &lt;p&gt;Middleware are a concept from &lt;a href=&#34;https://metacpan.org/module/Plack&#34;&gt;Plack&lt;/a&gt; which allow you to intercept requests before they are seen by your application, and manipulate responses before they are sent back to the server. This can be used to add many different kinds of behavior to your application - for instance, redirecting users to a login page if they attempt to access the site without being logged in.&lt;/p&gt;
 
