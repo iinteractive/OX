@@ -1,5 +1,103 @@
 <?xml version="1.0" encoding="us-ascii"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-06T00:25:59-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>Mounts</title><link href="http://ox.iinteractive.com/advent/2012-12-06.html"/><id>http://ox.iinteractive.com/advent/2012-12-06.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;The-mount-keyword&#34;&gt;The &lt;code&gt;mount&lt;/code&gt; keyword&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-07T00:44:12-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>PSGI</title><link href="http://ox.iinteractive.com/advent/2012-12-07.html"/><id>http://ox.iinteractive.com/advent/2012-12-07.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Overview&#34;&gt;Overview&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://metacpan.org/module/PSGI&#34;&gt;PSGI&lt;/a&gt; is the Perl (web) Server Gateway Interface. It defines a protocol for Perl web applications to communicate with web servers in such a way that applications can just write code using the protocol and automatically work on any web server that supports PSGI (which is most of them, these days). It consists of two main parts: the request API and the response API. A PSGI application is just a subroutine which takes a request environment hashref as a parameter and returns a valid response.&lt;/p&gt;
+
+&lt;p&gt;In OX, you create a PSGI application by calling the &lt;code&gt;to_app&lt;/code&gt; method on an application instance. This is also used as the return value of the &lt;code&gt;router&lt;/code&gt; block, to make writing short applications easier.&lt;/p&gt;
+
+&lt;h2 id=&#34;Request&#34;&gt;Request&lt;/h2&gt;
+
+&lt;p&gt;The request environment is a hashref containing all of the request data. You can access the actual request environment in OX via the &lt;code&gt;env&lt;/code&gt; method on an &lt;a href=&#34;https://metacpan.org/module/OX::Request&#34;&gt;OX::Request&lt;/a&gt; object. It is typically easier, however, to access the data via the methods on the request object (which we will discuss tomorrow). The raw environment hashref is available if you need to do more complicated things, or if OX::Request doesn&#38;#39;t expose the data that you need.&lt;/p&gt;
+
+&lt;p&gt;One thing that is exposed in the environment that may be useful is information about the capabilities of the server you are currently running on. PSGI discourages relying on specific server implementations if at all possible - any functionality you may need from a server should be exposed in a general way, so that other servers can also implement it. Some examples are:&lt;/p&gt;
+
+&lt;ul&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;psgi.multithread&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The server runs multiple requests simultaneously in separate threads.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;psgi.multiprocess&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The server runs multiple requests simultaneously in separate processes.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;psgi.run_once&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The server only runs a single request in a given process (like CGI).&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;psgi.nonblocking&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The server supports non-blocking operation via an event loop. You should make sure that your application uses a compatible event loop if you want to interact with it.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;psgi.streaming&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The server supports streaming responses. These will be described in the next section.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;Response&#34;&gt;Response&lt;/h2&gt;
+
+&lt;p&gt;Understanding how the response protocol works is much more useful, since, as mentioned previously, action subroutines in OX can return not only a string or a response object, but also any valid PSGI response. A PSGI response is either a three-element array reference, or (if &lt;code&gt;psgi.streaming&lt;/code&gt; is true) a code reference. The three elements of the array reference are, in order:&lt;/p&gt;
+
+&lt;ul&gt;
+
+&lt;li&gt;&lt;p&gt;The response code. This is a single integer between 100 and 599.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;An arrayref containing the headers, in key-value pairs. It is an arrayref rather than a hashref because the HTTP specification allows certain headers to be specified multiple times. This must contain at least a &lt;code&gt;Content-Type&lt;/code&gt; entry, unless the response code is &lt;code&gt;1xx&lt;/code&gt;, &lt;code&gt;204&lt;/code&gt;, or &lt;code&gt;304&lt;/code&gt;.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The response body. This can either be an arrayref of strings or a filehandle of some sort.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For instance, a simple response could look like this:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;[ &lt;span class=&#34;synConstant&#34;&gt;200&lt;/span&gt;, [ &lt;span class=&#34;synConstant&#34;&gt;&#39;Content-Type&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;text/plain&#39;&lt;/span&gt; ], [ &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;Hello world!&#38;quot;&lt;/span&gt; ] ]&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;In addition, if the &lt;code&gt;psgi.streaming&lt;/code&gt; variable is true in the environment, the response can be a coderef. This coderef will receive a callback subroutine as its only argument. You can use this callback in one of two ways.&lt;/p&gt;
+
+&lt;p&gt;The simplest way to use it is to just call the callback with a full response arrayref as described above. This can be useful if you are running on a nonblocking server, and want to not block the server while you wait for response data to be fetched.&lt;/p&gt;
+
+&lt;p&gt;For instance:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$responder&lt;/span&gt; = &lt;span class=&#34;synStatement&#34;&gt;shift&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$data&lt;/span&gt; = slow_database_query();&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$responder&lt;/span&gt;-&#38;gt;([&lt;span class=&#34;synConstant&#34;&gt;200&lt;/span&gt;, [&lt;span class=&#34;synConstant&#34;&gt;&#39;Content-Type&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;text/html&#39;&lt;/span&gt;], [render(&lt;span class=&#34;synIdentifier&#34;&gt;$data&lt;/span&gt;)]]);&lt;br /&gt;}&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;In addition, this form of response can be used for HTTP server push (also known as long-poll or Comet) applications. In these kinds of requests, the connection remains open, and the server streams data to the client, which reads it as it comes in. To support this, you can pass the callback an arrayref containing only the first two elements (response code and headers). The callback will then return an object which implements two methods, &lt;code&gt;write&lt;/code&gt; and &lt;code&gt;close&lt;/code&gt;, which can be used to send data to the client directly.&lt;/p&gt;
+
+&lt;p&gt;An example of this type of response:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;br /&gt;8:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$responder&lt;/span&gt; = &lt;span class=&#34;synStatement&#34;&gt;shift&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$writer&lt;/span&gt; = &lt;span class=&#34;synIdentifier&#34;&gt;$responder&lt;/span&gt;-&#38;gt;([&lt;span class=&#34;synConstant&#34;&gt;200&lt;/span&gt;, [&lt;span class=&#34;synConstant&#34;&gt;&#39;Content-Type&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;application/json&#39;&lt;/span&gt;]]);&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;while&lt;/span&gt; (&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$event&lt;/span&gt; = get_next_event()) {&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$writer-&#38;gt;write&lt;/span&gt;(encode_json(&lt;span class=&#34;synIdentifier&#34;&gt;$event&lt;/span&gt;) . &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;&lt;/span&gt;&lt;span class=&#34;synSpecial&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;synConstant&#34;&gt;&#38;quot;&lt;/span&gt;);&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;}&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$writer-&#38;gt;close&lt;/span&gt;;&lt;br /&gt;}&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;h3 id=&#34;response_cb&#34;&gt;&lt;code&gt;response_cb&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;Middleware can be applied to any PSGI application, and if they need to modify the response, dealing with all of these different kinds of responses can be difficult. Plack provides &lt;code&gt;Plack::Util::response_cb&lt;/code&gt; to handle this situation more conveniently. It takes a PSGI response and a coderef, and returns an updated PSGI response after having been filtered through the coderef. For instance:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt; = Plack::Util::response_cb(&lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt;, &lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt; = &lt;span class=&#34;synStatement&#34;&gt;shift&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;push&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;@{&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$res-&#38;gt;[&lt;/span&gt;&lt;span class=&#34;synConstant&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;synIdentifier&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;}&lt;/span&gt;, (&lt;span class=&#34;synConstant&#34;&gt;&#39;X-Foo&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;Bar&#39;&lt;/span&gt;);&lt;br /&gt;});&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;In this case, the response is updated in-place and returned (and the return value from the subroutine is ignored).&lt;/p&gt;
+
+&lt;p&gt;Alternatively, you can return a code reference from the subroutine, and it will be used as a content filter. For instance:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;br /&gt;8:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt; = Plack::Util::response_cb(&lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt;, &lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt; = &lt;span class=&#34;synStatement&#34;&gt;shift&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$chunk&lt;/span&gt; = &lt;span class=&#34;synStatement&#34;&gt;shift&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;synStatement&#34;&gt;unless&lt;/span&gt; &lt;span class=&#34;synStatement&#34;&gt;defined&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$chunk&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;synStatement&#34;&gt;uc&lt;/span&gt;(&lt;span class=&#34;synIdentifier&#34;&gt;$chunk&lt;/span&gt;);&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;};&lt;br /&gt;});&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;/div&gt;</summary><updated>2012-12-07T00:00:00-06:00</updated><author><name>Jesse Luehrs</name></author></entry><entry><title>Mounts</title><link href="http://ox.iinteractive.com/advent/2012-12-06.html"/><id>http://ox.iinteractive.com/advent/2012-12-06.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;The-mount-keyword&#34;&gt;The &lt;code&gt;mount&lt;/code&gt; keyword&lt;/h2&gt;
 
 &lt;p&gt;The &lt;code&gt;mount&lt;/code&gt; keyword allows you to include other &lt;a href=&#34;https://metacpan.org/module/PSGI&#34;&gt;PSGI&lt;/a&gt; applications inside your application, under a given request path. For instance, if you have static files that need to be served, you can create a &lt;a href=&#34;https://metacpan.org/module/Plack::App::File&#34;&gt;Plack::App::File&lt;/a&gt; instance and mount it under &lt;code&gt;/static&lt;/code&gt;, so that any request for a path underneath &lt;code&gt;/static&lt;/code&gt; will be delegated to the Plack::App::File app.&lt;/p&gt;
 

@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+PSGI
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>PSGI</h1>
+<div class='subtitle'>OX - 2012-12-07</div>
+
+<div class='pod'><h2 id="Overview">Overview</h2>
+
+<p><a href="https://metacpan.org/module/PSGI">PSGI</a> is the Perl (web) Server Gateway Interface. It defines a protocol for Perl web applications to communicate with web servers in such a way that applications can just write code using the protocol and automatically work on any web server that supports PSGI (which is most of them, these days). It consists of two main parts: the request API and the response API. A PSGI application is just a subroutine which takes a request environment hashref as a parameter and returns a valid response.</p>
+
+<p>In OX, you create a PSGI application by calling the <code>to_app</code> method on an application instance. This is also used as the return value of the <code>router</code> block, to make writing short applications easier.</p>
+
+<h2 id="Request">Request</h2>
+
+<p>The request environment is a hashref containing all of the request data. You can access the actual request environment in OX via the <code>env</code> method on an <a href="https://metacpan.org/module/OX::Request">OX::Request</a> object. It is typically easier, however, to access the data via the methods on the request object (which we will discuss tomorrow). The raw environment hashref is available if you need to do more complicated things, or if OX::Request doesn&#39;t expose the data that you need.</p>
+
+<p>One thing that is exposed in the environment that may be useful is information about the capabilities of the server you are currently running on. PSGI discourages relying on specific server implementations if at all possible - any functionality you may need from a server should be exposed in a general way, so that other servers can also implement it. Some examples are:</p>
+
+<ul>
+
+<li><p><code>psgi.multithread</code></p>
+
+<p>The server runs multiple requests simultaneously in separate threads.</p>
+
+</li>
+<li><p><code>psgi.multiprocess</code></p>
+
+<p>The server runs multiple requests simultaneously in separate processes.</p>
+
+</li>
+<li><p><code>psgi.run_once</code></p>
+
+<p>The server only runs a single request in a given process (like CGI).</p>
+
+</li>
+<li><p><code>psgi.nonblocking</code></p>
+
+<p>The server supports non-blocking operation via an event loop. You should make sure that your application uses a compatible event loop if you want to interact with it.</p>
+
+</li>
+<li><p><code>psgi.streaming</code></p>
+
+<p>The server supports streaming responses. These will be described in the next section.</p>
+
+</li>
+</ul>
+
+<h2 id="Response">Response</h2>
+
+<p>Understanding how the response protocol works is much more useful, since, as mentioned previously, action subroutines in OX can return not only a string or a response object, but also any valid PSGI response. A PSGI response is either a three-element array reference, or (if <code>psgi.streaming</code> is true) a code reference. The three elements of the array reference are, in order:</p>
+
+<ul>
+
+<li><p>The response code. This is a single integer between 100 and 599.</p>
+
+</li>
+<li><p>An arrayref containing the headers, in key-value pairs. It is an arrayref rather than a hashref because the HTTP specification allows certain headers to be specified multiple times. This must contain at least a <code>Content-Type</code> entry, unless the response code is <code>1xx</code>, <code>204</code>, or <code>304</code>.</p>
+
+</li>
+<li><p>The response body. This can either be an arrayref of strings or a filehandle of some sort.</p>
+
+</li>
+</ul>
+
+<p>For instance, a simple response could look like this:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>[ <span class="synConstant">200</span>, [ <span class="synConstant">'Content-Type'</span> =&gt; <span class="synConstant">'text/plain'</span> ], [ <span class="synConstant">&quot;Hello world!&quot;</span> ] ]</code><br />&nbsp;</td></table>
+
+<p>In addition, if the <code>psgi.streaming</code> variable is true in the environment, the response can be a coderef. This coderef will receive a callback subroutine as its only argument. You can use this callback in one of two ways.</p>
+
+<p>The simplest way to use it is to just call the callback with a full response arrayref as described above. This can be useful if you are running on a nonblocking server, and want to not block the server while you wait for response data to be fetched.</p>
+
+<p>For instance:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$responder</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$data</span> = slow_database_query();<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$responder</span>-&gt;([<span class="synConstant">200</span>, [<span class="synConstant">'Content-Type'</span> =&gt; <span class="synConstant">'text/html'</span>], [render(<span class="synIdentifier">$data</span>)]]);<br />}</code><br />&nbsp;</td></table>
+
+<p>In addition, this form of response can be used for HTTP server push (also known as long-poll or Comet) applications. In these kinds of requests, the connection remains open, and the server streams data to the client, which reads it as it comes in. To support this, you can pass the callback an arrayref containing only the first two elements (response code and headers). The callback will then return an object which implements two methods, <code>write</code> and <code>close</code>, which can be used to send data to the client directly.</p>
+
+<p>An example of this type of response:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$responder</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$writer</span> = <span class="synIdentifier">$responder</span>-&gt;([<span class="synConstant">200</span>, [<span class="synConstant">'Content-Type'</span> =&gt; <span class="synConstant">'application/json'</span>]]);<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">while</span> (<span class="synStatement">my</span> <span class="synIdentifier">$event</span> = get_next_event()) {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$writer-&gt;write</span>(encode_json(<span class="synIdentifier">$event</span>) . <span class="synConstant">&quot;</span><span class="synSpecial">\n</span><span class="synConstant">&quot;</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;}<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$writer-&gt;close</span>;<br />}</code><br />&nbsp;</td></table>
+
+<h3 id="response_cb"><code>response_cb</code></h3>
+
+<p>Middleware can be applied to any PSGI application, and if they need to modify the response, dealing with all of these different kinds of responses can be difficult. Plack provides <code>Plack::Util::response_cb</code> to handle this situation more conveniently. It takes a PSGI response and a coderef, and returns an updated PSGI response after having been filtered through the coderef. For instance:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synIdentifier">$res</span> = Plack::Util::response_cb(<span class="synIdentifier">$res</span>, <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$res</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">push</span> <span class="synIdentifier">@{</span> <span class="synIdentifier">$res-&gt;[</span><span class="synConstant">1</span><span class="synIdentifier">]</span> <span class="synIdentifier">}</span>, (<span class="synConstant">'X-Foo'</span> =&gt; <span class="synConstant">'Bar'</span>);<br />});</code><br />&nbsp;</td></table>
+
+<p>In this case, the response is updated in-place and returned (and the return value from the subroutine is ignored).</p>
+
+<p>Alternatively, you can return a code reference from the subroutine, and it will be used as a content filter. For instance:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synIdentifier">$res</span> = Plack::Util::response_cb(<span class="synIdentifier">$res</span>, <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$res</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$chunk</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synStatement">unless</span> <span class="synStatement">defined</span> <span class="synIdentifier">$chunk</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synStatement">uc</span>(<span class="synIdentifier">$chunk</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;};<br />});</code><br />&nbsp;</td></table>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/615c9501f43cca57a2467232c5257544?r=g&s=80&d=retro />
+This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="Mounts" href="2012-12-06.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
