@@ -1,5 +1,90 @@
 <?xml version="1.0" encoding="us-ascii"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-07T00:44:12-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>PSGI</title><link href="http://ox.iinteractive.com/advent/2012-12-07.html"/><id>http://ox.iinteractive.com/advent/2012-12-07.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Overview&#34;&gt;Overview&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-08T01:57:31-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>OX::Request and OX::Response</title><link href="http://ox.iinteractive.com/advent/2012-12-08.html"/><id>http://ox.iinteractive.com/advent/2012-12-08.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;OX::Request&#34;&gt;OX::Request&lt;/h2&gt;
+
+&lt;p&gt;As mentioned previously, action subroutines and methods receive an &lt;a href=&#34;https://metacpan.org/module/OX::Request&#34;&gt;OX::Request&lt;/a&gt; instance containing the request data as their first argument. OX::Request provides access to all of the request data that the application received for the current request. Everything from the PSGI environment is available in a nicely packaged object, as well as details of how OX matched the request against your router. There are even shortcuts to build OX::Response objects for your convenience.&lt;/p&gt;
+
+&lt;h3 id=&#34;Basic-request-data&#34;&gt;Basic request data&lt;/h3&gt;
+
+&lt;p&gt;The OX::Request instance provides methods to access all of the various parts of the request. Some commonly used methods include:&lt;/p&gt;
+
+&lt;ul&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;$r-&#38;gt;path&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Returns the request path.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;$r-&#38;gt;method&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Returns the HTTP method (GET, POST, etc) that was used for the request.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;$r-&#38;gt;headers&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Returns an &lt;a href=&#34;https://metacpan.org/module/HTTP::Headers&#34;&gt;HTTP::Headers&lt;/a&gt; object containing the headers in the request.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;$r-&#38;gt;param($name)&lt;/code&gt;, &lt;code&gt;$r-&#38;gt;parameters&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Allows access to the request parameters, either from the the query string or from the request body. The &lt;code&gt;param&lt;/code&gt; method returns the value for a single parameter, while the &lt;code&gt;parameters&lt;/code&gt; method returns a hashref of all parameters given.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;$r-&#38;gt;uploads&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Returns a hashref of upload objects, which can be used to access uploaded files.&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;OX::Request is a subclass of &lt;a href=&#34;https://metacpan.org/module/Web::Request&#34;&gt;Web::Request&lt;/a&gt;, so you can find more details in its documentation.&lt;/p&gt;
+
+&lt;h3 id=&#34;Encoding&#34;&gt;Encoding&lt;/h3&gt;
+
+&lt;p&gt;By default, OX decodes all request data as UTF-8 before passing it to the application, and encodes all response data as UTF-8 before sending it back to the server. This is almost certainly what you should be doing in any new applications - UTF-8 is used by over half of all websites. If you need to handle different encodings, however, you can adjust the request object to handle things however you want. The &lt;code&gt;encoding&lt;/code&gt; method will allow you to set any encoding supported by &lt;a href=&#34;https://metacpan.org/module/Encode&#34;&gt;Encode&lt;/a&gt;, or &lt;code&gt;undef&lt;/code&gt; to do no encoding at all. For instance:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;&lt;span class=&#34;synIdentifier&#34;&gt;index &lt;/span&gt;{&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$self&lt;/span&gt; = &lt;span class=&#34;synStatement&#34;&gt;shift&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; (&lt;span class=&#34;synIdentifier&#34;&gt;$r&lt;/span&gt;) = &lt;span class=&#34;synIdentifier&#34;&gt;@_&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$r-&#38;gt;encoding&lt;/span&gt;(&lt;span class=&#34;synConstant&#34;&gt;&#39;latin1&#39;&lt;/span&gt;);&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$page&lt;/span&gt; = &lt;span class=&#34;synIdentifier&#34;&gt;$r-&#38;gt;param&lt;/span&gt;(&lt;span class=&#34;synConstant&#34;&gt;&#39;page&#39;&lt;/span&gt;);&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synComment&#34;&gt;# ...&lt;/span&gt;&lt;br /&gt;}&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;This will set &lt;code&gt;$page&lt;/code&gt; to the value of the &lt;code&gt;page&lt;/code&gt; parameter, assuming that the request encoded the &lt;code&gt;page&lt;/code&gt; parameter using the latin1 encoding.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;encoding&lt;/code&gt; value is also used to encode the response. By default, all responses will be encoded as UTF-8, but if you need to return something like a binary file, you can do this:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;br /&gt;8:&#38;nbsp;&lt;br /&gt;9:&#38;nbsp;&lt;br /&gt;10:&#38;nbsp;&lt;br /&gt;11:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;&lt;span class=&#34;synIdentifier&#34;&gt;index &lt;/span&gt;{&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$self&lt;/span&gt; = &lt;span class=&#34;synStatement&#34;&gt;shift&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; (&lt;span class=&#34;synIdentifier&#34;&gt;$r&lt;/span&gt;) = &lt;span class=&#34;synIdentifier&#34;&gt;@_&lt;/span&gt;;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synComment&#34;&gt;# ...&lt;/span&gt;&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$r-&#38;gt;encoding&lt;/span&gt;(&lt;span class=&#34;synStatement&#34;&gt;undef&lt;/span&gt;);&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synStatement&#34;&gt;return&lt;/span&gt; [&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synConstant&#34;&gt;200&lt;/span&gt;,&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;[ &lt;span class=&#34;synConstant&#34;&gt;&#39;Content-Type&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;application/pdf&#39;&lt;/span&gt; ],&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;[ &lt;span class=&#34;synIdentifier&#34;&gt;$pdf_contents&lt;/span&gt; ],&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;];&lt;br /&gt;}&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;This ensures that the binary data in the file will not be corrupted by trying to encode it as UTF-8 before returning it.&lt;/p&gt;
+
+&lt;h3 id=&#34;Routing-details&#34;&gt;Routing details&lt;/h3&gt;
+
+&lt;p&gt;You can also access the route description for the matched route via the &lt;code&gt;$r-&#38;gt;mapping&lt;/code&gt; method. This will return a hashref containing all of the path variables. In addition, this hashref may contain additional data, either added by the route builder or specified in the route description itself. For instance, the ControllerAction route builder adds keys for &lt;code&gt;controller&lt;/code&gt; and &lt;code&gt;action&lt;/code&gt;, and the HTTPMethod route builder adds a &lt;code&gt;controller&lt;/code&gt; key.&lt;/p&gt;
+
+&lt;p&gt;You can specify additional elements to add to the mapping hashref in your route descriptions by specifying them in the hash along with your variable validations - values specified in this way are called &lt;i&gt;defaults&lt;/i&gt;. For instance:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/news.xml&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;feeds.news&#39;&lt;/span&gt;, (&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synConstant&#34;&gt;formatter&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;Data::Feed::RSS&#39;&lt;/span&gt;,&lt;br /&gt;);&lt;br /&gt;&lt;br /&gt;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/news.atom&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;feeds.news&#39;&lt;/span&gt;, (&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synConstant&#34;&gt;formatter&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#39;Data::Feed::Atom&#39;&lt;/span&gt;,&lt;br /&gt;);&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;In this case, the mapping hashref will contain a key for &lt;code&gt;formatter&lt;/code&gt; which contains the name of the formatter class to use. The &lt;code&gt;news&lt;/code&gt; action can then use this value to determine how to format the response, rather than having to guess by inspecting the request path.&lt;/p&gt;
+
+&lt;h2 id=&#34;OX::Response&#34;&gt;OX::Response&lt;/h2&gt;
+
+&lt;p&gt;If you need to return more complicated responses (with headers, cookies, and things like that), you can use &lt;a href=&#34;https://metacpan.org/module/OX::Response&#34;&gt;OX::Response&lt;/a&gt; (a subclass of &lt;a href=&#34;https://metacpan.org/module/Web::Response&#34;&gt;Web::Response&lt;/a&gt;) to make this process easier. You can create an OX::Response object by calling the &lt;code&gt;new_response&lt;/code&gt; method on the request object, and then setting the various values via methods on the response object. For instance:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;br /&gt;8:&#38;nbsp;&lt;br /&gt;9:&#38;nbsp;&lt;br /&gt;10:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt; = &lt;span class=&#34;synIdentifier&#34;&gt;$r-&#38;gt;new_response&lt;/span&gt;;&lt;br /&gt;&lt;span class=&#34;synIdentifier&#34;&gt;$res-&#38;gt;status&lt;/span&gt;(&lt;span class=&#34;synConstant&#34;&gt;200&lt;/span&gt;);&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;if&lt;/span&gt; (&lt;span class=&#34;synIdentifier&#34;&gt;$is_internet_explorer&lt;/span&gt;) {&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$res-&#38;gt;content_type&lt;/span&gt;(&lt;span class=&#34;synConstant&#34;&gt;&#39;application/vnd.ms-excel&#39;&lt;/span&gt;);&lt;br /&gt;}&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;else&lt;/span&gt; {&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$res-&#38;gt;content_type&lt;/span&gt;(&lt;span class=&#34;synConstant&#34;&gt;&#39;text/csv&#39;&lt;/span&gt;);&lt;br /&gt;}&lt;br /&gt;&lt;span class=&#34;synIdentifier&#34;&gt;$res-&#38;gt;content&lt;/span&gt;(&lt;span class=&#34;synConstant&#34;&gt;&#38;quot;foo,bar&lt;/span&gt;&lt;span class=&#34;synSpecial&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;synConstant&#34;&gt;baz,quux&lt;/span&gt;&lt;span class=&#34;synSpecial&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;synConstant&#34;&gt;&#38;quot;&lt;/span&gt;);&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt;;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;&lt;code&gt;new_response&lt;/code&gt; can also take key/value pairs to populate initial values for &lt;code&gt;status&lt;/code&gt;, &lt;code&gt;headers&lt;/code&gt;, &lt;code&gt;content&lt;/code&gt;, etc, or it can also take a valid (possibly partial) PSGI response to set some initial values:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;br /&gt;8:&#38;nbsp;&lt;br /&gt;9:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt; = &lt;span class=&#34;synIdentifier&#34;&gt;$r-&#38;gt;new_response&lt;/span&gt;([&lt;span class=&#34;synConstant&#34;&gt;200&lt;/span&gt;, [&lt;span class=&#34;synConstant&#34;&gt;&#38;quot;X-My-App&#38;quot;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;MyApp&#38;quot;&lt;/span&gt;]]);&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;if&lt;/span&gt; (&lt;span class=&#34;synIdentifier&#34;&gt;$is_internet_explorer&lt;/span&gt;) {&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$res-&#38;gt;content_type&lt;/span&gt;(&lt;span class=&#34;synConstant&#34;&gt;&#39;application/vnd.ms-excel&#39;&lt;/span&gt;);&lt;br /&gt;}&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;else&lt;/span&gt; {&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;&lt;span class=&#34;synIdentifier&#34;&gt;$res-&#38;gt;content_type&lt;/span&gt;(&lt;span class=&#34;synConstant&#34;&gt;&#39;text/csv&#39;&lt;/span&gt;);&lt;br /&gt;}&lt;br /&gt;&lt;span class=&#34;synIdentifier&#34;&gt;$res-&#38;gt;content&lt;/span&gt;(&lt;span class=&#34;synConstant&#34;&gt;&#38;quot;foo,bar&lt;/span&gt;&lt;span class=&#34;synSpecial&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;synConstant&#34;&gt;baz,quux&lt;/span&gt;&lt;span class=&#34;synSpecial&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;synConstant&#34;&gt;&#38;quot;&lt;/span&gt;);&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$res&lt;/span&gt;;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;See &lt;a href=&#34;https://metacpan.org/module/Web::Response&#34;&gt;Web::Response&lt;/a&gt; for more details about the full functionality available.&lt;/p&gt;
+
+&lt;/div&gt;</summary><updated>2012-12-08T00:00:00-06:00</updated><author><name>Jesse Luehrs</name></author></entry><entry><title>PSGI</title><link href="http://ox.iinteractive.com/advent/2012-12-07.html"/><id>http://ox.iinteractive.com/advent/2012-12-07.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Overview&#34;&gt;Overview&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://metacpan.org/module/PSGI&#34;&gt;PSGI&lt;/a&gt; is the Perl (web) Server Gateway Interface. It defines a protocol for Perl web applications to communicate with web servers in such a way that applications can just write code using the protocol and automatically work on any web server that supports PSGI (which is most of them, these days). It consists of two main parts: the request API and the response API. A PSGI application is just a subroutine which takes a request environment hashref as a parameter and returns a valid response.&lt;/p&gt;
 
