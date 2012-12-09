@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+uri_for
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>uri_for</h1>
+<div class='subtitle'>OX - 2012-12-09</div>
+
+<div class='pod'><h2 id="Paths-and-actions">Paths and actions</h2>
+
+<p>Different pages of your application need to be able to reference each other, and doing this by hardcoding URL paths is fairly fragile. URLs are the external API to your application, and may need to change for all kinds of different reasons, including things like SEO and general aesthetics which are frequently dictated by the client. Tying any part of your application&#39;s functionality to URL paths themselves is a good way to make the application hard to modify as time goes on.</p>
+
+<p>What we need is a way to refer to application endpoints using an internal identifier instead of an external one (the old adage &quot;All problems in computer science can be solved by another level of indirection&quot; comes to mind). That way, we can change our external URLs without having to modify much, if any, application code. Luckily, we already have one. Yesterday we saw how you could access the mapping for the current route via <code>$r-&gt;mapping</code>. The inverse operation of <code>$r-&gt;mapping</code> is <code>$r-&gt;uri_for</code>. <code>uri_for</code> takes a mapping hashref and returns the URI path corresponding to that mapping.</p>
+
+<p>For instance, given these routes:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>route <span class="synConstant">'/'</span>               =&gt; <span class="synConstant">'root.index'</span>;<br />route <span class="synConstant">'/view/:id'</span>       =&gt; <span class="synConstant">'root.view'</span>;<br />route <span class="synConstant">'/admin/view/:id'</span> =&gt; <span class="synConstant">'root.view'</span>, (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">section</span> =&gt; <span class="synConstant">'admin'</span>,<br />);</code><br />&nbsp;</td></table>
+
+<p>we get this:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synComment"># &quot;/&quot;</span><br /><span class="synStatement">say</span> <span class="synIdentifier">$r-&gt;uri_for</span>({<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">controller</span> =&gt; <span class="synConstant">'root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">action</span>     =&gt; <span class="synConstant">'index'</span>,<br />});<br /><br /><span class="synComment"># &quot;/view/123&quot;</span><br /><span class="synStatement">say</span> <span class="synIdentifier">$r-&gt;uri_for</span>({<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">controller</span> =&gt; <span class="synConstant">'root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">action</span>     =&gt; <span class="synConstant">'index'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">id</span>         =&gt; <span class="synConstant">123</span>,<br />});<br /><br /><span class="synComment"># &quot;/admin/view/123&quot;</span><br /><span class="synStatement">say</span> <span class="synIdentifier">$r-&gt;uri_for</span>({<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">controller</span> =&gt; <span class="synConstant">'root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">action</span>     =&gt; <span class="synConstant">'index'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">id</span>         =&gt; <span class="synConstant">123</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">section</span>    =&gt; <span class="synConstant">'admin'</span>,<br />});</code><br />&nbsp;</td></table>
+
+<p>Additionally, you only have to specify enough of the mapping to make it unique. For instance, if the three routes listed above were the only routes in the application, <code>$r-&gt;uri_for({ section =&gt; &#39;admin&#39;, id =&gt; 123 })</code> would also be sufficient for OX to figure out that you want <code>&quot;/admin/view/123&quot;</code>.</p>
+
+<h3 id="The-name-entry">The <code>name</code> entry</h3>
+
+<p>This can still be a bit verbose though, so there is a shorthand to make the common case easier. If you pass in just a single string to <code>uri_for</code>, it will be treated as though you passed a mapping with that string as the <code>name</code> value. This allows you to give the various routes in your application unique (and meaningful) names, and access them easily. If you say:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>route <span class="synConstant">'/'</span> =&gt; <span class="synConstant">'root.index'</span>;<br />route <span class="synConstant">'/about'</span> =&gt; <span class="synConstant">'root.about'</span>, (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">name</span> =&gt; <span class="synConstant">'about'</span>,<br />);</code><br />&nbsp;</td></table>
+
+<p>then you can use <code>$r-&gt;uri_for(&#39;about&#39;)</code> to access the <code>&quot;/about&quot;</code> page.</p>
+
+<p>In addition, the ControllerAction and HTTPMethod route builders also by default set the <code>name</code> value to be the action spec. This means that in the previous example, <code>$r-&gt;uri_for(&#39;root.index&#39;)</code> can also be used to access the <code>&quot;/&quot;</code> path.</p>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/615c9501f43cca57a2467232c5257544?r=g&s=80&d=retro />
+This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="OX::Request and OX::Response" href="2012-12-08.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
