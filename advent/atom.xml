@@ -1,5 +1,68 @@
 <?xml version="1.0" encoding="us-ascii"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-10T00:37:35-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>Exceptions</title><link href="http://ox.iinteractive.com/advent/2012-12-10.html"/><id>http://ox.iinteractive.com/advent/2012-12-10.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Exception-handling&#34;&gt;Exception handling&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-11T05:48:01-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>Deployment</title><link href="http://ox.iinteractive.com/advent/2012-12-11.html"/><id>http://ox.iinteractive.com/advent/2012-12-11.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Plack&#34;&gt;Plack&lt;/h2&gt;
+
+&lt;p&gt;OX interacts with web servers entirely via PSGI. This means that you can use any of the tools provided by &lt;a href=&#34;https://metacpan.org/module/Plack&#34;&gt;Plack&lt;/a&gt; to manage and deploy your OX applications. Plack provides functionality to run your app on many different application servers, tools to manage your application during development and deployment, and several middleware classes to fix deployment issues in various situations.&lt;/p&gt;
+
+&lt;h3 id=&#34;app.psgi-and-plackup&#34;&gt;&lt;code&gt;app.psgi&lt;/code&gt; and &lt;code&gt;plackup&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;Plack&#38;#39;s tools typically interact with applications via &lt;code&gt;.psgi&lt;/code&gt; files. This is a file which, when evaluated, returns a PSGI application coderef. As mentioned previously, an OX application as typically written is a valid &lt;code&gt;.psgi&lt;/code&gt; file:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synComment&#34;&gt;# app.psgi&lt;/span&gt;&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;use &lt;/span&gt;OX;&lt;br /&gt;&lt;br /&gt;router as {&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{ &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;Hello world!&#38;quot;&lt;/span&gt; };&lt;br /&gt;};&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;but this quickly becomes unwieldy. Splitting your application into multiple packages and files is important not only for code organization, but also because having a split between code that is inherent to your application and code that is specific to deployment makes the deployment process much easier. For instance, if your application uses sessions, the &lt;a href=&#34;https://metacpan.org/module/Plack::Middleware::Session&#34;&gt;Session&lt;/a&gt; middleware is conceptually part of the application itself - running the application without that middleware applied doesn&#38;#39;t make a lot of sense. On the other hand, the &lt;a href=&#34;https://metacpan.org/module/Plack::Middleware::ReverseProxy&#34;&gt;ReverseProxy&lt;/a&gt; middleware is dependent on your deployment environment - declaring that in your application doesn&#38;#39;t make sense because you might run your same application in several different environments, only some of which use a reverse proxy.&lt;/p&gt;
+
+&lt;p&gt;The typical way that OX applications are written is to write them as a class:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;br /&gt;8:&#38;nbsp;&lt;br /&gt;9:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synComment&#34;&gt;# Hello.pm&lt;/span&gt;&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;package&lt;/span&gt;&lt;span class=&#34;synType&#34;&gt; Hello&lt;/span&gt;;&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;use &lt;/span&gt;OX;&lt;br /&gt;&lt;br /&gt;router as {&lt;br /&gt;&#38;nbsp;&#38;nbsp;&#38;nbsp;&#38;nbsp;route &lt;span class=&#34;synConstant&#34;&gt;&#39;/&#39;&lt;/span&gt; =&#38;gt; &lt;span class=&#34;synStatement&#34;&gt;sub &lt;/span&gt;{ &lt;span class=&#34;synConstant&#34;&gt;&#38;quot;Hello world!&#38;quot;&lt;/span&gt; };&lt;br /&gt;};&lt;br /&gt;&lt;br /&gt;&lt;span class=&#34;synConstant&#34;&gt;1&lt;/span&gt;;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;and then write an &lt;code&gt;app.psgi&lt;/code&gt; file which instantiates the application:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synComment&#34;&gt;# app.psgi&lt;/span&gt;&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;use &lt;/span&gt;Hello;&lt;br /&gt;Hello-&#38;gt;new-&#38;gt;to_app;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;This way, you can easily add additional deployment-specific code to just the &lt;code&gt;app.psgi&lt;/code&gt; file, to do whatever you need to do:&lt;/p&gt;
+
+
+
+&lt;table class=&#39;code-listing&#39;&gt;&lt;tr&gt;&lt;td class=&#39;line-numbers&#39;&gt;&lt;br /&gt;&lt;code&gt;1:&#38;nbsp;&lt;br /&gt;2:&#38;nbsp;&lt;br /&gt;3:&#38;nbsp;&lt;br /&gt;4:&#38;nbsp;&lt;br /&gt;5:&#38;nbsp;&lt;br /&gt;6:&#38;nbsp;&lt;br /&gt;7:&#38;nbsp;&lt;br /&gt;8:&#38;nbsp;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;td class=&#39;code&#39;&gt;&lt;br /&gt;&lt;code&gt;&lt;span class=&#34;synComment&#34;&gt;# app.psgi&lt;/span&gt;&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;use &lt;/span&gt;Hello;&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;use &lt;/span&gt;Plack::Middleware::ReverseProxy;&lt;br /&gt;&lt;br /&gt;&lt;span class=&#34;synStatement&#34;&gt;my&lt;/span&gt; &lt;span class=&#34;synIdentifier&#34;&gt;$app&lt;/span&gt; = Hello-&#38;gt;new-&#38;gt;to_app;&lt;br /&gt;&lt;span class=&#34;synIdentifier&#34;&gt;$app&lt;/span&gt; = Plack::Middleware::ReverseProxy-&#38;gt;wrap(&lt;span class=&#34;synIdentifier&#34;&gt;$app&lt;/span&gt;);&lt;br /&gt;&lt;br /&gt;&lt;span class=&#34;synIdentifier&#34;&gt;$app&lt;/span&gt;;&lt;/code&gt;&lt;br /&gt;&#38;nbsp;&lt;/td&gt;&lt;/table&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://metacpan.org/module/Plack::Builder&#34;&gt;Plack::Builder&lt;/a&gt; can also be helpful for this.&lt;/p&gt;
+
+&lt;h2 id=&#34;Servers&#34;&gt;Servers&lt;/h2&gt;
+
+&lt;p&gt;Now that we have an &lt;code&gt;app.psgi&lt;/code&gt; file, we can run the application in any application server supported by &lt;a href=&#34;https://metacpan.org/module/Plack::Loader&#34;&gt;Plack::Loader&lt;/a&gt;. By default, if you just run &lt;code&gt;plackup&lt;/code&gt;, it will run your application using &lt;a href=&#34;https://metacpan.org/module/HTTP::Server::PSGI&#34;&gt;HTTP::Server::PSGI&lt;/a&gt;. This is a simple, single-process server which can be used during development. For your actual deployment, however, you&#38;#39;ll likely want to use a more fully-featured server.&lt;/p&gt;
+
+&lt;p&gt;By passing the &lt;code&gt;-s&lt;/code&gt; option to &lt;code&gt;plackup&lt;/code&gt;, you can use any application server which has a corresponding &lt;a href=&#34;https://metacpan.org/module/Plack::Handler&#34;&gt;Plack::Handler&lt;/a&gt; class. &lt;a href=&#34;https://metacpan.org/module/Starman&#34;&gt;Starman&lt;/a&gt; is a good example of a production-ready application server. It is fast, preforking, and supports all of HTTP/1.1. A typical Starman deployment involves running your application with starman as a normal user on a port that isn&#38;#39;t exposed to the public, and then running a reverse proxy of some sort in front of it. This ensures that you don&#38;#39;t need to run your application itself as root, and also prevents attacks like &lt;a href=&#34;http://en.wikipedia.org/wiki/Slowloris&#34;&gt;Slowloris&lt;/a&gt;, which Starman on its own would otherwise be vulnerable to.&lt;/p&gt;
+
+&lt;p&gt;To run Starman, you can pass &lt;code&gt;-s Starman&lt;/code&gt; to your &lt;code&gt;plackup&lt;/code&gt; invocation, or you can use the &lt;code&gt;starman&lt;/code&gt; runner script instead (which has more configuration options available). You should also add the ReverseProxy middleware to your &lt;code&gt;app.psgi&lt;/code&gt; file (to ensure that your application sees the correct values for the &lt;code&gt;host&lt;/code&gt;). For the reverse proxy itself, something like &lt;a href=&#34;http://www.nginx.org/&#34;&gt;nginx&lt;/a&gt; works well, using a configuration like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  server {
+      listen 80;
+      server_name myapp.example.com;
+
+      location / {
+          proxy_set_header Host               $http_host;
+          proxy_set_header X-Forwarded-Host   $http_host;
+          proxy_set_header X-Real-IP          $remote_addr;
+          proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Port   80;
+
+          proxy_pass http://localhost:5000/;
+      }
+  }&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should adjust the port in the proxy_pass statement to point to the port that you have Starman running on.&lt;/p&gt;
+
+&lt;h2 id=&#34;Further-reading&#34;&gt;Further reading&lt;/h2&gt;
+
+&lt;p&gt;If you need to deploy via other application servers or proxies, the Plack documentation covers a great deal of this. All of the server-specific documentation is covered in the &lt;a href=&#34;https://metacpan.org/module/Plack::Handler&#34;&gt;Plack::Handler&lt;/a&gt; classes (like &lt;a href=&#34;https://metacpan.org/module/Plack::Handler::FCGI&#34;&gt;Plack::Handler::FCGI&lt;/a&gt;, &lt;a href=&#34;https://metacpan.org/module/Plack::Handler::Apache2&#34;&gt;Plack::Handler::Apache2&lt;/a&gt;, etc). In addition, the &lt;a href=&#34;http://advent.plackperl.org/&#34;&gt;Plack advent calendar&lt;/a&gt; contains a lot of useful tips and tricks.&lt;/p&gt;
+
+&lt;/div&gt;</summary><updated>2012-12-11T00:00:00-06:00</updated><author><name>Jesse Luehrs</name></author></entry><entry><title>Exceptions</title><link href="http://ox.iinteractive.com/advent/2012-12-10.html"/><id>http://ox.iinteractive.com/advent/2012-12-10.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Exception-handling&#34;&gt;Exception handling&lt;/h2&gt;
 
 &lt;p&gt;OX applications are implicitly wrapped in the &lt;a href=&#34;https://metacpan.org/module/Plack::Middleware::HTTPExceptions&#34;&gt;Plack::Middleware::HTTPExceptions&lt;/a&gt; middleware. This allows you to throw exception objects which implement various methods describing an HTTP error or redirect response, and have that exception object translated into a real PSGI response.&lt;/p&gt;
 
