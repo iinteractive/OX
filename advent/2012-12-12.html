@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+Back To Basics
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>Back To Basics</h1>
+<div class='subtitle'>OX - 2012-12-12</div>
+
+<div class='pod'><h2 id="Round-And-Round-It-Goes">Round And Round It Goes</h2>
+
+<p>At this point, you&#39;ve had almost 2 weeks worth of in-depth details about the <a href="https://metacpan.org/module/OX">OX</a> framework, including entries <a href="https://metacpan.org/module/Path::Router">Path::Router</a>, <a href="https://metacpan.org/module/Bread::Board::Declare">Bread::Board::Declare</a>, <a href="https://metacpan.org/module/OX::Request">OX::Request</a> and <a href="https://metacpan.org/module/OX::Response">OX::Response</a>, and Plack, PSGI, and more middleware than you can shake a stick at. After that deep dive into all the components that you <i>can</i> make use of in an OX application, it&#39;s a good time to step back and look at the big picture again, and review what I consider to be one of OX&#39;s greatest strengths: the way it allows you to develop applications across a wide range of scales, and to iteratively move from one scale to another as the complexity of your application changes over time. Like so-called micro-frameworks, OX allows you to start developing an application as a single simple module -- and then over time, if the complexity of the problem calls for it, you can iteratively evolve your app into a multi-module monster, with a full MVC-oriented architecture (or MVA, or whatever the flavor du jour design pattern is). Because OX applications are really just Moose applications, they can be as simple or as complex as you need.</p>
+
+<h2 id="My-Pomodoro-Technique-Is-Almost-Unstoppable">My Pomodoro Technique Is (Almost) Unstoppable</h2>
+
+<p>Let&#39;s say you wanted to develop a simple web-based application to help you use the <a href="https://en.wikipedia.org/wiki/Pomodoro_Technique">Pomodoro Technique</a> during your daily work. The basic principle of this technique is alternating periods of work (typically 25 or 50 minutes long) with short breaks (usually 5 to 10 minutes). Each cycle is called a &quot;pomodoro&quot;, and every three to four pomodoros, you take a longer break (usually 30 minutes). During the course of a single pomodoro, you focus exclusively on finishing a single task, such as implementing a new feature or fixing a bug.</p>
+
+<p>I like the Pomodoro Technique quite a bit, and I have found that on those days when I don&#39;t have a lot of external interruptions (meetings, client phone calls, etc.), it&#39;s a really good way to balance staying focused on work with making sure I don&#39;t completely lose track of time or the overall structure of my day. I can make a rough plan at the beginning of the day -- this many pomodoros on this task, this many on that -- and then I have a rough outline for how my day should go.</p>
+
+<p>The biggest problem I have with my Pomodoro Technique -- aside from those pesky client calls! -- is keeping track of which pomodoro I&#39;m on to know when I should take my longer break. Was that the third or the fourth pomodoro? The fourth or the fifth? I frequently have that longer break set aside as a time to eat lunch, run an errand, or go for a walk or jog, so I want to make sure I take care of those things as well.</p>
+
+<h2 id="PomodorOX-To-The-Rescue">PomodorOX To The Rescue</h2>
+
+<p>Let&#39;s make the simplest possible OX application to track which Pomodoro we&#39;re on at any given point. Since this is going to be something I run locally and that typically won&#39;t be seen by anybody other than me, it can be as ugly... I mean, as simple and pragmatically efficient, as it needs to be. I spent about one pomodoro on this problem, and what I came up with looks like this:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> PomodorOX</span>;<br /><span class="synStatement">use </span>OX;<br /><br /><span class="synStatement">use </span>Lingua::EN::Numbers <span class="synConstant">qw/ num2en_ordinal /</span>;<br /><br /><span class="synStatement">my</span> <span class="synIdentifier">$goal</span>   = <span class="synConstant">12</span>;<br /><span class="synStatement">my</span> <span class="synIdentifier">$done</span>   = <span class="synConstant">0</span>;<br /><span class="synStatement">my</span> <span class="synIdentifier">$state</span>  = <span class="synConstant">'initial'</span>;<br /><br />router as {<br />&nbsp;&nbsp;route <span class="synConstant">'/'</span> =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$ord</span> = num2en_ordinal( <span class="synIdentifier">$done</span>+<span class="synConstant">1</span> );<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$label</span> = ( <span class="synIdentifier">$state</span> <span class="synStatement">eq</span> <span class="synConstant">'break'</span> <span class="synStatement">or</span> <span class="synIdentifier">$state</span> <span class="synStatement">eq</span> <span class="synConstant">'initial'</span>) ?<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">&quot;Start </span><span class="synIdentifier">$ord</span><span class="synConstant"> pomodoro&quot;</span> : <span class="synConstant">&quot;Finish </span><span class="synIdentifier">$ord</span><span class="synConstant"> pomodoro and take a break&quot;</span>;<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">if</span> ( <span class="synIdentifier">$state</span> <span class="synStatement">eq</span> <span class="synConstant">'pomo'</span> ) {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$state</span> = <span class="synConstant">'break'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$done</span>++;<br />&nbsp;&nbsp;&nbsp;&nbsp;}<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">else</span> { <span class="synIdentifier">$state</span> = <span class="synConstant">'pomo'</span> }<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synConstant">&lt;&lt;EOHTML;</span><br /><span class="synConstant">&lt;p&gt;POMODOROS DONE / PLANNED: </span><span class="synIdentifier">$done</span><span class="synConstant"> / </span><span class="synIdentifier">$goal</span><br /><span class="synConstant">&lt;input type=&quot;button&quot; value=&quot;</span><span class="synIdentifier">$label</span><span class="synConstant">&quot; onclick=&quot;window.location = '/';&quot; /&gt;&lt;/p&gt;</span><br /><span class="synConstant">EOHTML</span><br />&nbsp;&nbsp;};<br />};</code><br />&nbsp;</td></table>
+
+<p>This simple module implements a simple pomodoro tracker, which will keep track of how many pomodoros you&#39;ve completed over the course of the day. As we saw way back in day 1, since the <code>router</code> block returns a valid PSGI application, you can load this module directly with <code>plackup</code> to run this application.</p>
+
+
+
+(Note: you can download this application
+<a href="pomodoro.psgi">here</a>.)
+
+<h2 id="Evolve-Or-Die">Evolve Or Die</h2>
+
+<p>One could code this simple application in any of a number of Perl web frameworks and it would look essentially the same -- what&#39;s the advantage of OX, exactly? The advantage, as I said above, is in the way the OX framework allows you to iteratively evolve an application without huge changes in the application structure. For example, let&#39;s say you decided that you wanted to load the goal -- the number of Pomodoros you&#39;re trying to do in a day -- from a config file instead of hard-coding it. That might look like this:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;<br />29:&nbsp;<br />30:&nbsp;<br />31:&nbsp;<br />32:&nbsp;<br />33:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> PomodorOX</span>;<br /><span class="synStatement">use </span>OX;<br /><span class="synStatement">use </span><span class="synConstant">5.012</span>;<br /><br /><span class="synStatement">use </span>Lingua::EN::Numbers <span class="synConstant">qw/ num2en_ordinal /</span>;<br /><span class="synStatement">use </span>YAML                <span class="synConstant">qw/ LoadFile /</span>;<br /><br /><span class="synStatement">my</span> <span class="synIdentifier">$config</span> = LoadFile( <span class="synConstant">'pomodorox.yaml'</span> );<br /><span class="synStatement">my</span> <span class="synIdentifier">$goal</span>   = <span class="synIdentifier">$config-&gt;{</span><span class="synConstant">goal</span><span class="synIdentifier">}</span> // <span class="synConstant">12</span>;<br /><span class="synStatement">my</span> <span class="synIdentifier">$done</span>   = <span class="synConstant">0</span>;<br /><span class="synStatement">my</span> <span class="synIdentifier">$state</span>  = <span class="synConstant">'initial'</span>;<br /><br />router as {<br />&nbsp;&nbsp;route <span class="synConstant">'/'</span> =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$ord</span> = num2en_ordinal( <span class="synIdentifier">$done</span>+<span class="synConstant">1</span> );<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$label</span> = ( <span class="synIdentifier">$state</span> <span class="synStatement">eq</span> <span class="synConstant">'break'</span> <span class="synStatement">or</span> <span class="synIdentifier">$state</span> <span class="synStatement">eq</span> <span class="synConstant">'initial'</span>) ?<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">&quot;Start </span><span class="synIdentifier">$ord</span><span class="synConstant"> pomodoro&quot;</span> : <span class="synConstant">&quot;Finish </span><span class="synIdentifier">$ord</span><span class="synConstant"> pomodoro and take a break&quot;</span>;<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">if</span> ( <span class="synIdentifier">$state</span> <span class="synStatement">eq</span> <span class="synConstant">'pomo'</span> ) {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$state</span> = <span class="synConstant">'break'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$done</span>++;<br />&nbsp;&nbsp;&nbsp;&nbsp;}<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">else</span> { <span class="synIdentifier">$state</span> = <span class="synConstant">'pomo'</span> }<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synConstant">&lt;&lt;EOHTML;</span><br /><span class="synConstant">&lt;p&gt;</span><br /><span class="synConstant">  POMODOROS DONE / PLANNED: </span><span class="synIdentifier">$done</span><span class="synConstant"> / </span><span class="synIdentifier">$goal</span><br /><span class="synConstant">  &lt;input type=&quot;button&quot; value=&quot;</span><span class="synIdentifier">$label</span><span class="synConstant">&quot; onclick=&quot;window.location = '/';&quot; /&gt;</span><br /><span class="synConstant">&lt;/p&gt;</span><br /><span class="synConstant">EOHTML</span><br />&nbsp;&nbsp;};<br />};</code><br />&nbsp;</td></table>
+
+<p>Only lines 6-9 would need to change to add a configuration file. Further, because OX is completely configuration-system agnostic, you don&#39;t have to use <a href="https://metacpan.org/module/YAML">YAML</a>. You could use <a href="https://metacpan.org/module/Config::General">Config::General</a>, or <a href="https://metacpan.org/module/XML::Simple">XML::Simple</a>, or roll your own <code>PomodorOX::Config</code> module.</p>
+
+<h2 id="Longest-Journey-Single-Step-You-Know-The-Drill">Longest Journey, Single Step, You Know The Drill</h2>
+
+<p>The point of this article is not that you need to start all your web applications with a single module design. That would be silly. The point is also not that you should use the Pomodoro Technique -- although you may want to give it a shot.</p>
+
+<p>No, the point of this article is that, while OX does build on a number of components, and on some concepts (such as dependency injection and inversion of control) that have a reputation as being somewhat difficult to get ones head around, you don&#39;t really have to deal with those concepts to start using OX. You can start making useful web applications using only the simplest parts of <a href="https://metacpan.org/module/Path::Router">Path::Router</a>, and move on up to the capabilities that the <a href="https://metacpan.org/module/Bread::Board::Declare">Bread::Board::Declare</a>-based service resolution gives you once you get to the point where your application needs it.</p>
+
+<p>So block out a pomodoro or two today, and make a simple OX app. (If you can&#39;t think of anything special to do, make PomodorOX suck just a tiny bit less.) Once you&#39;ve got that app working, add another bit of functionality. When you&#39;ve gotten it to the point where you really want to refactor that inline action path out of the router block, then you&#39;re ready to go back and review the first few days in this calendar, and join <code>#ox</code> and start asking questions.</p>
+
+<p>Happy coding and happy holidays!</p>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/89415c88230cf6205f7518a6264c9aae?r=g&s=80&d=retro />
+This article contributed by: John SJ Anderson &lt;john.anderson@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="Deployment" href="2012-12-11.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
