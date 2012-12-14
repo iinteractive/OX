@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+More Bread::Board
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>More Bread::Board</h1>
+<div class='subtitle'>OX - 2012-12-14</div>
+
+<div class='pod'><h2 id="Typemaps-and-Dependency-Inference">Typemaps and Dependency Inference</h2>
+
+<p>Most of the classes in your application will probably only need to be instantiated in one way. You probably won&#39;t have multiple instances of a model class, for instance. This means that when you mention the model class in one of your controller classes, it&#39;s unambiguous what you&#39;re actually asking for - there&#39;s no reason that you should need to explicitly list it as a dependency, since it&#39;s already listed as the type constraint in the controller. Bread::Board understands this, and can be used to automatically introspect the dependency list for your classes via the attributes that they declare.</p>
+
+<p>Given an application like this:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;<br />29:&nbsp;<br />30:&nbsp;<br />31:&nbsp;<br />32:&nbsp;<br />33:&nbsp;<br />34:&nbsp;<br />35:&nbsp;<br />36:&nbsp;<br />37:&nbsp;<br />38:&nbsp;<br />39:&nbsp;<br />40:&nbsp;<br />41:&nbsp;<br />42:&nbsp;<br />43:&nbsp;<br />44:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp::Model</span>;<br /><span class="synStatement">use </span>Moose;<br /><br />has <span class="synConstant">dsn</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>       =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>      =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">required</span> =&gt; <span class="synConstant">1</span>,<br />);<br /><br /><span class="synStatement">package</span><span class="synType"> MyApp::Controller</span>;<br /><span class="synStatement">use </span>Moose;<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>       =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>      =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">required</span> =&gt; <span class="synConstant">1</span>,<br />);<br /><br /><span class="synComment"># ...</span><br /><br /><span class="synStatement">package</span><span class="synType"> MyApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />has <span class="synConstant">dsn</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'dbi:mysql:myapp'</span>,<br />);<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'dsn'</span>],<br />);<br /><br />has <span class="synConstant">controller</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Controller'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'model'</span>],<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synComment"># ...</span><br />};</code><br />&nbsp;</td></table>
+
+<p>we can instead tell Bread::Board to <i>infer</i> the dependencies for the controller service:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>has <span class="synConstant">controller</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'MyApp::Controller'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">infer</span> =&gt; <span class="synConstant">1</span>,<br />);</code><br />&nbsp;</td></table>
+
+<p>This looks through all of the required attributes in MyApp::Controller, finds the ones with type constraints that correspond to classes, and looks for services in the OX application whose type constraints correspond to those classes. Any services that it finds are automatically added to the list of dependencies that the service explicitly specifies (if any). This can&#39;t entirely replace manually specifying dependencies, but it can greatly simplify them.</p>
+
+<h2 id="Lifecycles">Lifecycles</h2>
+
+<p>By default, any time a service is resolved, a new instance is created. This is generally what you want (to avoid inadvertently leaking data between requests), but sometimes persisting data is necessary. For instance, you probably don&#39;t want to reconnect to the database on every single request, if performance is important for your application. In this case, you can specify a different <i>lifecycle</i> for a particular service:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>has <span class="synConstant">dsn</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'dbi:mysql:myapp'</span>,<br />);<br /><br />has <span class="synConstant">dbh</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'dsn'</span>],<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">lifecycle</span>    =&gt; <span class="synConstant">'Singleton'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">block</span>        =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$s</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> DBI-&gt;<span class="synStatement">connect</span>(<span class="synIdentifier">$s-&gt;param</span>(<span class="synConstant">'dsn'</span>));<br />&nbsp;&nbsp;&nbsp;&nbsp;},<br />);<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'dbh'</span>],<br />);</code><br />&nbsp;</td></table>
+
+<p>Here, the <code>dbh</code> service will be instantiated the first time that it is requested, but then every subsequent time, it will return the same instance. In this example, every time the <code>model</code> service is resolved, a new MyApp::Model instance will be created, but each of those instances will use the same <code>dbh</code>.</p>
+
+<p>In addition to the <code>Singleton</code> lifecycle, you can also specify a <code>Request</code> lifecycle. This will act like <code>Singleton</code>, except that the cached value will be cleared between requests.</p>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/615c9501f43cca57a2467232c5257544?r=g&s=80&d=retro />
+This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="Roles and Inheritance" href="2012-12-13.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
