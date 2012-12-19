@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+Under the Hood
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>Under the Hood</h1>
+<div class='subtitle'>OX - 2012-12-19</div>
+
+<div class='pod'><h2 id="OX::Application">OX::Application</h2>
+
+<p>Although <a href="https://metacpan.org/module/OX">OX</a> provides a useful sugar layer for writing your applications, it is really just a thin layer on top of an extensible internal structure. Much like Moose and Bread::Board, learning how the internals work can open up a lot more power to your applications.</p>
+
+<h3 id="Bread::Board::Container">Bread::Board::Container</h3>
+
+<p>An OX application is, fittingly, an instance of <a href="https://metacpan.org/module/OX::Application">OX::Application</a>. OX::Application is just a <a href="https://metacpan.org/module/Bread::Board::Container">Bread::Board container class</a> with a service named <code>App</code>, representing the final PSGI application coderef (in fact, <code>$app-&gt;to_app</code> is just a wrapper around <code>$app-&gt;resolve(service =&gt; &#39;App&#39;)</code>). This means that you can do anything with your OX applications that you would with any other Bread::Board container, such as include them in other Bread::Board containers, if your app is larger than just a web application.</p>
+
+<p>The <code>App</code> service is a block injection service, whose body just calls the <code>build_app</code> method on the application object itself. This means that defining your application is as simple as writing a <code>build_app</code> method. The <code>App</code> service also gets its dependencies via the <code>app_dependencies</code> method. The service itself, in <a href="https://metacpan.org/module/Bread::Board">Bread::Board</a> syntax, basically looks like this:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>service <span class="synConstant">App</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">block</span> =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$s</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$app</span> = <span class="synIdentifier">$self-&gt;build_app</span>(<span class="synIdentifier">$s</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synComment"># apply middleware to $app using $s-&gt;param('Middleware')</span><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$app</span><br />&nbsp;&nbsp;&nbsp;&nbsp;},<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">Middleware</span> =&gt; <span class="synConstant">'Middleware'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">%{</span> <span class="synIdentifier">$self-&gt;app_dependencies</span> <span class="synIdentifier">}</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;}<br />);</code><br />&nbsp;</td></table>
+
+<p>As you can see, this supports declaring middleware via an additional <code>Middleware</code> service. This service is expected to create an arrayref of middleware, and is created similarly to the <code>App</code> service, via <code>build_middleware</code> and <code>middleware_dependencies</code> methods.</p>
+
+<h3 id="Features-added-by-the-OX-sugar">Features added by the OX sugar</h3>
+
+<p>In addition, the OX sugar provides a default implementation of <code>build_app</code> that uses an additional <code>Router</code> service. The <code>Router</code> service again is created via methods on the application class, via <code>build_router</code> and <code>router_dependencies</code>. Since the router is an object, creating the object itself is usually always done the same way, the only difference being the routes that are added to it. To make this process easier, the <code>Router</code> service is created slightly differently - <code>build_router</code> has a default implementation that constructs a router object using the <code>router_class</code> method and the dependencies specified in <code>router_dependencies</code>, and then it calls <code>configure_router</code>, passing the constructed router object in.</p>
+
+<p>The default <code>build_app</code> implementation then calls the <code>app_from_router</code> method to turn the router object into a PSGI application. It also replaces the app with a <a href="https://metacpan.org/module/Plack::App::URLMap">Plack::App::URLMap</a> which has the initial app mounted at <code>&#39;/&#39;</code> if any mounts were declared.</p>
+
+<h2 id="Roles-as-plugins">Roles as plugins</h2>
+
+<p>The upshot to this is, OX has no explicit plugin interface. Most plugin-like behavior can already be provided via middleware (as we&#39;ve already seen), and anything that can&#39;t be done that way can instead be done by just writing normal roles to be applied to the application class.</p>
+
+<p>For instance, if you (for some reason) want to interpret your requests and responses as Windows-1252 instead of UTF-8, you can do this:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp::Request</span>;<br /><span class="synStatement">use </span>Moose;<br /><br />extends <span class="synConstant">'OX::Request'</span>;<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">default_encoding </span>{ <span class="synConstant">'Windows-1252'</span> }<br /><br /><span class="synStatement">package</span><span class="synType"> MyApp::Role::Windows1252</span>;<br /><span class="synStatement">use </span>Moose::Role;<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">request_class </span>{ <span class="synConstant">'MyApp::Request'</span> }<br /><br /><span class="synStatement">package</span><span class="synType"> MyApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />with <span class="synConstant">'MyApp::Role::Windows1252'</span>;<br /><br /><span class="synComment"># ...</span></code><br />&nbsp;</td></table>
+
+<p>Here, we override the request class for the application to use our custom request class, which has a different value for <code>default_encoding</code>. Any of the other methods mentioned in this article can also be overridden in similar ways. See the documentation for <a href="https://metacpan.org/module/OX::Application">OX::Application</a> for more details, as well as <a href="https://metacpan.org/module/OX::Application::Role::Router">OX::Application::Role::Router</a> and <a href="https://metacpan.org/module/OX::Application::Role::Request">OX::Application::Role::Request</a> which are applied to your class by default when you <code>use OX</code>.</p>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/615c9501f43cca57a2467232c5257544?r=g&s=80&d=retro />
+This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="Authentication And Authorization" href="2012-12-18.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
