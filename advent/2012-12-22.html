@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+Authentication III: Return Of The Middleware
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>Authentication III: Return Of The Middleware</h1>
+<div class='subtitle'>OX - 2012-12-22</div>
+
+<div class='pod'><h2 id="Our-Story-So-Far">Our Story So Far</h2>
+
+<p>We&#39;ve seen <a href="http://iinteractive.github.com/OX/advent/2012-12-15.html">how to use middleware for simple authentication</a> as well as <a href="http://iinteractive.github.com/OX/advent/2012-12-18.html">a more complicated model-based authentication and authorization scheme</a>. For most applications the former is far too simplistic, and if you&#39;re working on a reasonably complicated project, the latter has one large flaw: you have to remember to manually check for authentication and authorization, in every method that requires them. Eventually somebody will forget to add that one critical line when they&#39;re writing a new method, and then you have a problem.</p>
+
+<p>One potential fix, since <a href="https://metacpan.org/module/OX">OX</a> is really just <a href="https://metacpan.org/module/Moose">Moose</a> under the covers, is to use an <code>around</code> method modifier in your controller classes. While that approach can be made to work, it&#39;s not the best solution. Instead, let&#39;s return to middleware -- custom middleware, to be precise.</p>
+
+<h2 id="A-More-Elegant-Approach-For-A-More-Civilized-Application">A More Elegant Approach, For A More Civilized Application</h2>
+
+<p>We&#39;ll use the same <code>OXauth</code> demo application as the earlier, model-based authentication example, but change it to use a custom middleware. On the application level, the change is pretty minor, we just add an additional <code>wrap_if</code> statement to the <code>router</code> block, that applies the authentication middleware if the request path matches <code>/admin</code>. We also add a <code>name</code> attribute for the <code>login</code> action -- we&#39;ll see how and where that gets used shortly.</p>
+
+<p>(The code for this version of the application is available in the <a href="https://github.com/genehack/oxauth">OXauth repo</a> in the <code>middleware-auth</code> branch.)</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;<br />29:&nbsp;<br />30:&nbsp;<br />31:&nbsp;<br />32:&nbsp;<br />33:&nbsp;<br />34:&nbsp;<br />35:&nbsp;<br />36:&nbsp;<br />37:&nbsp;<br />38:&nbsp;<br />39:&nbsp;<br />40:&nbsp;<br />41:&nbsp;<br />42:&nbsp;<br />43:&nbsp;<br />44:&nbsp;<br />45:&nbsp;<br />46:&nbsp;<br />47:&nbsp;<br />48:&nbsp;<br />49:&nbsp;<br />50:&nbsp;<br />51:&nbsp;<br />52:&nbsp;<br />53:&nbsp;<br />54:&nbsp;<br />55:&nbsp;<br />56:&nbsp;<br />57:&nbsp;<br />58:&nbsp;<br />59:&nbsp;<br />60:&nbsp;<br />61:&nbsp;<br />62:&nbsp;<br />63:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> OXauth</span>;<br /><span class="synComment"># ABSTRACT: OX advent auth example</span><br /><span class="synStatement">use </span>OX;<br /><span class="synStatement">use </span><span class="synConstant">5.010</span>;<br /><br /><span class="synStatement">use </span>OXauth::Schema;<br /><br />has <span class="synConstant">connect_info</span> =&gt; ( <span class="synConstant">is</span> =&gt; <span class="synConstant">'ro'</span>, <span class="synConstant">isa</span> =&gt; <span class="synConstant">'ArrayRef'</span> , <span class="synConstant">required</span> =&gt; <span class="synConstant">1</span> );<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'OXauth::Schema'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [ <span class="synConstant">'connect_info'</span> ] ,<br />&nbsp;&nbsp;<span class="synConstant">lifecycle</span>    =&gt; <span class="synConstant">'Singleton'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">block</span>        =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;OXauth::Schema-&gt;<span class="synStatement">connect</span>( <span class="synIdentifier">@{</span> <span class="synStatement">shift</span><span class="synIdentifier">-&gt;param( </span><span class="synConstant">'connect_info'</span><span class="synIdentifier"> )}</span> )<br />&nbsp;&nbsp;} ,<br />);<br /><br />has <span class="synConstant">cache_dir</span>     =&gt; ( <span class="synConstant">is</span> =&gt; <span class="synConstant">'ro'</span> , <span class="synConstant">isa</span> =&gt; <span class="synConstant">'Str'</span> , <span class="synConstant">required</span> =&gt; <span class="synConstant">1</span> );<br />has <span class="synConstant">template_root</span> =&gt; ( <span class="synConstant">is</span> =&gt; <span class="synConstant">'ro'</span> , <span class="synConstant">isa</span> =&gt; <span class="synConstant">'Str'</span> , <span class="synConstant">required</span> =&gt; <span class="synConstant">1</span> );<br /><br />has <span class="synConstant">view</span> =&gt; (<br />&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'Text::Xslate'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; {<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">cache_dir</span> =&gt; <span class="synConstant">'cache_dir'</span> ,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">path</span>      =&gt; <span class="synConstant">'template_root'</span> ,<br />&nbsp;&nbsp;},<br />);<br /><br />has <span class="synConstant">admin_controller</span> =&gt; (<br />&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'OXauth::Controller::Admin'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">infer</span> =&gt; <span class="synConstant">1</span> ,<br />);<br /><br />has <span class="synConstant">auth_controller</span> =&gt; (<br />&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'OXauth::Controller::Auth'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">infer</span> =&gt; <span class="synConstant">1</span> ,<br />);<br /><br />has <span class="synConstant">root_controller</span> =&gt; (<br />&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'OXauth::Controller::Root'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">infer</span> =&gt; <span class="synConstant">1</span> ,<br />);<br /><br />router as {<br />&nbsp;&nbsp;wrap <span class="synConstant">'Plack::Middleware::Session'</span> =&gt; ( <span class="synConstant">store</span> =&gt; literal( <span class="synConstant">'File'</span> ));<br /><br />&nbsp;&nbsp;wrap_if( <span class="synStatement">sub </span>{ <span class="synIdentifier">$_[</span><span class="synConstant">0</span><span class="synIdentifier">]-&gt;{</span><span class="synConstant">PATH_INFO</span><span class="synIdentifier">}</span> =~ <span class="synStatement">m{</span><span class="synConstant">^/admin</span><span class="synStatement">}</span> },<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">'OXauth::Middleware::Auth'</span> =&gt; ( <span class="synConstant">model</span> =&gt; <span class="synConstant">'model'</span> ));<br /><br />&nbsp;&nbsp;route <span class="synConstant">'/'</span>       =&gt; <span class="synConstant">'root_controller.index'</span>;<br />&nbsp;&nbsp;route <span class="synConstant">'/login'</span>  =&gt; <span class="synConstant">'auth_controller.login'</span> , ( <span class="synConstant">name</span> =&gt; <span class="synConstant">'login'</span> );<br />&nbsp;&nbsp;route <span class="synConstant">'/logout'</span> =&gt; <span class="synConstant">'auth_controller.logout'</span>;<br />&nbsp;&nbsp;route <span class="synConstant">'/admin'</span>  =&gt; <span class="synConstant">'admin_controller.index'</span>;<br />};<br /><br />__PACKAGE__<span class="synIdentifier">-&gt;meta-&gt;make_immutable</span>;<br /><span class="synConstant">1</span>;</code><br />&nbsp;</td></table>
+
+<p>That <code>wrap_if</code> line is given the PSGI request environment as an argument. We look to see if the path of the current request matches the part of the application that requires authentication. If that inline <code>sub</code> returns a true value, the middleware will be included. Any arguments to the middleware will be resolved as <a href="https://metacpan.org/module/Bread::Board">Bread::Board</a> services -- so this middleware will receive the <code>model</code> service.</p>
+
+<p>All the real action happens in the custom middleware, so let&#39;s look at that now.</p>
+
+<h2 id="The-Middleware-Is-Strong-In-This-One">The Middleware Is Strong In This One</h2>
+
+<p>&quot;Custom middleware&quot; sounds pretty daunting, but in the end it&#39;s not. You write a <a href="https://metacpan.org/module/MooseX::NonMoose">MooseX::NonMoose</a> class that extends <a href="https://metacpan.org/module/Plack::Middleware">Plack::Middleware</a>, and provide a <code>call</code> callback method, which will get passed the PSGI environment. Writing the middleware as a <a href="https://metacpan.org/module/Moose">Moose</a> class means we can define attributes (<code>model</code>, in the case below) which are provided via OX&#39;s use of Bread::Board service resolution.</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;<br />29:&nbsp;<br />30:&nbsp;<br />31:&nbsp;<br />32:&nbsp;<br />33:&nbsp;<br />34:&nbsp;<br />35:&nbsp;<br />36:&nbsp;<br />37:&nbsp;<br />38:&nbsp;<br />39:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> OXauth::Middleware::Auth</span>;<br /><span class="synStatement">use </span>Moose;<br /><span class="synStatement">use </span>MooseX::NonMoose;<br />extends <span class="synConstant">'Plack::Middleware'</span>;<br /><br /><span class="synStatement">use </span>HTTP::Throwable::Factory <span class="synConstant">'http_exception'</span>;<br /><span class="synStatement">use </span>OX::Request;<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;<span class="synConstant">is</span>       =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;<span class="synConstant">isa</span>      =&gt; <span class="synConstant">'OXauth::Schema'</span> ,<br />&nbsp;&nbsp;<span class="synConstant">required</span> =&gt; <span class="synConstant">1</span>,<br />&nbsp;&nbsp;<span class="synConstant">handles</span>  =&gt; [ <span class="synConstant">qw/ load_user /</span> ] ,<br />);<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">call </span>{<br />&nbsp;&nbsp;<span class="synStatement">my</span>( <span class="synIdentifier">$self</span> , <span class="synIdentifier">$env</span> ) = <span class="synIdentifier">@_</span>;<br /><br />&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$req</span> = OX::Request-&gt;new(<span class="synConstant">env</span> =&gt; <span class="synIdentifier">$env</span>);<br /><br />&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$login_url</span> = <span class="synIdentifier">$req-&gt;uri_for</span>(<span class="synConstant">'login'</span>);<br /><br />&nbsp;&nbsp;<span class="synComment"># load the user data if there's a user_id set in the session</span><br />&nbsp;&nbsp;<span class="synStatement">if</span> ( <span class="synStatement">my</span> <span class="synIdentifier">$id</span> = <span class="synIdentifier">$req-&gt;session-&gt;{</span><span class="synConstant">user_id</span><span class="synIdentifier">}</span> ) {<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$req-&gt;session-&gt;{</span><span class="synConstant">user</span><span class="synIdentifier">}</span> = <span class="synIdentifier">$self-&gt;load_user</span>( <span class="synIdentifier">$id</span> );<br />&nbsp;&nbsp;}<br /><br />&nbsp;&nbsp;<span class="synComment"># if we have a user or if we're trying to login, carry on</span><br />&nbsp;&nbsp;<span class="synStatement">if</span> ( <span class="synIdentifier">$req-&gt;session-&gt;{</span><span class="synConstant">user</span><span class="synIdentifier">}</span> || <span class="synIdentifier">$req-&gt;uri-&gt;path</span> <span class="synStatement">eq</span> <span class="synIdentifier">$login_url</span>) {<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$self-&gt;app</span>-&gt;(<span class="synIdentifier">$env</span>);<br />&nbsp;&nbsp;}<br />&nbsp;&nbsp;<span class="synComment"># otherwise redirect to the login url</span><br />&nbsp;&nbsp;<span class="synStatement">else</span> {<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$req-&gt;new_response-&gt;redirect</span>( <span class="synIdentifier">$login_url</span> );<br />&nbsp;&nbsp;}<br />}<br /><br />__PACKAGE__<span class="synIdentifier">-&gt;meta-&gt;make_immutable</span>;<br /><span class="synConstant">1</span>;</code><br />&nbsp;</td></table>
+
+<p>The line that uses the <code>uri_for</code> method is the reason why we added a <code>name</code> attribute to the <code>/login</code> route -- that allows us to have a consistent stable identifier for that routing even if the path part or the controller method that it invokes is renamed. (See the <a href="https://metacpan.org/module/2012-12-09.html"><code>uri_for</code></a> entry earlier in the calendar for more information.)</p>
+
+<p>The logic here is very simple -- if there&#39;s a <code>user_id</code> key set in the session, we load up that user from the database. If there&#39;s a user in the session or if we&#39;re trying to load the login URL, we call the wrapped PSGI application instance, passing it the environment, and return the result -- which will allow for further routing or middleware application to happen.</p>
+
+<p>If we don&#39;t have a user and aren&#39;t trying to login, we instead generate a redirect to the login URL.</p>
+
+<p>All the code for the <code>login</code> and <code>logout</code> methods in <code>OXauth::Controller::Auth</code> remains exactly the same as in the earlier example (with one tiny addition -- the <code>logout</code> method clears the <code>user</code> key in the session hash in addition to <code>user_id</code>.)</p>
+
+<h2 id="Its-A-Trap">It&#39;s A Trap</h2>
+
+<p>The more observant may have noticed that the middleware code didn&#39;t actually need to check for whether the path matched the login URL -- because the middleware was only wrapped when the path matched <code>/admin</code>, and the login URL (at <code>/login</code>) would never be the path while the middleware was executing. We can easily make both checks necessary by adjusting the router block:</p>
+
+
+
+<table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>router as {<br />&nbsp;&nbsp;wrap <span class="synConstant">'Plack::Middleware::Session'</span> =&gt; ( <span class="synConstant">store</span> =&gt; literal( <span class="synConstant">'File'</span> ));<br /><br />&nbsp;&nbsp;wrap_if( <span class="synStatement">sub </span>{ <span class="synIdentifier">$_[</span><span class="synConstant">0</span><span class="synIdentifier">]-&gt;{</span><span class="synConstant">PATH_INFO</span><span class="synIdentifier">}</span> =~ <span class="synStatement">m{</span><span class="synConstant">^/admin</span><span class="synStatement">}</span> },<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">'OXauth::Middleware::Auth'</span> =&gt; ( <span class="synConstant">model</span> =&gt; <span class="synConstant">'model'</span> ));<br /><br />&nbsp;&nbsp;route <span class="synConstant">'/'</span>             =&gt; <span class="synConstant">'root_controller.index'</span>;<br />&nbsp;&nbsp;route <span class="synConstant">'/admin/login'</span>  =&gt; <span class="synConstant">'auth_controller.login'</span> , ( <span class="synConstant">name</span> =&gt; <span class="synConstant">'login'</span> );<br />&nbsp;&nbsp;route <span class="synConstant">'/admin/logout'</span> =&gt; <span class="synConstant">'auth_controller.logout'</span>;<br />&nbsp;&nbsp;route <span class="synConstant">'/admin'</span>        =&gt; <span class="synConstant">'admin_controller.index'</span>;<br />};</code><br />&nbsp;</td></table>
+
+<p>Since you&#39;re undoubtably using <code>uri_for</code> in your templates as well, those will also automatically reflect this change, and the application will continue to function identically, with no other code changes needed. This should emphasize how the flexible mapping between URL routes and methods called on resolved services, along with the name-based lookups available via the <code>uri_for</code> method, makes it trivial to reorganize your URL organization scheme <b>or</b> your code, independently of each other.</p>
+
+<h2 id="I-Find-Your-Lack-Of-Authorization-Disturbing">I Find Your Lack Of Authorization Disturbing</h2>
+
+<p>The earlier model-based example included an authorization component which this example lacks. Extending the middleware to support that would not be difficult, however. One approach would be to have a &#39;config&#39; service that defines which roles have access to which paths, and then add that service as an additional parameter to the middleware, which could then add in a permissions check once a user was loaded. At that point it would probably be easier to include your custom authentication middleware unconditionally (<i>i.e.</i>, via a normal <code>wrap</code> statement) and use the <code>config</code> service to determine both whether authentication was needed, and if so, what authorizations were also required.</p>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/89415c88230cf6205f7518a6264c9aae?r=g&s=80&d=retro />
+This article contributed by: John SJ Anderson &lt;john.anderson@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="OX off the Web" href="2012-12-21.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
