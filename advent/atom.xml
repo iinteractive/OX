@@ -1,5 +1,42 @@
 <?xml version="1.0" encoding="us-ascii"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-23T02:31:44-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>A form2email gateway in OX</title><link href="http://ox.iinteractive.com/advent/2012-12-23.html"/><id>http://ox.iinteractive.com/advent/2012-12-23.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;A-Friend-In-Need&#34;&gt;A Friend In Need&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>OX Advent Calendar</title><id>http://ox.iinteractive.com/advent/</id><link href="http://ox.iinteractive.com/advent/atom.xml" rel="self"/><updated>2012-12-24T13:53:41-06:00</updated><author><name>Jesse Luehrs</name></author><generator uri="http://search.cpan.org/dist/XML-Atom-SimpleFeed/" version="0.86">XML::Atom::SimpleFeed</generator><entry><title>Wrapping things up</title><link href="http://ox.iinteractive.com/advent/2012-12-24.html"/><id>http://ox.iinteractive.com/advent/2012-12-24.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;Taking-a-step-back&#34;&gt;Taking a step back&lt;/h2&gt;
+
+&lt;p&gt;So now that we&#38;#39;ve seen all of the things that OX is capable of, I hope that you have a better idea of how you can use OX in your own applications. We&#38;#39;ve been using OX internally at &lt;a href=&#34;http://www.iinteractive.com/&#34;&gt;work&lt;/a&gt; for quite some time, and it has been very successful in making our applications more readable, configurable, and testable.&lt;/p&gt;
+
+&lt;p&gt;Being able to structure our apps as the design requires rather than requiring a specific layout of classes has been a huge win, both in encouraging us to actually think about the design of the application and in allowing us to more generally share components between applications. Basing OX on Bread::Board has also made it much easier to integrate into our other applications which already have a Bread::Board structure.&lt;/p&gt;
+
+&lt;p&gt;OX has also provided solutions for some of the more common pain points we have run into with other frameworks. Things like being able to easily rearrange URL structures and reuse application components outside of the context of a web request have been huge helps in making our code more flexible to accomodating client requests. Having a centralized router definition and using Perl concepts like method calling and exceptions in favor of framework-specific concepts like forwarding and detaching actions has made it much easier to jump into code and see exactly which code will be run for a given request.&lt;/p&gt;
+
+&lt;p&gt;Finally, focusing on tying together existing code rather than requiring a lot of glue encourages writing reusable code. There have been several instances of being able to release something as a generic Plack middleware (or something along those lines) that can be used by other people and other frameworks, which may not have happened had our framework required its own custom plugin system. It also helps with being able to reuse internal components between applications, especially if not all of those applications use OX.&lt;/p&gt;
+
+&lt;h2 id=&#34;Moving-forward&#34;&gt;Moving forward&lt;/h2&gt;
+
+&lt;p&gt;Although we use OX at work, this doesn&#38;#39;t provide a very wide range of experience with its various capabilities. Right now, we could really use more people using it, to give more different perspectives on how well the different features work. While we&#38;#39;re fairly confident about the way most parts work, there are certain aspects that are newer or less well tested:&lt;/p&gt;
+
+&lt;ul&gt;
+
+&lt;li&gt;&lt;p&gt;Route builders&lt;/p&gt;
+
+&lt;p&gt;Is the default set of route builders sufficient, or are there more common patterns we want to provide? Also, is the interface for writing and using custom route builders straightforward and functional enough?&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Auto-encoding&lt;/p&gt;
+
+&lt;p&gt;Auto-encoding everything as UTF-8 by default is clearly the right way to go for new code, but the way we interface with this currently is a bit clunky (since not all endpoints will want to be auto-encoded - for instance, downloads of binary files). Can we provide a better way to do this?&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Router block configuration&lt;/p&gt;
+
+&lt;p&gt;There are cases where we want to only enable parts of the application under certain configurations - we may want to include extra debugging code only on staging servers, for instance, or our application may have several different states that it needs to switch between depending on configuration that we update at various points dictated by the client. Right now, the router block is fixed, and must be declared before any instance of the application is created, which means we can&#38;#39;t access any of the configuration data that is passed to the application&#38;#39;s constructor. What is a good solution here?&lt;/p&gt;
+
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In addition, we are also very open to new ideas, if the current interfaces are not sufficient for your needs. Although we&#38;#39;ve put a decent amount of effort into making things easy to get running, certain aspects are still more low level than perhaps they should be. Identifying which aspects these are requires more use in real world situations.&lt;/p&gt;
+
+&lt;p&gt;We keep the current TODO list in the &lt;a href=&#34;https://github.com/iinteractive/ox/wiki&#34;&gt;GitHub wiki&lt;/a&gt;, so if you have any feedback on items in that list, or new ideas for things you think we should consider, please do also let us know.&lt;/p&gt;
+
+&lt;/div&gt;</summary><updated>2012-12-24T00:00:00-06:00</updated><author><name>Jesse Luehrs</name></author></entry><entry><title>A form2email gateway in OX</title><link href="http://ox.iinteractive.com/advent/2012-12-23.html"/><id>http://ox.iinteractive.com/advent/2012-12-23.html</id><summary type="html">&lt;div class=&#39;pod&#39;&gt;&lt;h2 id=&#34;A-Friend-In-Need&#34;&gt;A Friend In Need&lt;/h2&gt;
 
 &lt;p&gt;Recently, a friend asked me for a favor -- she needed to collect vendor registration information for a conference she was organizing. Her internal IT staff didn&#38;#39;t have the resources to help her and none of the free options (such as Google Forms) would work. Thanks to &lt;a href=&#34;https://metacpan.org/module/OX&#34;&gt;OX&lt;/a&gt; and a number of other CPAN modules, I was able to quickly throw something together to help my friend out.&lt;/p&gt;
 

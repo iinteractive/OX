@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>
+OX Advent Calendar - 
+Wrapping things up
+
+</title>
+</head>
+<body>
+    <div id="contentwrapper">
+        <div id="header">
+            <h1><a href="index.html">OX Advent Calendar</a></h1>
+        </div>
+
+        <p id="tagline">
+          <a class='feed' href="atom.xml">Feed</a>
+        </p>
+
+        <div id="content">
+          
+
+<h1 class='title'>Wrapping things up</h1>
+<div class='subtitle'>OX - 2012-12-24</div>
+
+<div class='pod'><h2 id="Taking-a-step-back">Taking a step back</h2>
+
+<p>So now that we&#39;ve seen all of the things that OX is capable of, I hope that you have a better idea of how you can use OX in your own applications. We&#39;ve been using OX internally at <a href="http://www.iinteractive.com/">work</a> for quite some time, and it has been very successful in making our applications more readable, configurable, and testable.</p>
+
+<p>Being able to structure our apps as the design requires rather than requiring a specific layout of classes has been a huge win, both in encouraging us to actually think about the design of the application and in allowing us to more generally share components between applications. Basing OX on Bread::Board has also made it much easier to integrate into our other applications which already have a Bread::Board structure.</p>
+
+<p>OX has also provided solutions for some of the more common pain points we have run into with other frameworks. Things like being able to easily rearrange URL structures and reuse application components outside of the context of a web request have been huge helps in making our code more flexible to accomodating client requests. Having a centralized router definition and using Perl concepts like method calling and exceptions in favor of framework-specific concepts like forwarding and detaching actions has made it much easier to jump into code and see exactly which code will be run for a given request.</p>
+
+<p>Finally, focusing on tying together existing code rather than requiring a lot of glue encourages writing reusable code. There have been several instances of being able to release something as a generic Plack middleware (or something along those lines) that can be used by other people and other frameworks, which may not have happened had our framework required its own custom plugin system. It also helps with being able to reuse internal components between applications, especially if not all of those applications use OX.</p>
+
+<h2 id="Moving-forward">Moving forward</h2>
+
+<p>Although we use OX at work, this doesn&#39;t provide a very wide range of experience with its various capabilities. Right now, we could really use more people using it, to give more different perspectives on how well the different features work. While we&#39;re fairly confident about the way most parts work, there are certain aspects that are newer or less well tested:</p>
+
+<ul>
+
+<li><p>Route builders</p>
+
+<p>Is the default set of route builders sufficient, or are there more common patterns we want to provide? Also, is the interface for writing and using custom route builders straightforward and functional enough?</p>
+
+</li>
+<li><p>Auto-encoding</p>
+
+<p>Auto-encoding everything as UTF-8 by default is clearly the right way to go for new code, but the way we interface with this currently is a bit clunky (since not all endpoints will want to be auto-encoded - for instance, downloads of binary files). Can we provide a better way to do this?</p>
+
+</li>
+<li><p>Router block configuration</p>
+
+<p>There are cases where we want to only enable parts of the application under certain configurations - we may want to include extra debugging code only on staging servers, for instance, or our application may have several different states that it needs to switch between depending on configuration that we update at various points dictated by the client. Right now, the router block is fixed, and must be declared before any instance of the application is created, which means we can&#39;t access any of the configuration data that is passed to the application&#39;s constructor. What is a good solution here?</p>
+
+</li>
+</ul>
+
+<p>In addition, we are also very open to new ideas, if the current interfaces are not sufficient for your needs. Although we&#39;ve put a decent amount of effort into making things easy to get running, certain aspects are still more low level than perhaps they should be. Identifying which aspects these are requires more use in real world situations.</p>
+
+<p>We keep the current TODO list in the <a href="https://github.com/iinteractive/ox/wiki">GitHub wiki</a>, so if you have any feedback on items in that list, or new ideas for things you think we should consider, please do also let us know.</p>
+
+</div>
+
+<div id='author'>
+<img alt='Gravatar Image' style='vertical-align:middle' src=http://www.gravatar.com/avatar/615c9501f43cca57a2467232c5257544?r=g&s=80&d=retro />
+This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
+</div>
+
+
+<ul id="pager">
+    <li class="previous"><a title="A form2email gateway in OX" href="2012-12-23.html">Previous</a></li>
+
+    <li class="next">Next</li>
+</ul>
+<div style="clear: both"></div>
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
