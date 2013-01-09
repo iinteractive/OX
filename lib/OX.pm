@@ -54,6 +54,9 @@ might be configured as an OX application.
       );
   };
 
+For a more comprehensive introduction, you should check out the
+L<2012 OX advent calendar|http://ox.iinteractive.com/advent/>.
+
 =head1 DESCRIPTION
 
 OX is a web application framework based on L<Bread::Board>, L<Path::Router>,
