@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+
+0.10  2013-01-09
       - bump Path::Router dep to make sure we have all of the features we need.
         in particular, tests fail without the improved route match
         disambiguation introduced in 0.11.
