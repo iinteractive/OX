@@ -508,6 +508,9 @@ L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=OX>.
 
 =head1 SEE ALSO
 
+L<Dancer>, L<Catalyst>, L<Web::Simple>, L<Mojolicious> for other web frameworks
+in Perl.
+
 =head1 SUPPORT
 
 The IRC channel for this project is C<#ox> on C<irc.perl.org>.
