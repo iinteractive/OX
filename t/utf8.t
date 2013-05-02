@@ -104,7 +104,7 @@ test_psgi
             utf8::encode($body);
             my $req = HTTP::Request->new(
                 POST => 'http://localhost/content',
-                [],
+                ['Content-Type' => 'text/plain'],
                 $body
             );
             my $res = $cb->($req);
