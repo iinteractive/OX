@@ -4,6 +4,8 @@ use warnings;
 use Test::More;
 use Plack::Test;
 
+use HTTP::Request::Common;
+
 use utf8;
 
 {
@@ -118,6 +120,30 @@ test_psgi
             my $content = $res->content;
             like($content, qr/^[\x00-\xff]*$/, "raw content is in bytes");
             is($content, "\x01\x02\x03\x04\xf3", "got raw bytes");
+        }
+    };
+
+{
+    package UnicodeArgs;
+    use OX;
+
+    router as {
+        route '/:str' => sub {
+            my ($req, $str) = @_;
+            return [ 200, ['Content-Type' => 'text/plain'], ["got $str"] ];
+        }
+    };
+}
+
+test_psgi
+    app    => UnicodeArgs->new->to_app,
+    client => sub {
+        my $cb = shift;
+
+        {
+            my $res = $cb->(GET '/יאדנאמאד');
+            my $content = $res->decoded_content;
+            is($content, "got יאדנאמאד");
         }
     };
 

@@ -49,9 +49,14 @@ sub app_from_router {
         },
         target_to_app => sub {
             my ($target) = @_;
-            blessed($target) && $target->can('to_app')
+            my $app = blessed($target) && $target->can('to_app')
                 ? $target->to_app
                 : $target;
+            sub {
+                my ($req, @args) = @_;
+                @args = map { $req->_decode($_) } @args;
+                $app->($req, @args);
+            }
         },
         handle_response => sub {
             $self->handle_response(@_);
