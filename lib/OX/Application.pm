@@ -6,6 +6,7 @@ use namespace::autoclean;
 use Bread::Board;
 use Plack::Middleware::HTTPExceptions;
 use Plack::Util;
+use Scalar::Util 'weaken';
 use Try::Tiny;
 
 use OX::Util;
@@ -70,13 +71,14 @@ has name => (
 );
 
 sub BUILD {
-    my $self = shift;
+    my $_self = shift;
+    weaken(my $self = $_self);
 
     container $self => as {
         service Middleware => (
             block => sub {
                 my $s = shift;
-                $s->parent->build_middleware($s);
+                $self->build_middleware($s);
             },
             dependencies => $self->middleware_dependencies,
         );
@@ -85,7 +87,7 @@ sub BUILD {
             block => sub {
                 my $s = shift;
 
-                my $app = $s->parent->build_app($s);
+                my $app = $self->build_app($s);
 
                 my @middleware = (
                     sub {
@@ -105,7 +107,7 @@ sub BUILD {
                                         # flush all services that are
                                         # request-scoped after the response is
                                         # returned
-                                        $s->parent->_flush_request_services
+                                        $self->_flush_request_services
                                             unless defined $content;
 
                                         return $content;

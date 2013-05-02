@@ -5,6 +5,7 @@ use namespace::autoclean;
 
 use Bread::Board;
 use Class::Load 'load_class';
+use Scalar::Util 'weaken';
 
 =head1 DESCRIPTION
 
@@ -38,15 +39,16 @@ requires qw(router_class app_from_router);
 
 sub BUILD { }
 before BUILD => sub {
-    my $self = shift;
+    my $_self = shift;
+    weaken(my $self = $_self);
 
     container $self => as {
         service Router => (
             class => $self->router_class,
             block => sub {
                 my $s = shift;
-                my $router = $s->parent->build_router($s);
-                $s->parent->configure_router($router);
+                my $router = $self->build_router($s);
+                $self->configure_router($router);
                 return $router;
             },
             dependencies => $self->router_dependencies,
