@@ -3,6 +3,8 @@ use Moose;
 use namespace::autoclean;
 # ABSTRACT: OX::RouteBuilder which routes to a method in a controller based on the HTTP method
 
+use Try::Tiny;
+
 with 'OX::RouteBuilder';
 
 =head1 SYNOPSIS
@@ -51,7 +53,7 @@ sub compile_routes {
         my $match = $req->mapping;
         my $a = $match->{action};
 
-        my $s = $app->fetch($a);
+        my $s = try { $app->fetch($a) };
         return [
             500,
             [],

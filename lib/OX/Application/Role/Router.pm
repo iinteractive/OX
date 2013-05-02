@@ -45,8 +45,8 @@ before BUILD => sub {
             class => $self->router_class,
             block => sub {
                 my $s = shift;
-                my $router = $self->build_router($s);
-                $self->configure_router($router);
+                my $router = $s->parent->build_router($s);
+                $s->parent->configure_router($router);
                 return $router;
             },
             dependencies => $self->router_dependencies,
