@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+
+0.11  2013-05-02
       - fix a couple memory leaks in the Bread::Board parts. (danielr)
       - proper error return for errors looking up action methods in
         ControllerAction and HTTPMethod route builders. (danielr)
