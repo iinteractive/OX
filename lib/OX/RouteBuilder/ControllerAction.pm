@@ -3,6 +3,8 @@ use Moose;
 use namespace::autoclean;
 # ABSTRACT: OX::RouteBuilder which routes to an action method in a controller class
 
+use Try::Tiny;
+
 with 'OX::RouteBuilder';
 
 =head1 SYNOPSIS
@@ -49,7 +51,7 @@ sub compile_routes {
         my $c = $match->{controller};
         my $a = $match->{action};
 
-        my $s = $app->fetch($c);
+        my $s = try { $app->fetch($c) };
         return [
             500,
             [],

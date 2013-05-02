@@ -76,7 +76,7 @@ sub BUILD {
         service Middleware => (
             block => sub {
                 my $s = shift;
-                $self->build_middleware($s);
+                $s->parent->build_middleware($s);
             },
             dependencies => $self->middleware_dependencies,
         );
@@ -85,7 +85,7 @@ sub BUILD {
             block => sub {
                 my $s = shift;
 
-                my $app = $self->build_app($s);
+                my $app = $s->parent->build_app($s);
 
                 my @middleware = (
                     sub {
@@ -105,7 +105,7 @@ sub BUILD {
                                         # flush all services that are
                                         # request-scoped after the response is
                                         # returned
-                                        $self->_flush_request_services
+                                        $s->parent->_flush_request_services
                                             unless defined $content;
 
                                         return $content;
