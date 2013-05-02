@@ -51,11 +51,12 @@ sub compile_routes {
         my $c = $match->{controller};
         my $a = $match->{action};
 
-        my $s = try { $app->fetch($c) };
+        my $err;
+        my $s = try { $app->fetch($c) } catch { ($err) = split "\n"; undef };
         return [
             500,
             [],
-            [blessed($app) . " has no service $c"]
+            ["Cannot resolve $c in " . blessed($app) . ": $err"]
         ] unless $s;
 
         my $component = $s->get;

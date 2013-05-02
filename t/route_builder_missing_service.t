@@ -29,13 +29,13 @@ test_psgi
         {
             my $res = $cb->(GET '/controller_action');
             is($res->code, 500, "without controller from route spec we got Internal Server Error");
-	    is($res->content, "Foo has no service root", "got the right content" );
+            like($res->content, qr/^Cannot resolve root in Foo: Could not find container or service for root in Foo/, "got the right content" );
         }
 
         {
             my $res = $cb->(GET '/http_method');
             is($res->code, 500, "without controller from route spec we got Internal Server Error");
-	    is($res->content, "Foo has no service root_index", "got the right content" );
+            like($res->content, qr/^Cannot resolve root_index in Foo: Could not find container or service for root_index in Foo/, "got the right content" );
         }
     };
 
