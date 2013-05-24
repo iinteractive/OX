@@ -14,6 +14,8 @@ my %calls;
 
     extends 'Plack::Middleware';
 
+    has 'some_dependency' => (is=>'ro',isa=>'Str',required=>1);
+
     sub prepare_app {
         my ( $self ) = @_;
         $calls{ 'prepare_app' }++;
@@ -33,8 +35,10 @@ my %calls;
     package Foo;
     use OX;
 
+    has 'foo' => ( is=>'ro',isa=>'Str',value=>'a value');
+
     router as {
-        wrap 'Foo::Middleware';
+        wrap 'Foo::Middleware' => ( some_dependency=>'foo' );
         route '/' => sub { "root" } => (
             name => 'root',
         );
