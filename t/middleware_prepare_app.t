@@ -35,7 +35,7 @@ my %calls;
     package Foo;
     use OX;
 
-    has 'foo' => ( is=>'ro',isa=>'Str',value=>'a value');
+    has 'foo' => ( is=>'ro',isa=>'Str',value=>'a value', lifecycle=>'Singleton');
 
     router as {
         wrap 'Foo::Middleware' => ( some_dependency=>'foo' );
