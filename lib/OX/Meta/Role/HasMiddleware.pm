@@ -38,6 +38,7 @@ sub add_middleware {
         my $meta = $self->name->meta;
         my $needs_reresolve = 0;
         foreach my $dep (values %{$args{dependencies}} ) {
+            next if blessed($dep) && $dep->isa('Bread::Board::Literal');
             my $attrib = $meta->get_attribute($dep);
             if (!$attrib->lifecycle || $attrib->lifecycle ne 'Singleton') {
                 $needs_reresolve = 1;
