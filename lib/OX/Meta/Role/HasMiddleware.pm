@@ -17,16 +17,37 @@ has middleware => (
     },
 );
 
-sub add_middleware {
+has 'needs_reresolve' => (
+    isa=>'Bool',
+    is=>'ro',
+    lazy_build=>1,
+);
+sub _build_needs_reresolve {
     my $self = shift;
 
-    $self->_add_middleware(OX::Meta::Middleware->new(@_));
+    foreach ($self->middleware) {
+        return 1 if $_->needs_reresolve;
+    }
+    return;
 }
 
-sub has_middleware_dependencies {
-    my $self = shift;
+sub add_middleware {
+    my ($self, %args) = @_;
 
-    return any { %{ $_->dependencies } } $self->middleware;
+    if ($args{dependencies}) {
+        my $meta = $self->name->meta;
+        my $needs_reresolve = 0;
+        foreach my $dep (values %{$args{dependencies}} ) {
+            my $attrib = $meta->get_attribute($dep);
+            if (!$attrib->lifecycle || $attrib->lifecycle ne 'Singleton') {
+                $needs_reresolve = 1;
+                last;
+            }
+        }
+        $args{needs_reresolve} = $needs_reresolve;
+    }
+
+    $self->_add_middleware(OX::Meta::Middleware->new( %args ));
 }
 
 sub all_middleware {
@@ -36,7 +57,6 @@ sub all_middleware {
 
 =for Pod::Coverage
   add_middleware
-  has_middleware_dependencies
   all_middleware
 
 =cut
