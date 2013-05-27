@@ -90,7 +90,7 @@ around to_app => sub {
     my $self = shift;
 
     return $self->$orig(@_)
-        unless $self->meta->has_middleware_dependencies;
+        unless $self->meta->needs_reresolve;
 
     # need to re-resolve for every request, to ensure that middleware
     # dependencies are correct - otherwise, a middleware that depends on a
