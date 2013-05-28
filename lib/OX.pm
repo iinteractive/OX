@@ -439,7 +439,13 @@ in the application coderef so far, and use the result as the new application.
 =cut
 
 sub wrap {
-    my ($middleware, %deps) = @_;
+    my ($lifecycle, $middleware, %deps);
+    if (@_ % 2) {
+        ($middleware, %deps) = @_;
+    }
+    else {
+        ($lifecycle, $middleware, %deps) = @_;
+    }
 
     confess "wrap called outside of a router block"
         unless $CURRENT_CLASS;
@@ -447,6 +453,9 @@ sub wrap {
     $CURRENT_CLASS->add_middleware(
         middleware   => $middleware,
         dependencies => \%deps,
+        (defined $lifecycle
+            ? (lifecycle => $lifecycle)
+            : ()),
     );
 }
 
