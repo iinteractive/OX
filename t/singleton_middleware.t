@@ -7,6 +7,7 @@ use Plack::Test;
 use HTTP::Request::Common;
 
 my $called;
+my $prepare_app;
 
 {
     package MyApp::Foo;
@@ -34,6 +35,10 @@ my $called;
 
     sub BUILD {
         $called++;
+    }
+
+    sub prepare_app {
+        $prepare_app++;
     }
 
     sub call {
@@ -77,6 +82,7 @@ test_psgi
             is($res->content, '/');
             is($res->header('X-Foo'), 'FOO');
             is($called, 1);
+            is($prepare_app, 1);
         }
 
         {
@@ -85,6 +91,7 @@ test_psgi
             is($res->content, '/');
             is($res->header('X-Foo'), 'FOO');
             is($called, 2);
+            is($prepare_app, 2);
         }
     };
 
@@ -113,12 +120,14 @@ test_psgi
         my $cb = shift;
 
         $called = 0;
+        $prepare_app = 0;
         {
             my $res = $cb->(GET '/');
             ok($res->is_success);
             is($res->content, '/');
             is($res->header('X-Foo'), 'FOO');
             is($called, 1);
+            is($prepare_app, 1);
         }
 
         {
@@ -127,6 +136,7 @@ test_psgi
             is($res->content, '/');
             is($res->header('X-Foo'), 'FOO');
             is($called, 1);
+            is($prepare_app, 1);
         }
     };
 
