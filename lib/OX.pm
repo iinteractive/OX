@@ -514,9 +514,8 @@ sub literal {
 
 No known bugs.
 
-Please report any bugs through RT: email
-C<bug-ox at rt.cpan.org>, or browse to
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=OX>.
+Please report any bugs to GitHub Issues at
+L<https://github.com/iinteractive/OX/issues>.
 
 =head1 SEE ALSO
 
@@ -535,21 +534,21 @@ You can also look for information at:
 
 =over 4
 
-=item * AnnoCPAN: Annotated CPAN documentation
+=item * MetaCPAN
 
-L<http://annocpan.org/dist/OX>
+L<https://metacpan.org/release/OX>
 
-=item * CPAN Ratings
+=item * Github
 
-L<http://cpanratings.perl.org/d/OX>
+L<https://github.com/iinteractive/OX>
 
 =item * RT: CPAN's request tracker
 
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=OX>
 
-=item * Search CPAN
+=item * CPAN Ratings
 
-L<http://search.cpan.org/dist/OX>
+L<http://cpanratings.perl.org/d/OX>
 
 =back
 
