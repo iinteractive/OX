@@ -11,3 +11,7 @@ install:
     - dzil listdeps --author --missing | cpanm -q --notest
 script:
     - dzil test --all
+notifications:
+    channels:
+        - "irc.perl.org#ox"
+    on_success: change
