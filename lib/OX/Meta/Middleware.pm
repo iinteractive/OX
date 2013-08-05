@@ -14,6 +14,12 @@ has dependencies => (
     default => sub { +{} },
 );
 
+has needs_reresolve => (
+    is      => 'ro',
+    isa     => 'Bool',
+    default => '0',
+);
+
 has condition => (
     is  => 'ro',
     isa => 'CodeRef',
