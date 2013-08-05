@@ -91,4 +91,8 @@ sub _merge_routes {
     }
 }
 
+=for Pod::Coverage
+
+=cut
+
 1;

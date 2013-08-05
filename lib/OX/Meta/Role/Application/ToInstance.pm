@@ -11,4 +11,8 @@ sub _apply_routes {
     $obj->regenerate_router_config;
 }
 
+=for Pod::Coverage
+
+=cut
+
 1;

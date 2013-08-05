@@ -12,4 +12,8 @@ subtype 'OX::Types::MiddlewareClass',
 subtype 'OX::Types::Middleware',
      as 'CodeRef|OX::Types::MiddlewareClass|Plack::Middleware';
 
+=for Pod::Coverage
+
+=cut
+
 1;

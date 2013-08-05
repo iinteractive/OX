@@ -18,4 +18,8 @@ has dependencies => (
 
 __PACKAGE__->meta->make_immutable;
 
+=for Pod::Coverage
+
+=cut
+
 1;

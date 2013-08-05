@@ -11,4 +11,8 @@ after apply => sub {
     $self->_apply_routes($role, $class);
 };
 
+=for Pod::Coverage
+
+=cut
+
 1;
