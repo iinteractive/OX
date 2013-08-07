@@ -1,6 +1,12 @@
 Revision history for OX
 
 {{$NEXT}}
+      - allow specifying lifecycles for middleware declared with the 'wrap'
+        keyword. this should allow you to create middleware which depend on
+        other services, and yet don't need to be recreated on every request (by
+        making them Singletons). (Thomas Klausner, #10, #13)
+      - fix OX classes inheriting from Bread::Board::Declare classes (Caleb
+        Cushing, #12)
 
 0.11  2013-05-02
       - fix a couple memory leaks in the Bread::Board parts. (danielr)
