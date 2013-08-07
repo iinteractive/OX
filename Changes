@@ -1,6 +1,8 @@
 Revision history for OX
 
 {{$NEXT}}
+
+0.12  2013-08-07
       - allow specifying lifecycles for middleware declared with the 'wrap'
         keyword. this should allow you to create middleware which depend on
         other services, and yet don't need to be recreated on every request (by
