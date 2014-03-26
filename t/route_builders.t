@@ -5,8 +5,9 @@ use Test::More;
 use Plack::Test;
 use Test::Fatal;
 
-{
+BEGIN {
     package RouteBuilder::REST;
+    $INC{'RouteBuilder/REST.pm'} = __FILE__;
     use Moose;
 
     use Moose::Util::TypeConstraints qw(find_type_constraint);
@@ -73,6 +74,12 @@ use Test::Fatal;
             action => $1,
         }
     }
+
+    sub import {
+        my ($package) = @_;
+        my $caller = caller;
+        Moose::Util::find_meta($caller)->add_route_builder($package);
+    }
 }
 
 {
@@ -119,6 +126,45 @@ test_psgi
 
 {
     package Bar;
+    use OX;
+    use RouteBuilder::REST;
+
+    has root => (
+        is  => 'ro',
+        isa => 'Root',
+    );
+
+    router as {
+        route '/' => 'REST:root';
+        route '/foo' => sub {
+            [200, ['Content-Type' => 'text/plain'], ["foo"]]
+        };
+    }, (root => 'root');
+}
+
+test_psgi
+    app => Bar->new->to_app,
+    client => sub {
+        my $cb = shift;
+        {
+            my $req = HTTP::Request->new(GET => 'http://localhost/');
+            my $res = $cb->($req);
+            is($res->content, "root: get", "right content for GET");
+        }
+        {
+            my $req = HTTP::Request->new(POST => 'http://localhost/');
+            my $res = $cb->($req);
+            is($res->content, "root default: POST", "right content for POST");
+        }
+        {
+            my $req = HTTP::Request->new(GET => 'http://localhost/foo');
+            my $res = $cb->($req);
+            is($res->content, "foo", "right content for /foo");
+        }
+    };
+
+{
+    package Baz;
     use OX;
 
     ::like(

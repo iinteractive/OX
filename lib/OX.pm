@@ -200,6 +200,7 @@ C<script_name>).
 =cut
 
 our $CURRENT_CLASS;
+our %INITIALIZED_CLASSES;
 
 sub router {
     my ($top_meta, @args) = @_;
@@ -209,11 +210,15 @@ sub router {
         : $top_meta;
 
     confess "Only one top level router is allowed"
-        if !$CURRENT_CLASS && $meta->has_route_builders;
+        if $INITIALIZED_CLASSES{$meta->name};
+    $INITIALIZED_CLASSES{$meta->name} = 1;
 
+    my $explicit_routebuilders;
     if (ref($args[0]) eq 'ARRAY') {
+        $meta->_clear_route_builders;
         $meta->add_route_builder($_) for @{ $args[0] };
         shift @args;
+        $explicit_routebuilders = 1;
     }
     my ($body, %params) = @args;
 
@@ -226,7 +231,7 @@ sub router {
         $meta->add_method(build_router => sub { $body });
     }
     elsif (ref($body) eq 'CODE') {
-        if (!$meta->has_route_builders) {
+        if (!$explicit_routebuilders) {
             if ($CURRENT_CLASS) {
                 for my $route_builder ($CURRENT_CLASS->route_builders) {
                     $meta->add_route_builder($route_builder);

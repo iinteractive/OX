@@ -1,6 +1,7 @@
 Revision history for OX
 
 {{$NEXT}}
+      - allow custom routebuilders to register themselves
 
 0.13  2013-08-14
       - fix inadvertent test dep (Caleb Cushing, #14)
