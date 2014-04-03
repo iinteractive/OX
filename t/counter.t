@@ -7,9 +7,7 @@ use Test::More;
 use Test::Path::Router;
 use Plack::Test;
 
-BEGIN {
-    use_ok('OX::Application');
-}
+use OX::Application;
 
 use lib 't/apps/Counter/lib';
 

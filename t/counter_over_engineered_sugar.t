@@ -8,9 +8,7 @@ use Test::Path::Router;
 use Plack::Test;
 use Test::Requires 'Template', 'MooseX::Types::Path::Class', 'Path::Class';
 
-BEGIN {
-    use_ok('OX::Application');
-}
+use OX::Application;
 
 use lib 't/apps/Counter-Over-Engineered-Sugar/lib';
 
