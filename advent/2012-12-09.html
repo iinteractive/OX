@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ uri_for
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -37,13 +37,9 @@ uri_for
 
 <p>For instance, given these routes:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>route <span class="synConstant">'/'</span>               =&gt; <span class="synConstant">'root.index'</span>;<br />route <span class="synConstant">'/view/:id'</span>       =&gt; <span class="synConstant">'root.view'</span>;<br />route <span class="synConstant">'/admin/view/:id'</span> =&gt; <span class="synConstant">'root.view'</span>, (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">section</span> =&gt; <span class="synConstant">'admin'</span>,<br />);</code><br />&nbsp;</td></table>
 
 <p>we get this:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synComment"># &quot;/&quot;</span><br /><span class="synStatement">say</span> <span class="synIdentifier">$r-&gt;uri_for</span>({<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">controller</span> =&gt; <span class="synConstant">'root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">action</span>     =&gt; <span class="synConstant">'index'</span>,<br />});<br /><br /><span class="synComment"># &quot;/view/123&quot;</span><br /><span class="synStatement">say</span> <span class="synIdentifier">$r-&gt;uri_for</span>({<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">controller</span> =&gt; <span class="synConstant">'root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">action</span>     =&gt; <span class="synConstant">'index'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">id</span>         =&gt; <span class="synConstant">123</span>,<br />});<br /><br /><span class="synComment"># &quot;/admin/view/123&quot;</span><br /><span class="synStatement">say</span> <span class="synIdentifier">$r-&gt;uri_for</span>({<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">controller</span> =&gt; <span class="synConstant">'root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">action</span>     =&gt; <span class="synConstant">'index'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">id</span>         =&gt; <span class="synConstant">123</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">section</span>    =&gt; <span class="synConstant">'admin'</span>,<br />});</code><br />&nbsp;</td></table>
 
@@ -52,8 +48,6 @@ uri_for
 <h3 id="The-name-entry">The <code>name</code> entry</h3>
 
 <p>This can still be a bit verbose though, so there is a shorthand to make the common case easier. If you pass in just a single string to <code>uri_for</code>, it will be treated as though you passed a mapping with that string as the <code>name</code> value. This allows you to give the various routes in your application unique (and meaningful) names, and access them easily. If you say:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>route <span class="synConstant">'/'</span> =&gt; <span class="synConstant">'root.index'</span>;<br />route <span class="synConstant">'/about'</span> =&gt; <span class="synConstant">'root.about'</span>, (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">name</span> =&gt; <span class="synConstant">'about'</span>,<br />);</code><br />&nbsp;</td></table>
 
@@ -77,9 +71,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ PSGI
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -89,8 +89,6 @@ PSGI
 
 <p>For instance, a simple response could look like this:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>[ <span class="synConstant">200</span>, [ <span class="synConstant">'Content-Type'</span> =&gt; <span class="synConstant">'text/plain'</span> ], [ <span class="synConstant">&quot;Hello world!&quot;</span> ] ]</code><br />&nbsp;</td></table>
 
 <p>In addition, if the <code>psgi.streaming</code> variable is true in the environment, the response can be a coderef. This coderef will receive a callback subroutine as its only argument. You can use this callback in one of two ways.</p>
@@ -99,15 +97,11 @@ PSGI
 
 <p>For instance:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$responder</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$data</span> = slow_database_query();<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$responder</span>-&gt;([<span class="synConstant">200</span>, [<span class="synConstant">'Content-Type'</span> =&gt; <span class="synConstant">'text/html'</span>], [render(<span class="synIdentifier">$data</span>)]]);<br />}</code><br />&nbsp;</td></table>
 
 <p>In addition, this form of response can be used for HTTP server push (also known as long-poll or Comet) applications. In these kinds of requests, the connection remains open, and the server streams data to the client, which reads it as it comes in. To support this, you can pass the callback an arrayref containing only the first two elements (response code and headers). The callback will then return an object which implements two methods, <code>write</code> and <code>close</code>, which can be used to send data to the client directly.</p>
 
 <p>An example of this type of response:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$responder</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$writer</span> = <span class="synIdentifier">$responder</span>-&gt;([<span class="synConstant">200</span>, [<span class="synConstant">'Content-Type'</span> =&gt; <span class="synConstant">'application/json'</span>]]);<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">while</span> (<span class="synStatement">my</span> <span class="synIdentifier">$event</span> = get_next_event()) {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$writer-&gt;write</span>(encode_json(<span class="synIdentifier">$event</span>) . <span class="synConstant">&quot;</span><span class="synSpecial">\n</span><span class="synConstant">&quot;</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;}<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$writer-&gt;close</span>;<br />}</code><br />&nbsp;</td></table>
 
@@ -115,15 +109,11 @@ PSGI
 
 <p>Middleware can be applied to any PSGI application, and if they need to modify the response, dealing with all of these different kinds of responses can be difficult. Plack provides <code>Plack::Util::response_cb</code> to handle this situation more conveniently. It takes a PSGI response and a coderef, and returns an updated PSGI response after having been filtered through the coderef. For instance:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synIdentifier">$res</span> = Plack::Util::response_cb(<span class="synIdentifier">$res</span>, <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$res</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">push</span> <span class="synIdentifier">@{</span> <span class="synIdentifier">$res-&gt;[</span><span class="synConstant">1</span><span class="synIdentifier">]</span> <span class="synIdentifier">}</span>, (<span class="synConstant">'X-Foo'</span> =&gt; <span class="synConstant">'Bar'</span>);<br />});</code><br />&nbsp;</td></table>
 
 <p>In this case, the response is updated in-place and returned (and the return value from the subroutine is ignored).</p>
 
 <p>Alternatively, you can return a code reference from the subroutine, and it will be used as a content filter. For instance:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synIdentifier">$res</span> = Plack::Util::response_cb(<span class="synIdentifier">$res</span>, <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$res</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$chunk</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synStatement">unless</span> <span class="synStatement">defined</span> <span class="synIdentifier">$chunk</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synStatement">uc</span>(<span class="synIdentifier">$chunk</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;};<br />});</code><br />&nbsp;</td></table>
 
@@ -143,9 +133,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

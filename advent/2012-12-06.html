@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ Mounts
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -39,16 +39,12 @@ Mounts
 
 <li><p>A PSGI coderef</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>mount <span class="synConstant">'/static'</span> =&gt; Plack::App::File-&gt;new(<span class="synConstant">root</span> =&gt; <span class="synConstant">&quot;static&quot;</span>)-&gt;to_app;</code><br />&nbsp;</td></table>
 
 <p>In this case, the coderef is delegated to directly.</p>
 
 </li>
 <li><p>An object</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>mount <span class="synConstant">'/static'</span> =&gt; Plack::App::File-&gt;new(<span class="synConstant">root</span> =&gt; <span class="synConstant">&quot;static&quot;</span>);</code><br />&nbsp;</td></table>
 
@@ -57,16 +53,12 @@ Mounts
 </li>
 <li><p>The name of a class</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>mount <span class="synConstant">'/static'</span> =&gt; <span class="synConstant">&quot;Plack::App::File&quot;</span>, (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">root</span>     =&gt; <span class="synConstant">'static_root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">encoding</span> =&gt; literal(<span class="synConstant">'latin1'</span>),<br />);</code><br />&nbsp;</td></table>
 
 <p>This will first instantiate a new instance of the class, and then use that instance as described in the previous bullet point. The instance will be instantiated via Bread::Board, so it can depend on services that your application has declared. The dependencies should be listed as a hash after the name of the class.</p>
 
 </li>
 <li><p>Another router</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>mount <span class="synConstant">'/auth'</span> =&gt; router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/login'</span> =&gt; <span class="synConstant">'auth.login'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synComment"># ...</span><br />};</code><br />&nbsp;</td></table>
 
@@ -91,9 +83,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

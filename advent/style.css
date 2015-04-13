@@ -107,6 +107,7 @@ a:not(.article) {
 }
 
 .calendar {
+  float: right;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 1em;
@@ -120,8 +121,6 @@ a:not(.article) {
 
 .calendar td {
   text-align: center;
-  width: 9em;
-  height: 5em;
   padding: 0;
 }
 
@@ -294,6 +293,14 @@ pre, code, .code-listing {
 
 /* BEGIN CHRISTMAS:  Move to "extra CSS" */
 
+.calendar {
+    width: 30%;
+}
+.calendar td.day {
+    font-size: 0.5em;
+    padding-top: 0;
+    padding-bottom: 0;
+}
 .calendar td.day.advent.missing,
 .calendar td.day.missing#dec-25,
 .calendar td.day.missing#dec-26 {

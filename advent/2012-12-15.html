@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ Options For Simple Authentication
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -43,17 +43,11 @@ Options For Simple Authentication
 
 <p><a href="https://metacpan.org/module/Plack::Middleware::Auth::Basic">Plack::Middleware::Auth::Basic</a>, as you might guess from the module name, is a middleware that implements basic types of authentication for your application. The module takes an <code>authenticator</code> configuration option, which can be an object that implements an <code>authenticate</code> method (with a <code>($username,$password)</code> signature) or a simple callback function, which will also be called with the username and password provided in response to the authentication dialogue. This means an OX application implementing basic authentication can be as simple as:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyOXsomeApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />router as {<br />&nbsp;&nbsp;wrap <span class="synConstant">'Plack::Middleware::Auth::Basic'</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">authenticator</span> =&gt; literal( <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span>( <span class="synIdentifier">$user</span>, <span class="synIdentifier">$pass</span> ) = <span class="synIdentifier">@_</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$user</span> <span class="synStatement">eq</span> <span class="synConstant">'s00per'</span> <span class="synStatement">and</span> <span class="synIdentifier">$pass</span> <span class="synStatement">eq</span> <span class="synConstant">'s3kr1t'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;} ),<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">realm</span> =&gt; literal( <span class="synConstant">&quot;my awesome app!&quot;</span> ),<br />&nbsp;&nbsp;);<br /><br />&nbsp;&nbsp;route <span class="synConstant">'/'</span> =&gt; <span class="synStatement">sub </span>{ <span class="synConstant">&quot;hello world!&quot;</span> };<br />};</code><br />&nbsp;</td></table>
 
 <p>The <code>realm</code> option being passed to the middleware is used to control what is displayed in the pop-up window that appears when the web browser prompts for credentials. Since <code>wrap</code> stanzas in the <code>router</code> statement do the same sort of <code>Bread::Board</code>-based service resolution as other parts of <code>OX</code>, you could also use attributes for the <a href="https://metacpan.org/module/Plack::Middleware::Auth::Basic">Plack::Middleware::Auth::Basic</a> parameters, like so:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyOXsomeApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />has <span class="synConstant">basic_auth_realm</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'My Awesome App!'</span><br />);<br /><br />router as {<br />&nbsp;&nbsp;wrap <span class="synConstant">'Plack::Middleware::Auth::Basic'</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">authenticator</span> =&gt; literal( <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> ( <span class="synIdentifier">$user</span> , <span class="synIdentifier">$pass</span> ) = <span class="synIdentifier">@_</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$user</span> <span class="synStatement">eq</span> <span class="synConstant">'s00per'</span> <span class="synStatement">and</span> <span class="synIdentifier">$pass</span> <span class="synStatement">eq</span> <span class="synConstant">'s3kr1t'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;} ),<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">realm</span> =&gt; <span class="synConstant">'basic_auth_realm'</span>,<br />&nbsp;&nbsp;);<br /><br />&nbsp;&nbsp;route <span class="synConstant">'/'</span> =&gt; <span class="synStatement">sub </span>{ <span class="synConstant">&quot;hello world!&quot;</span> };<br />};</code><br />&nbsp;</td></table>
-
-
 
 (Note: you can download this application
 <a href="basic.psgi">here</a>.)
@@ -64,11 +58,7 @@ Options For Simple Authentication
 
 <p>Here&#39;s a simple OX application that uses form-based authentication to control access to the <code>/admin</code> endpoint, while allowing unauthenticated access for <code>/</code>.</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;<br />29:&nbsp;<br />30:&nbsp;<br />31:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyOXsomeApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br /><span class="synStatement">use </span>HTTP::Throwable::Factory <span class="synConstant">qw/ http_throw /</span>;<br /><br />router as {<br />&nbsp;&nbsp;wrap <span class="synConstant">'Plack::Middleware::Session'</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">store</span> =&gt; literal( <span class="synConstant">'File'</span> ),<br />&nbsp;&nbsp;);<br /><br />&nbsp;&nbsp;wrap <span class="synConstant">'Plack::Middleware::Auth::Form'</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">authenticator</span> =&gt; literal( <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> ( <span class="synIdentifier">$user</span>, <span class="synIdentifier">$pass</span> ) = <span class="synIdentifier">@_</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$user</span> <span class="synStatement">eq</span> <span class="synConstant">'s00per'</span> <span class="synStatement">and</span> <span class="synIdentifier">$pass</span> <span class="synStatement">eq</span> <span class="synConstant">'s3kr1t'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;} ),<br />&nbsp;&nbsp;);<br /><br />&nbsp;&nbsp;route <span class="synConstant">'/'</span> =&gt; <span class="synStatement">sub </span>{ <span class="synConstant">&quot;hello world!&quot;</span> };<br /><br />&nbsp;&nbsp;route <span class="synConstant">'/admin'</span> =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> ( <span class="synIdentifier">$request</span> ) = <span class="synIdentifier">@_</span>;<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$user</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">unless</span> ( <span class="synIdentifier">$user</span> = <span class="synIdentifier">$request-&gt;session-&gt;{</span><span class="synConstant">user_id</span><span class="synIdentifier">}</span> ) {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$request-&gt;session-&gt;{</span><span class="synConstant">redir_to</span><span class="synIdentifier">}</span> = <span class="synConstant">'/admin'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http_throw( <span class="synConstant">Found</span> =&gt; { <span class="synConstant">location</span> =&gt; <span class="synConstant">'/login'</span> } );<br />&nbsp;&nbsp;&nbsp;&nbsp;}<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synConstant">&quot;admin section!&lt;br/&gt;hello </span><span class="synIdentifier">$user</span><span class="synConstant">!&quot;</span>;<br />&nbsp;&nbsp;};<br />};</code><br />&nbsp;</td></table>
-
-
 
 (Note: you can download this application
 <a href="form.psgi">here</a>.)
@@ -99,9 +89,15 @@ This article contributed by: John SJ Anderson &lt;john.anderson@iinteractive.com
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

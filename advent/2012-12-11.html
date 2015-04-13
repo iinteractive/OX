@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ Deployment
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -37,27 +37,19 @@ Deployment
 
 <p>Plack&#39;s tools typically interact with applications via <code>.psgi</code> files. This is a file which, when evaluated, returns a PSGI application coderef. As mentioned previously, an OX application as typically written is a valid <code>.psgi</code> file:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synComment"># app.psgi</span><br /><span class="synStatement">use </span>OX;<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/'</span> =&gt; <span class="synStatement">sub </span>{ <span class="synConstant">&quot;Hello world!&quot;</span> };<br />};</code><br />&nbsp;</td></table>
 
 <p>but this quickly becomes unwieldy. Splitting your application into multiple packages and files is important not only for code organization, but also because having a split between code that is inherent to your application and code that is specific to deployment makes the deployment process much easier. For instance, if your application uses sessions, the <a href="https://metacpan.org/module/Plack::Middleware::Session">Session</a> middleware is conceptually part of the application itself - running the application without that middleware applied doesn&#39;t make a lot of sense. On the other hand, the <a href="https://metacpan.org/module/Plack::Middleware::ReverseProxy">ReverseProxy</a> middleware is dependent on your deployment environment - declaring that in your application doesn&#39;t make sense because you might run your same application in several different environments, only some of which use a reverse proxy.</p>
 
 <p>The typical way that OX applications are written is to write them as a class:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synComment"># Hello.pm</span><br /><span class="synStatement">package</span><span class="synType"> Hello</span>;<br /><span class="synStatement">use </span>OX;<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/'</span> =&gt; <span class="synStatement">sub </span>{ <span class="synConstant">&quot;Hello world!&quot;</span> };<br />};<br /><br /><span class="synConstant">1</span>;</code><br />&nbsp;</td></table>
 
 <p>and then write an <code>app.psgi</code> file which instantiates the application:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synComment"># app.psgi</span><br /><span class="synStatement">use </span>Hello;<br />Hello-&gt;new-&gt;to_app;</code><br />&nbsp;</td></table>
 
 <p>This way, you can easily add additional deployment-specific code to just the <code>app.psgi</code> file, to do whatever you need to do:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synComment"># app.psgi</span><br /><span class="synStatement">use </span>Hello;<br /><span class="synStatement">use </span>Plack::Middleware::ReverseProxy;<br /><br /><span class="synStatement">my</span> <span class="synIdentifier">$app</span> = Hello-&gt;new-&gt;to_app;<br /><span class="synIdentifier">$app</span> = Plack::Middleware::ReverseProxy-&gt;wrap(<span class="synIdentifier">$app</span>);<br /><br /><span class="synIdentifier">$app</span>;</code><br />&nbsp;</td></table>
 
@@ -108,9 +100,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

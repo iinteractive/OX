@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ Exceptions
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -38,8 +38,6 @@ Exceptions
 <h2 id="HTTP::Throwable">HTTP::Throwable</h2>
 
 <p>HTTP::Throwable implements a set of exception classes for HTTP redirect and error codes (3xx, 4xx, 5xx). HTTP::Throwable itself is a role which provides functionality common to all of the classes, but you typically interact with it via <a href="https://metacpan.org/module/HTTP::Throwable::Factory">HTTP::Throwable::Factory</a>, which provides shortcuts for creating and throwing HTTP::Throwable objects. For instance:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">use </span>HTTP::Throwable::Factory <span class="synConstant">'http_throw'</span>;<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">index </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$self</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> (<span class="synIdentifier">$r</span>) = <span class="synIdentifier">@_</span>;<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;http_throw(<span class="synConstant">MethodNotAllowed</span> =&gt; { <span class="synConstant">allow</span> =&gt; [ <span class="synConstant">qw(GET)</span> ] })<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">unless</span> <span class="synIdentifier">$r-&gt;method</span> <span class="synStatement">eq</span> <span class="synConstant">'GET'</span>;<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;http_throw(<span class="synConstant">Found</span> =&gt; { <span class="synConstant">location</span> =&gt; <span class="synIdentifier">$r-&gt;uri_for</span>(<span class="synConstant">'login'</span>) })<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">unless</span> <span class="synStatement">exists</span> <span class="synIdentifier">$r-&gt;session-&gt;{</span><span class="synConstant">user_id</span><span class="synIdentifier">}</span>;<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synComment"># ...</span><br />}</code><br />&nbsp;</td></table>
 
@@ -81,9 +79,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ Middleware
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -45,8 +45,6 @@ Middleware
 
 <li><p>A coderef</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>wrap <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$app</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$env</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$res</span> = <span class="synIdentifier">$app</span>-&gt;(<span class="synIdentifier">$env</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">push</span> <span class="synIdentifier">@{</span> <span class="synIdentifier">$res-&gt;[</span><span class="synConstant">1</span><span class="synIdentifier">]</span> <span class="synIdentifier">}</span>, (<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">'X-Powered-By'</span> =&gt; <span class="synConstant">&quot;OX </span><span class="synIdentifier">$</span><span class="synType">OX::</span><span class="synIdentifier">VERSION</span><span class="synConstant">&quot;</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$res</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;};<br />};</code><br />&nbsp;</td></table>
 
 <p>This will call the given subroutine with the application as the first argument, and use the return value as the new application.</p>
@@ -54,16 +52,12 @@ Middleware
 </li>
 <li><p>An instance of a Plack::Middleware subclass</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">my</span> <span class="synIdentifier">$mw</span> = Plack::Middleware::AccessLog-&gt;new(<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">format</span> =&gt; <span class="synConstant">'combined'</span>,<br />);<br /><br />wrap <span class="synIdentifier">$mw</span>;</code><br />&nbsp;</td></table>
 
 <p>This will call the <code>wrap</code> method on the object, and use the return value as the new application.</p>
 
 </li>
 <li><p>The name of a Plack::Middleware subclass</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>wrap <span class="synConstant">'Plack::Middleware::Static'</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">root</span> =&gt; <span class="synConstant">'static_root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">path</span> =&gt; literal(<span class="synConstant">qr{^/</span><span class="synSpecial">(?:</span><span class="synConstant">images|js|css</span><span class="synSpecial">)</span><span class="synConstant">/}</span>),<br />);</code><br />&nbsp;</td></table>
 
@@ -80,8 +74,6 @@ Middleware
 
 <p><code>wrap_if</code> allows you to conditionally apply middleware. It takes a coderef as an additional initial parameter, and the middleware will only be applied if that coderef returns a true value. It is similar to the <code>enable_if</code> keyword in <a href="https://metacpan.org/module/Plack::Builder">Plack::Builder</a>. For instance:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>wrap_if <span class="synStatement">sub </span>{ <span class="synIdentifier">$_[</span><span class="synConstant">0</span><span class="synIdentifier">]-&gt;{</span><span class="synConstant">REMOTE_ADDR</span><span class="synIdentifier">}</span> <span class="synStatement">eq</span> <span class="synConstant">'127.0.0.1'</span> },<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">'Plack::Middleware::StackTrace'</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">force</span> =&gt; literal(<span class="synConstant">1</span>),<br />&nbsp;&nbsp;&nbsp;&nbsp;);</code><br />&nbsp;</td></table>
 
 <p>The condition subroutine will be called with the PSGI environment as the first argument, and should return true if the middleware should be applied. This example will only apply the <a href="https://metacpan.org/module/Plack::Middleware::StackTrace">StackTrace</a> middleware if the request is coming from localhost.</p>
@@ -89,8 +81,6 @@ Middleware
 <h2 id="Example">Example</h2>
 
 <p>Here is a more complete example of using <code>wrap</code> and <code>wrap_if</code>. This application enables the <a href="https://metacpan.org/module/Plack::Middleware::StackTrace">StackTrace</a> middleware for requests coming from localhost (to make debugging easier), and serves static files from the application via the <a href="https://metacpan.org/module/Plack::Middleware::Static">Static</a> middleware.</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />has <span class="synConstant">static_root</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'root/static/'</span>,<br />);<br /><br />has <span class="synConstant">profile</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>  =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span> =&gt; <span class="synConstant">'MyApp::Controller::Profile'</span>,<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;wrap_if <span class="synStatement">sub </span>{ <span class="synIdentifier">$_[</span><span class="synConstant">0</span><span class="synIdentifier">]-&gt;{</span><span class="synConstant">REMOTE_ADDR</span><span class="synIdentifier">}</span> <span class="synStatement">eq</span> <span class="synConstant">'127.0.0.1'</span> },<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">'Plack::Middleware::StackTrace'</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">force</span> =&gt; literal(<span class="synConstant">1</span>),<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;wrap <span class="synConstant">'Plack::Middleware::Static'</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">root</span> =&gt; <span class="synConstant">'static_root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">path</span> =&gt; literal(<span class="synConstant">qr{^/</span><span class="synSpecial">(?:</span><span class="synConstant">images|js|css</span><span class="synSpecial">)</span><span class="synConstant">/}</span>),<br />&nbsp;&nbsp;&nbsp;&nbsp;);<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/profile'</span>       =&gt; <span class="synConstant">'profile.self'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/profile/:user'</span> =&gt; <span class="synConstant">'profile.view'</span>;<br />};</code><br />&nbsp;</td></table>
 
@@ -110,9 +100,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

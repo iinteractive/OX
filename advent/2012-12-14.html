@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ More Bread::Board
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -35,13 +35,9 @@ More Bread::Board
 
 <p>Given an application like this:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;<br />29:&nbsp;<br />30:&nbsp;<br />31:&nbsp;<br />32:&nbsp;<br />33:&nbsp;<br />34:&nbsp;<br />35:&nbsp;<br />36:&nbsp;<br />37:&nbsp;<br />38:&nbsp;<br />39:&nbsp;<br />40:&nbsp;<br />41:&nbsp;<br />42:&nbsp;<br />43:&nbsp;<br />44:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp::Model</span>;<br /><span class="synStatement">use </span>Moose;<br /><br />has <span class="synConstant">dsn</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>       =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>      =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">required</span> =&gt; <span class="synConstant">1</span>,<br />);<br /><br /><span class="synStatement">package</span><span class="synType"> MyApp::Controller</span>;<br /><span class="synStatement">use </span>Moose;<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>       =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>      =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">required</span> =&gt; <span class="synConstant">1</span>,<br />);<br /><br /><span class="synComment"># ...</span><br /><br /><span class="synStatement">package</span><span class="synType"> MyApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />has <span class="synConstant">dsn</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'dbi:mysql:myapp'</span>,<br />);<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'dsn'</span>],<br />);<br /><br />has <span class="synConstant">controller</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Controller'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'model'</span>],<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synComment"># ...</span><br />};</code><br />&nbsp;</td></table>
 
 <p>we can instead tell Bread::Board to <i>infer</i> the dependencies for the controller service:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>has <span class="synConstant">controller</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'MyApp::Controller'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">infer</span> =&gt; <span class="synConstant">1</span>,<br />);</code><br />&nbsp;</td></table>
 
@@ -50,8 +46,6 @@ More Bread::Board
 <h2 id="Lifecycles">Lifecycles</h2>
 
 <p>By default, any time a service is resolved, a new instance is created. This is generally what you want (to avoid inadvertently leaking data between requests), but sometimes persisting data is necessary. For instance, you probably don&#39;t want to reconnect to the database on every single request, if performance is important for your application. In this case, you can specify a different <i>lifecycle</i> for a particular service:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>has <span class="synConstant">dsn</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'dbi:mysql:myapp'</span>,<br />);<br /><br />has <span class="synConstant">dbh</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'dsn'</span>],<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">lifecycle</span>    =&gt; <span class="synConstant">'Singleton'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">block</span>        =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$s</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> DBI-&gt;<span class="synStatement">connect</span>(<span class="synIdentifier">$s-&gt;param</span>(<span class="synConstant">'dsn'</span>));<br />&nbsp;&nbsp;&nbsp;&nbsp;},<br />);<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'dbh'</span>],<br />);</code><br />&nbsp;</td></table>
 
@@ -75,9 +69,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

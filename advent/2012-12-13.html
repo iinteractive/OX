@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ Roles and Inheritance
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -33,13 +33,9 @@ Roles and Inheritance
 
 <p>OX applications are just a special type of Moose class, and this includes supporting role application. You can define roles for various parts of your application, and then compose them into the main application class. The only difference is that in order to support composition of things like routes and services, you will need to <code>use</code> the <a href="https://metacpan.org/module/OX::Role">OX::Role</a> module instead of <a href="https://metacpan.org/module/Moose::Role">Moose::Role</a>. This will provide the appropriate support for defining router components and services.</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;<br />27:&nbsp;<br />28:&nbsp;<br />29:&nbsp;<br />30:&nbsp;<br />31:&nbsp;<br />32:&nbsp;<br />33:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp::Auth</span>;<br /><span class="synStatement">use </span>OX::Role;<br /><br />has <span class="synConstant">auth</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Controller::Auth'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'model'</span>],<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/login'</span>  =&gt; <span class="synConstant">'auth.login'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/logout'</span> =&gt; <span class="synConstant">'auth.logout'</span>;<br />};<br /><br /><span class="synStatement">package</span><span class="synType"> MyApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />with <span class="synConstant">'MyApp::Auth'</span>;<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>  =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span> =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />);<br /><br />has <span class="synConstant">root</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Controller::Root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'model'</span>],<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/'</span> =&gt; <span class="synConstant">'root.index'</span>;<br />};</code><br />&nbsp;</td></table>
 
 <p>Here, <code>/</code>, <code>/login</code>, and <code>/logout</code> will all be valid routes for the application - the role composition process will merge the routes defined in each role into the main application&#39;s router. This follows the normal role composition algorithm, so you can do things like override a route from a role by defining a new route for the same path in the class:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>  =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span> =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />);<br /><br />has <span class="synConstant">root</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Controller::Root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'model'</span>],<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/'</span>      =&gt; <span class="synConstant">'root.index'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/login'</span> =&gt; <span class="synConstant">'root.login'</span>;<br />};<br /><br />with <span class="synConstant">'MyApp::Auth'</span>;</code><br />&nbsp;</td></table>
 
@@ -53,13 +49,9 @@ Roles and Inheritance
 
 <p>For instance, if you have an application that looks like this:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;<br />20:&nbsp;<br />21:&nbsp;<br />22:&nbsp;<br />23:&nbsp;<br />24:&nbsp;<br />25:&nbsp;<br />26:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />has <span class="synConstant">dsn</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>    =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>   =&gt; <span class="synConstant">'Str'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'dbi:mysql:myapp'</span>,<br />);<br /><br />has <span class="synConstant">model</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Model'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'dsn'</span>],<br />);<br /><br />has <span class="synConstant">root</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Controller::Root'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'model'</span>],<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/'</span>         =&gt; <span class="synConstant">'root.index'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/register'</span> =&gt; <span class="synConstant">'root.register'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/login'</span>    =&gt; <span class="synConstant">'root.login'</span>;<br />};</code><br />&nbsp;</td></table>
 
 <p>you can create a specialization of it for testing via something like this:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;<br />19:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp::Test</span>;<br /><span class="synStatement">use </span>OX;<br /><br />extends <span class="synConstant">'MyApp'</span>;<br /><br />has <span class="synConstant">'+dsn'</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">value</span> =&gt; <span class="synConstant">'dbi:SQLite::memory:'</span>,<br />);<br /><br />has <span class="synConstant">debug</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">is</span>           =&gt; <span class="synConstant">'ro'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">isa</span>          =&gt; <span class="synConstant">'MyApp::Controller::Debug'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; [<span class="synConstant">'model'</span>],<br />);<br /><br />router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/dump_users'</span>    =&gt; <span class="synConstant">'debug.dump_users'</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/dump_accesses'</span> =&gt; <span class="synConstant">'debug.dump_accesses'</span>;<br />};</code><br />&nbsp;</td></table>
 
@@ -81,9 +73,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

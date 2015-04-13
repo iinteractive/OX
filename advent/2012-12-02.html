@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ Route Builders and Actions
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -37,8 +37,6 @@ Route Builders and Actions
 
 <p>Route builders are the part of OX which takes an action spec and determines which code to run when its associated path is matched. For instance, in this router:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>router as {<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/'</span>          =&gt; <span class="synStatement">sub </span>{ <span class="synConstant">&quot;Hello world!&quot;</span> };<br />&nbsp;&nbsp;&nbsp;&nbsp;route <span class="synConstant">'/posts/:id'</span> =&gt; <span class="synConstant">'posts.view'</span>;<br />};</code><br />&nbsp;</td></table>
 
 <p><code>/</code> uses a route builder which just calls the given coderef directly, while <code>/posts/24</code> uses a route builder which generates a coderef to call the <code>view</code> method on the <code>posts</code> controller.</p>
@@ -49,8 +47,6 @@ Route Builders and Actions
 
 <li><p><a href="https://metacpan.org/module/OX::RouteBuilder::Code">OX::RouteBuilder::Code</a></p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>route <span class="synConstant">'/'</span> =&gt; <span class="synStatement">sub </span>{ <span class="synConstant">&quot;Hello world!&quot;</span> };</code><br />&nbsp;</td></table>
 
 <p>This route builder will be used whenever the action spec is a coderef. It is the most basic route builder - it just allows you to specify a coderef to call when the route is chosen.</p>
@@ -58,30 +54,22 @@ Route Builders and Actions
 </li>
 <li><p><a href="https://metacpan.org/module/OX::RouteBuilder::ControllerAction">OX::RouteBuilder::ControllerAction</a></p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>route <span class="synConstant">'/'</span> =&gt; <span class="synConstant">'root.index'</span>;</code><br />&nbsp;</td></table>
 
 <p>The ControllerAction route builder will be used if the action spec consists of two words (<code>\w+</code>) separated by a period. Those two words will be used to look up a controller to use and a method to call on that controller. The controller is looked up by name among the attributes on the OX application (really services, but we will discuss that when we explain Bread::Board).</p>
 
 <p>The code which is run for the above example is roughly equivalent to:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$controller</span> = <span class="synIdentifier">$self-&gt;root</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$controller-&gt;index</span>(<span class="synIdentifier">@_</span>);<br />}</code><br />&nbsp;</td></table>
 
 </li>
 <li><p><a href="https://metacpan.org/module/OX::RouteBuilder::HTTPMethod">OX::RouteBuilder::HTTPMethod</a></p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>route <span class="synConstant">'/'</span> =&gt; <span class="synConstant">'root'</span>;</code><br />&nbsp;</td></table>
 
 <p>The HTTPMethod route builder will be used if the action spec consists of a single word (<code>\w+</code>). This word will be used to look up a controller as in the ControllerAction route builder, but the method to call will be the lowercase version of the HTTP method used (<code>get</code>, <code>post</code>, etc). If no appropriate method is found in the class, it will attempt to call the method named <code>any</code> instead. If that is also not found, the request will return a 405 error.</p>
 
 <p>The code which is run for the above example is roughly equivalent to:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> (<span class="synIdentifier">$r</span>) = <span class="synIdentifier">@_</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$controller</span> = <span class="synIdentifier">$self-&gt;root</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$method</span> = <span class="synStatement">lc</span>(<span class="synIdentifier">$r-&gt;method</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">$method</span> = <span class="synConstant">'any'</span>             <span class="synStatement">if</span> !<span class="synIdentifier">$controller-&gt;can</span>(<span class="synIdentifier">$method</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> [<span class="synConstant">405</span>, [], [<span class="synConstant">&quot;error&quot;</span>]] <span class="synStatement">if</span> !<span class="synIdentifier">$controller-&gt;can</span>(<span class="synIdentifier">$method</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$controller-&gt;$method</span>(<span class="synIdentifier">@_</span>);<br />}</code><br />&nbsp;</td></table>
 
@@ -131,9 +119,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 

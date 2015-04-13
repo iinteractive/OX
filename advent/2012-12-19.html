@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="WWW::AdventCalendar v1.108" />
+    <meta name="generator" content="WWW::AdventCalendar v1.111" />
     <link rel="alternate" title="OX Advent Calendar XML feed" href="atom.xml" type="application/atom+xml" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" type="text/css" />
@@ -19,8 +19,8 @@ Under the Hood
             <h1><a href="index.html">OX Advent Calendar</a></h1>
         </div>
 
-        <p id="tagline">
-          <a class='feed' href="atom.xml">Feed</a>
+        <p id="tagline">2012 
+         <a class='feed' href="atom.xml">Feed</a>
         </p>
 
         <div id="content">
@@ -39,8 +39,6 @@ Under the Hood
 
 <p>The <code>App</code> service is a block injection service, whose body just calls the <code>build_app</code> method on the application object itself. This means that defining your application is as simple as writing a <code>build_app</code> method. The <code>App</code> service also gets its dependencies via the <code>app_dependencies</code> method. The service itself, in <a href="https://metacpan.org/module/Bread::Board">Bread::Board</a> syntax, basically looks like this:</p>
 
-
-
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code>service <span class="synConstant">App</span> =&gt; (<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">block</span> =&gt; <span class="synStatement">sub </span>{<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$s</span> = <span class="synStatement">shift</span>;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">my</span> <span class="synIdentifier">$app</span> = <span class="synIdentifier">$self-&gt;build_app</span>(<span class="synIdentifier">$s</span>);<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synComment"># apply middleware to $app using $s-&gt;param('Middleware')</span><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synStatement">return</span> <span class="synIdentifier">$app</span><br />&nbsp;&nbsp;&nbsp;&nbsp;},<br />&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">dependencies</span> =&gt; {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synConstant">Middleware</span> =&gt; <span class="synConstant">'Middleware'</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="synIdentifier">%{</span> <span class="synIdentifier">$self-&gt;app_dependencies</span> <span class="synIdentifier">}</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;}<br />);</code><br />&nbsp;</td></table>
 
 <p>As you can see, this supports declaring middleware via an additional <code>Middleware</code> service. This service is expected to create an arrayref of middleware, and is created similarly to the <code>App</code> service, via <code>build_middleware</code> and <code>middleware_dependencies</code> methods.</p>
@@ -56,8 +54,6 @@ Under the Hood
 <p>The upshot to this is, OX has no explicit plugin interface. Most plugin-like behavior can already be provided via middleware (as we&#39;ve already seen), and anything that can&#39;t be done that way can instead be done by just writing normal roles to be applied to the application class.</p>
 
 <p>For instance, if you (for some reason) want to interpret your requests and responses as Windows-1252 instead of UTF-8, you can do this:</p>
-
-
 
 <table class='code-listing'><tr><td class='line-numbers'><br /><code>1:&nbsp;<br />2:&nbsp;<br />3:&nbsp;<br />4:&nbsp;<br />5:&nbsp;<br />6:&nbsp;<br />7:&nbsp;<br />8:&nbsp;<br />9:&nbsp;<br />10:&nbsp;<br />11:&nbsp;<br />12:&nbsp;<br />13:&nbsp;<br />14:&nbsp;<br />15:&nbsp;<br />16:&nbsp;<br />17:&nbsp;<br />18:&nbsp;</code><br />&nbsp;</td><td class='code'><br /><code><span class="synStatement">package</span><span class="synType"> MyApp::Request</span>;<br /><span class="synStatement">use </span>Moose;<br /><br />extends <span class="synConstant">'OX::Request'</span>;<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">default_encoding </span>{ <span class="synConstant">'Windows-1252'</span> }<br /><br /><span class="synStatement">package</span><span class="synType"> MyApp::Role::Windows1252</span>;<br /><span class="synStatement">use </span>Moose::Role;<br /><br /><span class="synStatement">sub </span><span class="synIdentifier">request_class </span>{ <span class="synConstant">'MyApp::Request'</span> }<br /><br /><span class="synStatement">package</span><span class="synType"> MyApp</span>;<br /><span class="synStatement">use </span>OX;<br /><br />with <span class="synConstant">'MyApp::Role::Windows1252'</span>;<br /><br /><span class="synComment"># ...</span></code><br />&nbsp;</td></table>
 
@@ -79,9 +75,15 @@ This article contributed by: Jesse Luehrs &lt;jesse.luehrs@iinteractive.com&gt;
 <div style="clear: both"></div>
 
         </div>
+
     </div>
+
+
+
 </body>
 </html>
+
+
 
 
 
