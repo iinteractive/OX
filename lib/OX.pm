@@ -441,6 +441,14 @@ constructor call, to avoid it being parsed as an indirect method call.
 If you specify a coderef as the middleware, it will call that coderef, passing
 in the application coderef so far, and use the result as the new application.
 
+If you want the middleware instance to persist between requests (e.g.
+because it is expensive to init, or does some package level caching),
+add C<'Singleton'> to the begin of the parameters passed to C<wrap>
+
+  wrap 'Singleton', 'Plack::Middleware::Foo' => (
+      bar => literal(42),
+  );
+
 =cut
 
 sub wrap {
@@ -480,15 +488,24 @@ environment. For instance:
 =cut
 
 sub wrap_if {
-    my ($condition, $middleware, %deps) = @_;
+    my $condition = shift;
+    my ($lifecycle, $middleware, %deps);
+    if (@_ % 2) {
+        ($middleware, %deps) = @_;
+    }
+    else {
+        ($lifecycle, $middleware, %deps) = @_;
+    }
 
     confess "wrap_if called outside of a router block"
         unless $CURRENT_CLASS;
-
     $CURRENT_CLASS->add_middleware(
         condition    => $condition,
         middleware   => $middleware,
         dependencies => \%deps,
+        (defined $lifecycle
+            ? (lifecycle => $lifecycle)
+            : ()),
     );
 }
 
